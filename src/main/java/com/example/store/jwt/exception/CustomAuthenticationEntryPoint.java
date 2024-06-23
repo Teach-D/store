@@ -2,22 +2,20 @@ package com.example.store.jwt.exception;
 
 
 import com.google.gson.Gson;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
-
 
 @Slf4j
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
@@ -25,9 +23,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         log.error("Commence Get Exception : {}", exception);
 
         if(exception == null) {
-            log.info("aa");
-/*            log.error("entry point >> exception is null");
-            setResponse(response, JwtExceptionCode.NOT_FOUND_TOKEN);*/
+            log.error("entry point >> exception is null");
+            setResponse(response, JwtExceptionCode.NOT_FOUND_TOKEN);
         }
         //잘못된 토큰인 경우
         else if(exception.equals(JwtExceptionCode.INVALID_TOKEN.getCode())) {

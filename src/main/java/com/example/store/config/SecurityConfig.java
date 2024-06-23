@@ -47,8 +47,6 @@ public class SecurityConfig {
         // CSRF 보안을 활성
         http.authorizeHttpRequests(authz -> authz
                 .requestMatchers("/members/signup", "/members/login", "/members/refreshToken").permitAll()
-                .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("USER", "ADMIN")  // 인증된 사용자
-                .requestMatchers(HttpMethod.POST, "/**").hasAnyRole("USER", "ADMIN") // MANAGER 권한
                 .anyRequest().permitAll()
         );
 

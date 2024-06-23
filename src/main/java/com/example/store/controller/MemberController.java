@@ -4,9 +4,12 @@ import com.example.store.dto.*;
 import com.example.store.entity.Member;
 import com.example.store.entity.RefreshToken;
 import com.example.store.entity.Role;
+import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.JwtTokenizer;
+import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.MemberService;
 import com.example.store.service.RefreshTokenService;
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,5 +91,34 @@ public class MemberController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @PostMapping("/refreshToken")
+    public ResponseEntity requestRefresh(@RequestBody RefreshTokenDto refreshTokenDto) {
+        RefreshToken refreshToken = refreshTokenService.findRefreshToken(refreshTokenDto.getRefreshToken()).orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+        Claims claims = jwtTokenizer.parseRefreshToken(refreshToken.getValue());
+
+        Long userId = Long.valueOf((Integer) claims.get("userId"));
+
+        Member member = memberService.getMember(userId).orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        List roles = (List) claims.get("roles");
+        String email = claims.getSubject();
+
+        String accessToken = jwtTokenizer.createAccessToken(userId, email, roles);
+
+        MemberLoginResponseDto loginResponse = MemberLoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshTokenDto.getRefreshToken())
+                .nickname(member.getName())
+                .memberId(member.getMemberId())
+                .build();
+
+        return new ResponseEntity(loginResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity userinfo(@IfLogin LoginUserDto loginUserDto) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        return new ResponseEntity(member, HttpStatus.OK);
+    }
 
 }

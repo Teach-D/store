@@ -1,10 +1,10 @@
 package com.example.store.jwt.provider;
 
+
 import com.example.store.jwt.token.JwtAuthenticationToken;
 import com.example.store.jwt.util.JwtTokenizer;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
