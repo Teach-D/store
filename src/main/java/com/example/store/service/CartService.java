@@ -25,4 +25,9 @@ public class CartService {
             return cart.get();
         }
     }
+
+    public Cart getCart(Long memberId) {
+        Cart cart = cartRepository.findByMemberId(memberId).orElseThrow();
+        return cart;
+    }
 }

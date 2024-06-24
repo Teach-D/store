@@ -1,6 +1,7 @@
 package com.example.store.service;
 
 import com.example.store.dto.AddProductDto;
+import com.example.store.dto.EditProductDto;
 import com.example.store.entity.Category;
 import com.example.store.entity.Product;
 import com.example.store.entity.Rating;
@@ -24,6 +25,7 @@ public class ProductService {
         Category category = categoryService.getCategory(addProductDto.getCategoryId());
         Product product = new Product();
         product.setCategory(category);
+        product.setQuantity(addProductDto.getQuantity());
         product.setPrice(addProductDto.getPrice());
         product.setDescription(addProductDto.getDescription());
         product.setImageUrl(addProductDto.getImageUrl());
@@ -49,5 +51,21 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProduct(Long id) {
         return productRepository.findById(id).orElseThrow();
+    }
+
+    public Product editProduct(EditProductDto editProductDto, Long id) {
+        Product product = productRepository.findById(id).orElseThrow();
+        product.setCategory(categoryService.getCategory(editProductDto.getCategoryId()));
+        product.setPrice(editProductDto.getPrice());
+        product.setDescription(editProductDto.getDescription());
+        product.setImageUrl(editProductDto.getImageUrl());
+        product.setTitle(editProductDto.getTitle());
+
+        return productRepository.save(product);
+    }
+
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id).orElseThrow();
+        productRepository.delete(product);
     }
 }
