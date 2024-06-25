@@ -3,12 +3,16 @@ package com.example.store.service;
 import com.example.store.entity.Cart;
 import com.example.store.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class CartService {
 
     private final CartRepository cartRepository;
@@ -27,7 +31,12 @@ public class CartService {
     }
 
     public Cart getCart(Long memberId) {
-        Cart cart = cartRepository.findByMemberId(memberId).orElseThrow();
+        log.info(String.valueOf(memberId));
+        Cart cart = cartRepository.findByMemberId(memberId).get();
         return cart;
+    }
+
+    public void deleteCart(Long cartId) {
+        cartRepository.deleteById(cartId);
     }
 }

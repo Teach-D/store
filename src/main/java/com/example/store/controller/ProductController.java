@@ -2,6 +2,7 @@ package com.example.store.controller;
 
 import com.example.store.dto.AddProductDto;
 import com.example.store.dto.EditProductDto;
+import com.example.store.dto.ResponseProductDto;
 import com.example.store.entity.Product;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
@@ -21,14 +22,14 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public Product addProduct(@IfLogin LoginUserDto loginUserDto, @RequestBody AddProductDto addProductDto) {
         log.info(loginUserDto.getRoles().toString());
         return productService.addProduct(addProductDto);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public Product editProduct(@RequestBody EditProductDto editProductDto, @PathVariable Long id) {
         return productService.editProduct(editProductDto, id);
     }
@@ -43,8 +44,11 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getProducts(@PathVariable Long id) {
-        return productService.getProduct(id);
+    public ResponseProductDto getProducts(@PathVariable Long id) {
+        Product product = productService.getProduct(id);
+        ResponseProductDto responseProductDto = new ResponseProductDto();
+        responseProductDto.setProduct(product);
+        return responseProductDto;
     }
 
     @DeleteMapping("/{id}")

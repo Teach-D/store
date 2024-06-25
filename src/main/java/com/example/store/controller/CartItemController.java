@@ -2,6 +2,7 @@ package com.example.store.controller;
 
 import com.example.store.dto.AddCartItemDto;
 import com.example.store.dto.EditCartItemDto;
+import com.example.store.dto.ResponseCartItemDto;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Member;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/cartItems")
@@ -74,17 +76,26 @@ public class CartItemController {
     }
 
     @GetMapping
-    public List<CartItem> getCartItems(@IfLogin LoginUserDto loginUserDto, @RequestParam(required = false) Long cartId) {
-        if (cartId == null) {
-            return cartItemService.getCartItemsByCartId(cartId);
+    public List<ResponseCartItemDto> getCartItems(@IfLogin LoginUserDto loginUserDto) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
+        List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            ResponseCartItemDto responseCartItemDto = new ResponseCartItemDto();
+            responseCartItemDto.setQuantity(cartItem.getQuantity());
+            responseCartItemDto.setProduct(cartItem.getProduct());
+            cartItemDtos.add(responseCartItemDto);
         }
-        log.info("확인");
 
-        return cartItemService.getCartItemsByCartId(cartId);
+        return cartItemDtos;
     }
 
     @GetMapping("/{cartItemId}")
-    public CartItem getCartItem(@PathVariable Long cartItemId) {
-        return cartItemService.getCartItem(cartItemId);
+    public ResponseCartItemDto getCartItem(@PathVariable Long cartItemId) {
+        ResponseCartItemDto responseCartItemDto = new ResponseCartItemDto();
+        CartItem cartItem = cartItemService.getCartItem(cartItemId);
+        responseCartItemDto.setQuantity(cartItem.getQuantity());
+        responseCartItemDto.setProduct(cartItem.getProduct());
+        return responseCartItemDto;
     }
 }

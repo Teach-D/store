@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -38,5 +39,9 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Optional<Member> getMember(String email) {
         return memberRepository.findByEmail(email);
+    }
+
+    public void deleteMember(Long memberId) {
+        memberRepository.deleteById(memberId);
     }
 }
