@@ -1,5 +1,6 @@
 package com.example.store.controller;
 
+import com.example.store.dto.ResponseCartDto;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Member;
@@ -25,10 +26,13 @@ public class CartApiController {
     private final MemberService memberService;
 
     @GetMapping
-    public Cart getCart(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseCartDto getCart(@IfLogin LoginUserDto loginUserDto) {
         String email = loginUserDto.getEmail();
         Member member = memberService.findByEmail(email);
-        return cartService.getCart(member.getMemberId());
+        Cart cart = cartService.getCart(member.getMemberId());
+        ResponseCartDto responseCartDto = new ResponseCartDto();
+        responseCartDto.setId(cart.getId());
+        return responseCartDto;
     }
 
 }

@@ -52,7 +52,6 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
     }

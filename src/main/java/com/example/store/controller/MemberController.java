@@ -131,6 +131,7 @@ public class MemberController {
     @GetMapping("/info")
     public ResponseEntity userinfo(@IfLogin LoginUserDto loginUserDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
+        log.info(member.getEmail());
         ResponseMemberDto responseMemberDto = new ResponseMemberDto();
         responseMemberDto.setEmail(member.getEmail());
         responseMemberDto.setName(member.getName());

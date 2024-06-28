@@ -33,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token="";
         try {
             token = getToken(request);
+            log.info(token);
             if (StringUtils.hasText(token)) {
                 getAuthentication(token);
             }
