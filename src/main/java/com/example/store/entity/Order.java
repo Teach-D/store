@@ -29,4 +29,8 @@ public class Order {
 
     private String date;
 
+    @OneToOne
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
 }

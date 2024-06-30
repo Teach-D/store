@@ -25,11 +25,13 @@ public class OrderController {
     private final OrderService orderService;
     private final MemberService memberService;
     private final OrderItemService orderItemService;
+    private final DeliveryService deliveryService;
 
     @PostMapping
     public void addOrder(@IfLogin LoginUserDto loginUserDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
+        Delivery delivery = member.getDelivery();
         Order order = new Order();
 
         for (CartItem cartItem : cartItems) {
@@ -42,6 +44,7 @@ public class OrderController {
             orderItemService.save(orderItem);
         }
         order.setMember(member);
+        order.setDelivery(delivery);
         LocalDate localDate = LocalDate.now();
         String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
         order.setDate(date);

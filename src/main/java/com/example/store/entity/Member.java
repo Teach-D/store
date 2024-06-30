@@ -33,6 +33,10 @@ public class Member {
     @CreationTimestamp
     private LocalDateTime regDate;
 
+    @OneToOne
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
     @ManyToMany
     @JoinTable(name = "member_role",
         joinColumns = @JoinColumn(name = "member_id"),
