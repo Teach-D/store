@@ -29,8 +29,10 @@ public class Order {
 
     private String date;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
+
+    private int totalPrice;
 
 }

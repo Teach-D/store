@@ -26,13 +26,16 @@ public class OrderController {
     private final MemberService memberService;
     private final OrderItemService orderItemService;
     private final DeliveryService deliveryService;
+    private final DiscountService discountService;
 
-    @PostMapping
-    public void addOrder(@IfLogin LoginUserDto loginUserDto) {
+    @PostMapping("/{discountId}")
+    public void addOrderDiscount(@IfLogin LoginUserDto loginUserDto, @PathVariable Long discountId) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
         Delivery delivery = member.getDelivery();
         Order order = new Order();
+        Discount discount = discountService.getDiscount(discountId);
+        int totalPrice = 0;
 
         for (CartItem cartItem : cartItems) {
             OrderItem orderItem = new OrderItem();
@@ -42,9 +45,44 @@ public class OrderController {
             order.getOrderItems().add(orderItem);
             cartItemService.deleteCartItem(member.getMemberId(), cartItem.getId());
             orderItemService.save(orderItem);
+            totalPrice = (totalPrice + cartItem.getProduct().getPrice() * cartItem.getQuantity());
         }
+
+        if(member.getDiscounts().contains(discount)) {
+            totalPrice = totalPrice - discount.getDiscountPrice();
+        }
+
         order.setMember(member);
         order.setDelivery(delivery);
+        order.setTotalPrice(totalPrice);
+        LocalDate localDate = LocalDate.now();
+        String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
+        order.setDate(date);
+        orderService.save(order);
+    }
+
+    @PostMapping("/")
+    public void addOrder(@IfLogin LoginUserDto loginUserDto) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
+        Delivery delivery = member.getDelivery();
+        Order order = new Order();
+        int totalPrice = 0;
+
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setOrder(order);
+            orderItem.setQuantity(cartItem.getQuantity());
+            order.getOrderItems().add(orderItem);
+            cartItemService.deleteCartItem(member.getMemberId(), cartItem.getId());
+            orderItemService.save(orderItem);
+            totalPrice = (totalPrice + cartItem.getProduct().getPrice() * cartItem.getQuantity());
+        }
+
+        order.setMember(member);
+        order.setDelivery(delivery);
+        order.setTotalPrice(totalPrice);
         LocalDate localDate = LocalDate.now();
         String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
         order.setDate(date);
@@ -70,10 +108,10 @@ public class OrderController {
                 responseOrderDto1.getProducts().add(responseProductDto);
 
             }
-
+            responseOrderDto1.setId(order.getOrderId());
+            responseOrderDto1.setTotalPrice(order.getTotalPrice());
             responseOrderDto.add(responseOrderDto1);
         }
-
 
         return responseOrderDto;
     }
@@ -97,6 +135,7 @@ public class OrderController {
             }
 
             responseOrderDto.setDate(order.getDate());
+            responseOrderDto.setTotalPrice(order.getTotalPrice());
             return responseOrderDto;
         } else {
             return null;

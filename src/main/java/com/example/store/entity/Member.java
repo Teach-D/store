@@ -7,7 +7,9 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,6 +46,13 @@ public class Member {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "member_discount",
+            joinColumns = @JoinColumn(name = "member_id"),
+            inverseJoinColumns = @JoinColumn(name = "discount_id")
+    )
+    private List<Discount> discounts = new ArrayList<>();
+
     @Override
     public String toString() {
         return "User{" +
@@ -57,5 +66,9 @@ public class Member {
 
     public void addRole(Role role) {
         roles.add(role);
+    }
+
+    public void addDiscount(Discount discount) {
+        discounts.add(discount);
     }
 }

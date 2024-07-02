@@ -6,7 +6,7 @@ import lombok.Data;
 public class EditProductDto {
     private String title;
 
-    private Double price;
+    private int price;
 
     private String description;
 

@@ -12,5 +12,6 @@ public class ResponseOrderDto {
     private List<ResponseProductDto> products = new ArrayList<>();
     private String date;
     private Long id;
+    private int totalPrice;
 
 }
