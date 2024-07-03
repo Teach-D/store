@@ -1,12 +1,13 @@
 package com.example.store.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
-@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Product {
 
     @Id
@@ -30,4 +31,19 @@ public class Product {
     @Embedded
     private Rating rating;
 
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void updateProduct(Category category, int price, String description, String imageUrl, String title) {
+        this.category = category;
+        this.price = price;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.title = title;
+    }
+
+    public void updateRating(Rating rating) {
+        this.rating = rating;
+    }
 }

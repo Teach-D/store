@@ -30,8 +30,7 @@ public class CartApiController {
         String email = loginUserDto.getEmail();
         Member member = memberService.findByEmail(email);
         Cart cart = cartService.getCart(member.getMemberId());
-        ResponseCartDto responseCartDto = new ResponseCartDto();
-        responseCartDto.setId(cart.getId());
+        ResponseCartDto responseCartDto = ResponseCartDto.builder().id(cart.getId()).build();
         return responseCartDto;
     }
 

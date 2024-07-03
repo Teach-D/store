@@ -36,10 +36,14 @@ public class DiscountService {
 
     public void updateDiscount(Long discountId, AddDiscountDto addDiscountDto) {
         Discount discount = discountRepository.findById(discountId).get();
-        discount.setDiscountName(addDiscountDto.getDiscountName());
-        discount.setDiscountPrice(addDiscountDto.getDiscountPrice());
-        discount.setExpirationDate(addDiscountDto.getExpirationDate());
-        discount.setQuantity(addDiscountDto.getQuantity());
+
+        discount.updateDiscount(
+                addDiscountDto.getDiscountName(),
+                addDiscountDto.getDiscountPrice(),
+                addDiscountDto.getExpirationDate(),
+                addDiscountDto.getQuantity()
+        );
+
         discountRepository.save(discount);
     }
 }

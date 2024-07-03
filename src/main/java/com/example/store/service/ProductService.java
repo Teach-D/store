@@ -24,17 +24,21 @@ public class ProductService {
     @Transactional
     public Product addProduct(AddProductDto addProductDto) {
         Category category = categoryService.getCategory(addProductDto.getCategoryId());
-        Product product = new Product();
-        product.setCategory(category);
-        product.setQuantity(addProductDto.getQuantity());
-        product.setPrice(addProductDto.getPrice());
-        product.setDescription(addProductDto.getDescription());
-        product.setImageUrl(addProductDto.getImageUrl());
-        product.setTitle(addProductDto.getTitle());
-        Rating rating = new Rating();
-        rating.setRate(0.0);
-        rating.setCount(0);
-        product.setRating(rating);
+        Product product = Product.builder()
+                        .category(category)
+                        .quantity(addProductDto.getQuantity())
+                        .price(addProductDto.getPrice())
+                        .description(addProductDto.getDescription())
+                        .imageUrl(addProductDto.getImageUrl())
+                        .title(addProductDto.getTitle())
+                        .build();
+
+        Rating rating = Rating.builder()
+                        .rate(0.0)
+                        .count(0)
+                        .build();
+
+        product.updateRating(rating);
 
         return productRepository.save(product);
     }
@@ -56,11 +60,13 @@ public class ProductService {
 
     public Product editProduct(EditProductDto editProductDto, Long id) {
         Product product = productRepository.findById(id).orElseThrow();
-        product.setCategory(categoryService.getCategory(editProductDto.getCategoryId()));
-        product.setPrice(editProductDto.getPrice());
-        product.setDescription(editProductDto.getDescription());
-        product.setImageUrl(editProductDto.getImageUrl());
-        product.setTitle(editProductDto.getTitle());
+        product.updateProduct(
+                categoryService.getCategory(editProductDto.getCategoryId()),
+                editProductDto.getPrice(),
+                editProductDto.getDescription(),
+                editProductDto.getImageUrl(),
+                editProductDto.getTitle()
+        );
 
         return productRepository.save(product);
     }

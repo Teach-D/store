@@ -1,6 +1,7 @@
 package com.example.store.controller;
 
 import com.example.store.dto.AddDeliveryDto;
+import com.example.store.dto.ResponseCartItemDto;
 import com.example.store.dto.ResponseDeliveryDto;
 import com.example.store.entity.Delivery;
 import com.example.store.entity.Member;
@@ -31,28 +32,24 @@ public class DeliveryController {
             return null;
         }
 
-        ResponseDeliveryDto responseDeliveryDto = new ResponseDeliveryDto();
-        responseDeliveryDto.setAddress(delivery.getAddress());
-        responseDeliveryDto.setRecipient(delivery.getRecipient());
-        responseDeliveryDto.setRequest(delivery.getRequest());
-        responseDeliveryDto.setPhoneNumber(delivery.getPhoneNumber());
-        log.info(responseDeliveryDto.toString());
+        ResponseDeliveryDto responseDeliveryDto = ResponseDeliveryDto
+                .builder().address(delivery.getAddress())
+                        .recipient(delivery.getRecipient())
+                                .request(delivery.getRequest())
+                                        .phoneNumber(delivery.getPhoneNumber()).build();
         return responseDeliveryDto;
     }
 
     @PostMapping
     public void setDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDeliveryDto addDeliveryDto) {
-        String email = loginUserDto.getEmail();
-        log.info(addDeliveryDto.getRequest());
-        log.info(email);
-        Member member = memberService.findByEmail(email);
-        Delivery delivery = new Delivery();
-        delivery.setAddress(addDeliveryDto.getAddress());
-        delivery.setRecipient(addDeliveryDto.getRecipient());
-        delivery.setRequest(addDeliveryDto.getRequest());
-        delivery.setPhoneNumber(addDeliveryDto.getPhoneNumber());
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        Delivery delivery = Delivery.builder()
+                .address(addDeliveryDto.getAddress())
+                        .recipient(addDeliveryDto.getRecipient())
+                                .request(addDeliveryDto.getRequest())
+                                        .phoneNumber(addDeliveryDto.getPhoneNumber()).build();
         deliveryService.addDelivery(delivery);
-        member.setDelivery(delivery);
+        member.addDelivery(delivery);
         memberService.addMember(member);
     }
 
@@ -61,10 +58,11 @@ public class DeliveryController {
         String email = loginUserDto.getEmail();
         Member member = memberService.findByEmail(email);
         Delivery delivery = member.getDelivery();
-        delivery.setAddress(addDeliveryDto.getAddress());
-        delivery.setRecipient(addDeliveryDto.getRecipient());
-        delivery.setRequest(addDeliveryDto.getRequest());
-        delivery.setPhoneNumber(addDeliveryDto.getPhoneNumber());
+        delivery.updateDeliver(
+                addDeliveryDto.getAddress(), addDeliveryDto.getRecipient(),
+                addDeliveryDto.getRequest(), addDeliveryDto.getPhoneNumber()
+        );
+
         deliveryService.updateDelivery(delivery);
     }
 
@@ -73,7 +71,7 @@ public class DeliveryController {
         String email = loginUserDto.getEmail();
         Member member = memberService.findByEmail(email);
         Delivery delivery = member.getDelivery();
-        member.setDelivery(null);
+        member.emptyDelivery();
 
         deliveryService.deleteDelivery(delivery);
     }

@@ -20,9 +20,7 @@ public class CartService {
     public Cart addCart(Long memberId, String date) {
         Optional<Cart> cart = cartRepository.findByMemberIdAndDate(memberId, date);
         if(cart.isEmpty()) {
-            Cart newCart = new Cart();
-            newCart.setMemberId(memberId);
-            newCart.setDate(date);
+            Cart newCart = Cart.builder().memberId(memberId).date(date).build();
             Cart saveCart = cartRepository.save(newCart);
             return saveCart;
         } else {

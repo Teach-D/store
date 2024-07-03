@@ -1,11 +1,14 @@
 package com.example.store.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MemberSignupResponseDto {
 
     private Long memberId;

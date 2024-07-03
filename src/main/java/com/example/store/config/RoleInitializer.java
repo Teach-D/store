@@ -13,13 +13,19 @@ public class RoleInitializer {
     public CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {
             if(roleRepository.count() == 0) {
-                Role userRole = new Role();
-                userRole.setRoleId(1L);
-                userRole.setName("ROLE_USER");
+                Role userRole = Role
+                        .builder()
+                        .roleId(1L)
+                        .name("ROLE_USER")
+                        .build();
 
-                Role adminRole = new Role();
-                adminRole.setRoleId(2L);
-                adminRole.setName("ROLE_ADMIN");
+
+                Role adminRole = Role
+                        .builder()
+                        .roleId(2L)
+                        .name("ROLE_ADMIN")
+                        .build();
+
 
                 roleRepository.save(userRole);
                 roleRepository.save(adminRole);

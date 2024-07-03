@@ -1,9 +1,7 @@
 package com.example.store.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -13,9 +11,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@NoArgsConstructor
 @Getter
-@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Member {
 
     @Id
@@ -70,5 +69,13 @@ public class Member {
 
     public void addDiscount(Discount discount) {
         discounts.add(discount);
+    }
+
+    public void addDelivery(Delivery delivery) {
+        this.delivery = delivery;
+    }
+
+    public void emptyDelivery() {
+        this.delivery = null;
     }
 }

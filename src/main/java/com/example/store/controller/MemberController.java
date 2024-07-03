@@ -43,19 +43,20 @@ public class MemberController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Member member = new Member();
-        member.setName(memberSignupDto.getName());
-        member.setEmail(memberSignupDto.getEmail());
-        member.setPassword(passwordEncoder.encode(memberSignupDto.getPassword()));
+        Member member = Member.builder()
+                        .name(memberSignupDto.getName())
+                        .email(memberSignupDto.getEmail())
+                        .password(memberSignupDto.getPassword())
+                        .build();
 
         Member saveMember = memberService.addMember(member);
 
-        MemberSignupResponseDto memberSignupResponseDto = new MemberSignupResponseDto();
-        memberSignupResponseDto.setMemberId(saveMember.getMemberId());
-        memberSignupResponseDto.setEmail(saveMember.getEmail());
-        memberSignupResponseDto.setName(saveMember.getName());
-        memberSignupResponseDto.setRegDate(saveMember.getRegDate());
-
+        MemberSignupResponseDto memberSignupResponseDto = MemberSignupResponseDto.builder()
+                        .memberId(saveMember.getMemberId())
+                        .email(saveMember.getEmail())
+                        .name(saveMember.getName())
+                        .regDate(saveMember.getRegDate())
+                        .build();
 
         LocalDate localDate = LocalDate.now();
         String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
@@ -83,9 +84,7 @@ public class MemberController {
         String refreshToken = jwtTokenizer.createRefreshToken(member.getMemberId(), member.getEmail(),  roles);
 
         // RefreshToken을 DB에 저장한다. 성능 때문에 DB가 아니라 Redis에 저장하는 것이 좋다.
-        RefreshToken refreshTokenEntity = new RefreshToken();
-        refreshTokenEntity.setValue(refreshToken);
-        refreshTokenEntity.setMemberId(member.getMemberId());
+        RefreshToken refreshTokenEntity = RefreshToken.builder().value(refreshToken).memberId(member.getMemberId()).build();
         refreshTokenService.addRefreshToken(refreshTokenEntity);
 
         MemberLoginResponseDto loginResponse = MemberLoginResponseDto.builder()
@@ -132,11 +131,13 @@ public class MemberController {
     public ResponseEntity userinfo(@IfLogin LoginUserDto loginUserDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         log.info(member.getEmail());
-        ResponseMemberDto responseMemberDto = new ResponseMemberDto();
-        responseMemberDto.setEmail(member.getEmail());
-        responseMemberDto.setName(member.getName());
-        responseMemberDto.setRegDate(member.getRegDate());
-        responseMemberDto.setRoles(member.getRoles());
+        ResponseMemberDto responseMemberDto = ResponseMemberDto.builder()
+                        .email(member.getEmail())
+                        .name(member.getName())
+                        .regDate(member.getRegDate())
+                        .roles(member.getRoles())
+                        .build();
+
         return new ResponseEntity(responseMemberDto, HttpStatus.OK);
     }
 
@@ -146,7 +147,7 @@ public class MemberController {
         Cart cart = cartService.getCart(member.getMemberId());
         for (CartItem cartItem : cart.getCartItemList()) {
             Product product = cartItem.getProduct();
-            product.setQuantity(product.getQuantity() + cartItem.getQuantity());
+            product.updateQuantity(product.getQuantity() + cartItem.getQuantity());
         }
 
         cartService.deleteCart(cart.getId());

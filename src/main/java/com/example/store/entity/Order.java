@@ -1,17 +1,16 @@
 package com.example.store.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@NoArgsConstructor
 @Getter
-@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "orders")
 public class Order {
 
@@ -25,6 +24,7 @@ public class Order {
     private Member member;
 
     @OneToMany(mappedBy = "order")
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     private String date;
@@ -35,4 +35,11 @@ public class Order {
 
     private int totalPrice;
 
+    public void updateTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public void updateMember(Member member) {
+        this.member = member;
+    }
 }

@@ -39,13 +39,15 @@ public class DiscountController {
 
         List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
         for (Discount discount : discounts) {
-            ResponseDiscountDto responseDiscountDto = new ResponseDiscountDto();
-            responseDiscountDto.setDiscountName(discount.getDiscountName());
-            responseDiscountDto.setDiscountPrice(discount.getDiscountPrice());
-            responseDiscountDto.setQuantity(discount.getQuantity());
-            responseDiscountDto.setId(discount.getId());
-            responseDiscountDto.setDiscountCondition(discount.getDiscountCondition());
-            responseDiscountDto.setExpirationDate(discount.getExpirationDate());
+            ResponseDiscountDto responseDiscountDto = ResponseDiscountDto.builder()
+                    .discountName(discount.getDiscountName())
+                    .discountPrice(discount.getDiscountPrice())
+                    .quantity(discount.getQuantity())
+                    .id(discount.getId())
+                    .discountCondition(discount.getDiscountCondition())
+                    .expirationDate(discount.getExpirationDate())
+                    .build();
+
             responseDiscountDtos.add(responseDiscountDto);
         }
         return new ResponseEntity(responseDiscountDtos, HttpStatus.OK);
@@ -56,13 +58,14 @@ public class DiscountController {
         List<Discount> allDiscount = discountService.getAllDiscount();
         List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
         for (Discount discount : allDiscount) {
-            ResponseDiscountDto responseDiscountDto = new ResponseDiscountDto();
-            responseDiscountDto.setDiscountName(discount.getDiscountName());
-            responseDiscountDto.setDiscountPrice(discount.getDiscountPrice());
-            responseDiscountDto.setQuantity(discount.getQuantity());
-            responseDiscountDto.setId(discount.getId());
-            responseDiscountDto.setDiscountCondition(discount.getDiscountCondition());
-            responseDiscountDto.setExpirationDate(discount.getExpirationDate());
+            ResponseDiscountDto responseDiscountDto = ResponseDiscountDto.builder()
+                    .discountName(discount.getDiscountName())
+                    .discountPrice(discount.getDiscountPrice())
+                    .quantity(discount.getQuantity())
+                    .id(discount.getId())
+                    .discountCondition(discount.getDiscountCondition())
+                    .expirationDate(discount.getExpirationDate())
+                    .build();
             responseDiscountDtos.add(responseDiscountDto);
         }
         return new ResponseEntity(responseDiscountDtos, HttpStatus.OK);
@@ -78,7 +81,7 @@ public class DiscountController {
             return null;
         }
 
-        discount.setQuantity(discount.getQuantity() - 1);
+        discount.updateQuantity(discount.getQuantity() - 1);
         member.addDiscount(discount);
         for (Discount memberDiscount : member.getDiscounts()) {
             log.info(memberDiscount.getDiscountName());
@@ -90,12 +93,14 @@ public class DiscountController {
 
     @PostMapping
     public ResponseEntity addDiscount(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDiscountDto addDiscountDto) {
-        Discount discount = new Discount();
-        discount.setDiscountName(addDiscountDto.getDiscountName());
-        discount.setDiscountPrice(addDiscountDto.getDiscountPrice());
-        discount.setQuantity(addDiscountDto.getQuantity());
-        discount.setExpirationDate(addDiscountDto.getExpirationDate());
-        discount.setDiscountCondition(addDiscountDto.getDiscountCondition());
+        Discount discount = Discount.builder()
+                        .discountName(addDiscountDto.getDiscountName())
+                        .discountPrice(addDiscountDto.getDiscountPrice())
+                        .quantity(addDiscountDto.getQuantity())
+                        .expirationDate(addDiscountDto.getExpirationDate())
+                        .discountCondition(addDiscountDto.getDiscountCondition())
+                        .build();
+
         discountService.addDiscount(discount);
         return new ResponseEntity(HttpStatus.OK);
 

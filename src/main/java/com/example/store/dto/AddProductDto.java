@@ -1,8 +1,11 @@
 package com.example.store.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AddProductDto {
     private String title;
 

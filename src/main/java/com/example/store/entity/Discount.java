@@ -1,12 +1,13 @@
 package com.example.store.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
-@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Discount {
 
     @Id
@@ -22,4 +23,15 @@ public class Discount {
     private int quantity;
 
     private int discountCondition;
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void updateDiscount(String discountName, int discountPrice, String expirationDate, int quantity) {
+        this.discountName = discountName;
+        this.discountPrice = discountPrice;
+        this.expirationDate = expirationDate;
+        this.quantity = quantity;
+    }
 }

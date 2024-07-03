@@ -41,20 +41,20 @@ public class CartItemController {
         if (cartItemService.isCartItemExist(addCartItemDto.getCartId(), productId)) {
             log.info(" 중복 ");
             CartItem cartItem = cartItemService.getCartItem(addCartItemDto.getCartId(), productId);
-            cartItem.setQuantity(cartItem.getQuantity() + addCartItemDto.getQuantity());
+            cartItem.updateQuantity(cartItem.getQuantity() + addCartItemDto.getQuantity());
             cartItemService.updateCartItem(cartItem);
             return;
         }
 
         Product product = productService.getProduct(productId);
-        product.setQuantity(product.getQuantity() - addCartItemDto.getQuantity());
+        product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
         cartItemService.addCartItem(addCartItemDto, product);
     }
 
     @PutMapping("/{cartItemId}")
     public void editCartItem(@PathVariable Long cartItemId, @RequestBody EditCartItemDto editCartItemDto) {
         CartItem cartItem = cartItemService.getCartItem(cartItemId);
-        cartItem.setQuantity(editCartItemDto.getQuantity());
+        cartItem.updateQuantity(editCartItemDto.getQuantity());
         log.info(editCartItemDto.toString());
         cartItemService.updateCartItem(cartItem);
     }
@@ -69,7 +69,7 @@ public class CartItemController {
 
         if (cartItemService.isCartItemExistByCartId(cart.getId(), cartItemId) == false)
             return ResponseEntity.badRequest().build();
-        product1.setQuantity(product1.getQuantity() + cartItem.getQuantity());
+        product1.updateQuantity(product1.getQuantity() + cartItem.getQuantity());
         cartItemService.deleteCartItem(member.getMemberId(), cartItemId);
 
         return ResponseEntity.ok().build();
@@ -80,10 +80,10 @@ public class CartItemController {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
         List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
+
         for (CartItem cartItem : cartItems) {
-            ResponseCartItemDto responseCartItemDto = new ResponseCartItemDto();
-            responseCartItemDto.setQuantity(cartItem.getQuantity());
-            responseCartItemDto.setProduct(cartItem.getProduct());
+            ResponseCartItemDto responseCartItemDto = ResponseCartItemDto
+                    .builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
             cartItemDtos.add(responseCartItemDto);
         }
 
@@ -92,10 +92,9 @@ public class CartItemController {
 
     @GetMapping("/{cartItemId}")
     public ResponseCartItemDto getCartItem(@PathVariable Long cartItemId) {
-        ResponseCartItemDto responseCartItemDto = new ResponseCartItemDto();
         CartItem cartItem = cartItemService.getCartItem(cartItemId);
-        responseCartItemDto.setQuantity(cartItem.getQuantity());
-        responseCartItemDto.setProduct(cartItem.getProduct());
+        ResponseCartItemDto responseCartItemDto = ResponseCartItemDto.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
+
         return responseCartItemDto;
     }
 }

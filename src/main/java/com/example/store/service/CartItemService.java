@@ -23,10 +23,11 @@ public class CartItemService {
     public CartItem addCartItem(AddCartItemDto addCartItemDto, Product product) {
         Cart cart = cartRepository.findById(addCartItemDto.getCartId()).orElseThrow();
 
-        CartItem cartItem = new CartItem();
-        cartItem.setCart(cart);
-        cartItem.setQuantity(addCartItemDto.getQuantity());
-        cartItem.setProduct(product);
+        CartItem cartItem = CartItem.builder()
+                        .cart(cart)
+                        .quantity(addCartItemDto.getQuantity())
+                        .product(product)
+                        .build();
 
         return cartItemRepository.save(cartItem);
     }
@@ -44,7 +45,7 @@ public class CartItemService {
     @Transactional
     public CartItem updateCartItem(CartItem cartItem) {
         CartItem findCartItem = cartItemRepository.findById(cartItem.getId()).orElseThrow();
-        findCartItem.setQuantity(cartItem.getQuantity());
+        findCartItem.updateQuantity(cartItem.getQuantity());
         return findCartItem;
     }
 

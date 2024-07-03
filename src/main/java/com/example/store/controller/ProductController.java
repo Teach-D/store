@@ -46,8 +46,9 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseProductDto getProducts(@PathVariable Long id) {
         Product product = productService.getProduct(id);
-        ResponseProductDto responseProductDto = new ResponseProductDto();
-        responseProductDto.setProduct(product);
+        ResponseProductDto responseProductDto = ResponseProductDto.builder()
+                        .product(product)
+                        .build();
         return responseProductDto;
     }
 

@@ -1,9 +1,12 @@
 package com.example.store.dto;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RefreshTokenDto {
     @NotEmpty
     String refreshToken;

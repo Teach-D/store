@@ -18,8 +18,7 @@ public class CategoryService {
 
     @Transactional
     public Category addCategory(AddCategoryDto addCategoryDto) {
-        Category category = new Category();
-        category.setName(addCategoryDto.getName());
+        Category category = Category.builder().name(addCategoryDto.getName()).build();
 
         return categoryRepository.save(category);
     }
