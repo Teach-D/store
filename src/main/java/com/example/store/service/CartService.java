@@ -29,7 +29,6 @@ public class CartService {
     }
 
     public Cart getCart(Long memberId) {
-        log.info(String.valueOf(memberId));
         Cart cart = cartRepository.findByMemberId(memberId).get();
         return cart;
     }

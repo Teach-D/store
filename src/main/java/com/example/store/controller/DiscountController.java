@@ -29,16 +29,11 @@ public class DiscountController {
     @GetMapping
     public ResponseEntity allDiscountByMember(@IfLogin LoginUserDto loginUserDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         List<Discount> discounts = member.getDiscounts();
-        log.info("aa");
-        for (Discount discount : discounts) {
-            log.info(discount.toString());
-        }
-
-
-
         List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
-        for (Discount discount : discounts) {
+
+        discounts.forEach(discount -> {
             ResponseDiscountDto responseDiscountDto = ResponseDiscountDto.builder()
                     .discountName(discount.getDiscountName())
                     .discountPrice(discount.getDiscountPrice())
@@ -49,15 +44,18 @@ public class DiscountController {
                     .build();
 
             responseDiscountDtos.add(responseDiscountDto);
-        }
+        });
+
         return new ResponseEntity(responseDiscountDtos, HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    public ResponseEntity allDiscount(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity allDiscount() {
+
         List<Discount> allDiscount = discountService.getAllDiscount();
         List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
-        for (Discount discount : allDiscount) {
+
+        allDiscount.forEach(discount -> {
             ResponseDiscountDto responseDiscountDto = ResponseDiscountDto.builder()
                     .discountName(discount.getDiscountName())
                     .discountPrice(discount.getDiscountPrice())
@@ -67,25 +65,24 @@ public class DiscountController {
                     .expirationDate(discount.getExpirationDate())
                     .build();
             responseDiscountDtos.add(responseDiscountDto);
-        }
+        });
+
         return new ResponseEntity(responseDiscountDtos, HttpStatus.OK);
     }
 
     @PostMapping("/{id}")
     public ResponseEntity setDiscountByMember(@IfLogin LoginUserDto loginUserDto, @PathVariable(value = "id") Long id) {
-
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         Discount discount = discountService.getDiscount(id);
 
+        // 회원이 추가하려는 쿠폰이 이미 가지고 있는 쿠폰일 때
         if (member.getDiscounts().contains(discount)) {
             return null;
         }
 
         discount.updateQuantity(discount.getQuantity() - 1);
+
         member.addDiscount(discount);
-        for (Discount memberDiscount : member.getDiscounts()) {
-            log.info(memberDiscount.getDiscountName());
-        }
         memberService.addMember(member);
 
         return new ResponseEntity(HttpStatus.OK);
@@ -93,6 +90,7 @@ public class DiscountController {
 
     @PostMapping
     public ResponseEntity addDiscount(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDiscountDto addDiscountDto) {
+
         Discount discount = Discount.builder()
                         .discountName(addDiscountDto.getDiscountName())
                         .discountPrice(addDiscountDto.getDiscountPrice())
@@ -102,6 +100,7 @@ public class DiscountController {
                         .build();
 
         discountService.addDiscount(discount);
+
         return new ResponseEntity(HttpStatus.OK);
 
     }
@@ -114,12 +113,13 @@ public class DiscountController {
     @DeleteMapping("/{id}")
     public ResponseEntity deleteDiscount(@PathVariable Long id) {
         discountService.deleteDiscount(id);
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    // discount 삭제 안됨, 관련된 것까지 한번에 같이 삭제해야 함
     @DeleteMapping("/cancel/{id}")
     public void cancelDiscount(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
-
     }
 }

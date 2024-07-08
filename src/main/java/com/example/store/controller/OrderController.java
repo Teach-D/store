@@ -28,6 +28,64 @@ public class OrderController {
     private final DeliveryService deliveryService;
     private final DiscountService discountService;
 
+    @GetMapping
+    public List<ResponseOrderDto> getOrders(@IfLogin LoginUserDto loginUserDto) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        List<Order> orders = orderService.findByMember(member);
+        List<ResponseOrderDto> responseOrderDtos = new ArrayList<>();
+
+        orders.forEach(order -> {
+            ResponseOrderDto responseOrderDto = ResponseOrderDto.builder()
+                    .date(order.getDate())
+                    .id(order.getOrderId())
+                    .totalPrice(order.getTotalPrice())
+                    .build();
+
+            order.getOrderItems().forEach(orderItem -> {
+                Product product = orderItem.getProduct();
+                ResponseProductDto responseProductDto = ResponseProductDto.builder()
+                        .product(product)
+                        .quantity(orderItem.getQuantity())
+                        .build();
+
+                responseOrderDto.getProducts().add(responseProductDto);
+            });
+
+            responseOrderDtos.add(responseOrderDto);
+        });
+
+        return responseOrderDtos;
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseOrderDto getOrder(@IfLogin LoginUserDto loginUserDto, @PathVariable Long orderId) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        Order order = orderService.findById(orderId);
+
+        order.updateMember(member);
+        ResponseOrderDto responseOrderDto = ResponseOrderDto
+                .builder()
+                .date(order.getDate())
+                .totalPrice(order.getTotalPrice())
+                .build();
+
+        if (order.getMember() == member) {
+
+            order.getOrderItems().forEach(orderItem -> {
+                Product product = orderItem.getProduct();
+                ResponseProductDto responseProductDto = ResponseProductDto.builder()
+                        .product(product)
+                        .quantity(orderItem.getQuantity())
+                        .build();
+                responseOrderDto.getProducts().add(responseProductDto);
+            });
+
+            return responseOrderDto;
+        } else {
+            return null;
+        }
+    }
+
     @PostMapping("/{discountId}")
     public void addOrderDiscount(@IfLogin LoginUserDto loginUserDto, @PathVariable Long discountId) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
@@ -65,7 +123,6 @@ public class OrderController {
         if(member.getDiscounts().contains(discount)) {
             totalPrice = totalPrice - discount.getDiscountPrice();
         }
-
 
         order.updateTotalPrice(totalPrice);
 
@@ -106,76 +163,16 @@ public class OrderController {
         orderService.save(order);
     }
 
-    @GetMapping
-    public List<ResponseOrderDto> getOrders(@IfLogin LoginUserDto loginUserDto) {
-        log.info("aa");
-        Member member = memberService.findByEmail(loginUserDto.getEmail());
-        List<Order> orders = orderService.findByMember(member);
-        List<ResponseOrderDto> responseOrderDtos = new ArrayList<>();
-
-        for (Order order : orders) {
-            ResponseOrderDto responseOrderDto = ResponseOrderDto.builder()
-                            .date(order.getDate())
-                            .id(order.getOrderId())
-                            .totalPrice(order.getTotalPrice())
-                            .build();
-
-            for (OrderItem orderItem : order.getOrderItems()) {
-                Product product = orderItem.getProduct();
-                ResponseProductDto responseProductDto = ResponseProductDto.builder()
-                                .product(product)
-                                .quantity(orderItem.getQuantity())
-                                .build();
-
-                responseOrderDto.getProducts().add(responseProductDto);
-
-            }
-
-            responseOrderDtos.add(responseOrderDto);
-        }
-
-        return responseOrderDtos;
-    }
-
-    @GetMapping("/{orderId}")
-    public ResponseOrderDto getOrder(@IfLogin LoginUserDto loginUserDto, @PathVariable Long orderId) {
-        Member member = memberService.findByEmail(loginUserDto.getEmail());
-        Order order = orderService.findById(orderId);
-
-        order.updateMember(member);
-        ResponseOrderDto responseOrderDto = ResponseOrderDto
-                    .builder()
-                    .date(order.getDate())
-                    .totalPrice(order.getTotalPrice())
-                    .build();
-
-        log.info(order.getMember().getEmail());
-        if (order.getMember() == member) {
-
-            for (OrderItem orderItem : order.getOrderItems()) {
-                Product product = orderItem.getProduct();
-                ResponseProductDto responseProductDto = ResponseProductDto.builder()
-                                .product(product)
-                                .quantity(orderItem.getQuantity())
-                                .build();
-                responseOrderDto.getProducts().add(responseProductDto);
-            }
-
-            return responseOrderDto;
-        } else {
-            return null;
-        }
-    }
-
     @DeleteMapping("/{orderId}")
     public void cancelOrder(@IfLogin LoginUserDto loginUserDto, @PathVariable Long orderId) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         Order order = orderService.findById(orderId);
-        for (OrderItem orderItem : order.getOrderItems()) {
+
+        order.getOrderItems().forEach(orderItem -> {
             Product product = orderItem.getProduct();
             product.updateQuantity(product.getQuantity() + orderItem.getQuantity());
             orderItemService.delete(orderItem.getOrderId());
-        }
+        });
 
         orderService.delete(order);
     }

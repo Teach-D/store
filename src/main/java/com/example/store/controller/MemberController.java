@@ -93,13 +93,13 @@ public class MemberController {
                 .memberId(member.getMemberId())
                 .nickname(member.getName())
                 .build();
+
         return new ResponseEntity(loginResponse, HttpStatus.OK);
     }
     @DeleteMapping("/logout")
     public ResponseEntity logout(@RequestBody RefreshTokenDto refreshTokenDto) {
-        log.info("logout");
-        log.info(String.valueOf(refreshTokenDto));
         refreshTokenService.deleteRefreshToken(refreshTokenDto.getRefreshToken());
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -130,7 +130,7 @@ public class MemberController {
     @GetMapping("/info")
     public ResponseEntity userinfo(@IfLogin LoginUserDto loginUserDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
-        log.info(member.getEmail());
+
         ResponseMemberDto responseMemberDto = ResponseMemberDto.builder()
                         .email(member.getEmail())
                         .name(member.getName())
@@ -145,6 +145,7 @@ public class MemberController {
     public ResponseEntity signout(@IfLogin LoginUserDto loginUserDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         Cart cart = cartService.getCart(member.getMemberId());
+
         for (CartItem cartItem : cart.getCartItemList()) {
             Product product = cartItem.getProduct();
             product.updateQuantity(product.getQuantity() + cartItem.getQuantity());
@@ -152,6 +153,7 @@ public class MemberController {
 
         cartService.deleteCart(cart.getId());
         memberService.deleteMember(member.getMemberId());
+
         return new ResponseEntity(HttpStatus.OK);
     }
 }
