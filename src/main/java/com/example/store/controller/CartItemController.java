@@ -34,12 +34,38 @@ public class CartItemController {
     private final MemberService memberService;
     private final CartService cartService;
 
+    @GetMapping
+    public List<ResponseCartItemDto> getCartItems(@IfLogin LoginUserDto loginUserDto) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+
+        List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
+
+        List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
+
+        cartItems.forEach(cartItem -> {
+            ResponseCartItemDto responseCartItemDto = ResponseCartItemDto
+                    .builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
+            cartItemDtos.add(responseCartItemDto);
+        });
+
+
+        return cartItemDtos;
+    }
+
+    @GetMapping("/{cartItemId}")
+    public ResponseCartItemDto getCartItem(@PathVariable Long cartItemId) {
+        CartItem cartItem = cartItemService.getCartItem(cartItemId);
+        ResponseCartItemDto responseCartItemDto = ResponseCartItemDto.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
+
+        return responseCartItemDto;
+    }
+
     @PostMapping("/{productId}")
     public void addCartItem(@IfLogin LoginUserDto loginUserDto, @RequestBody AddCartItemDto addCartItemDto, @PathVariable Long productId) {
-        log.info(loginUserDto.getEmail());
+
         Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         if (cartItemService.isCartItemExist(addCartItemDto.getCartId(), productId)) {
-            log.info(" 중복 ");
             CartItem cartItem = cartItemService.getCartItem(addCartItemDto.getCartId(), productId);
             cartItem.updateQuantity(cartItem.getQuantity() + addCartItemDto.getQuantity());
             cartItemService.updateCartItem(cartItem);
@@ -55,46 +81,24 @@ public class CartItemController {
     public void editCartItem(@PathVariable Long cartItemId, @RequestBody EditCartItemDto editCartItemDto) {
         CartItem cartItem = cartItemService.getCartItem(cartItemId);
         cartItem.updateQuantity(editCartItemDto.getQuantity());
-        log.info(editCartItemDto.toString());
         cartItemService.updateCartItem(cartItem);
     }
 
     @DeleteMapping("/{cartItemId}")
     public ResponseEntity deleteCartItem(@IfLogin LoginUserDto loginUserDto, @PathVariable Long cartItemId) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         Cart cart = cartService.getCart(member.getMemberId());
         CartItem cartItem = cartItemService.getCartItem(cartItemId);
         Product product = cartItem.getProduct();
-        Product product1 = productService.getProduct(product.getId());
+        Product findProduct = productService.getProduct(product.getId());
 
         if (cartItemService.isCartItemExistByCartId(cart.getId(), cartItemId) == false)
             return ResponseEntity.badRequest().build();
-        product1.updateQuantity(product1.getQuantity() + cartItem.getQuantity());
+
+        findProduct.updateQuantity(findProduct.getQuantity() + cartItem.getQuantity());
         cartItemService.deleteCartItem(member.getMemberId(), cartItemId);
 
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping
-    public List<ResponseCartItemDto> getCartItems(@IfLogin LoginUserDto loginUserDto) {
-        Member member = memberService.findByEmail(loginUserDto.getEmail());
-        List<CartItem> cartItems = cartItemService.getCartItems(member.getMemberId());
-        List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
-
-        for (CartItem cartItem : cartItems) {
-            ResponseCartItemDto responseCartItemDto = ResponseCartItemDto
-                    .builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
-            cartItemDtos.add(responseCartItemDto);
-        }
-
-        return cartItemDtos;
-    }
-
-    @GetMapping("/{cartItemId}")
-    public ResponseCartItemDto getCartItem(@PathVariable Long cartItemId) {
-        CartItem cartItem = cartItemService.getCartItem(cartItemId);
-        ResponseCartItemDto responseCartItemDto = ResponseCartItemDto.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
-
-        return responseCartItemDto;
     }
 }

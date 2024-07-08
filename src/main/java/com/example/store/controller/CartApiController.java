@@ -27,10 +27,11 @@ public class CartApiController {
 
     @GetMapping
     public ResponseCartDto getCart(@IfLogin LoginUserDto loginUserDto) {
-        String email = loginUserDto.getEmail();
-        Member member = memberService.findByEmail(email);
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
         Cart cart = cartService.getCart(member.getMemberId());
+
         ResponseCartDto responseCartDto = ResponseCartDto.builder().id(cart.getId()).build();
+
         return responseCartDto;
     }
 

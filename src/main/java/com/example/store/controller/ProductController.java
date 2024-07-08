@@ -21,19 +21,6 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Product addProduct(@IfLogin LoginUserDto loginUserDto, @RequestBody AddProductDto addProductDto) {
-        log.info(loginUserDto.getRoles().toString());
-        return productService.addProduct(addProductDto);
-    }
-
-    @PutMapping("/{id}")
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Product editProduct(@RequestBody EditProductDto editProductDto, @PathVariable Long id) {
-        return productService.editProduct(editProductDto, id);
-    }
-
     @GetMapping
     public Page<Product> getProducts(@RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page) {
         int size = 10;
@@ -47,9 +34,22 @@ public class ProductController {
     public ResponseProductDto getProducts(@PathVariable Long id) {
         Product product = productService.getProduct(id);
         ResponseProductDto responseProductDto = ResponseProductDto.builder()
-                        .product(product)
-                        .build();
+                .product(product)
+                .build();
         return responseProductDto;
+    }
+
+    @PostMapping
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    public Product addProduct(@IfLogin LoginUserDto loginUserDto, @RequestBody AddProductDto addProductDto) {
+        log.info(loginUserDto.getRoles().toString());
+        return productService.addProduct(addProductDto);
+    }
+
+    @PutMapping("/{id}")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    public Product editProduct(@RequestBody EditProductDto editProductDto, @PathVariable Long id) {
+        return productService.editProduct(editProductDto, id);
     }
 
     @DeleteMapping("/{id}")

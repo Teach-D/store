@@ -20,7 +20,6 @@ public class CategoryController {
     @PostMapping
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public Category addCategory(@RequestBody AddCategoryDto addCategoryDto) {
-        log.info("aa");
         return categoryService.addCategory(addCategoryDto);
     }
 

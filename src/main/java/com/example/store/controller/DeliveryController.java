@@ -24,8 +24,8 @@ public class DeliveryController {
 
     @GetMapping
     public ResponseDeliveryDto getCart(@IfLogin LoginUserDto loginUserDto) {
-        String email = loginUserDto.getEmail();
-        Member member = memberService.findByEmail(email);
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         Delivery delivery = member.getDelivery();
 
         if (delivery == null) {
@@ -43,6 +43,7 @@ public class DeliveryController {
     @PostMapping
     public void setDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDeliveryDto addDeliveryDto) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         Delivery delivery = Delivery.builder()
                 .address(addDeliveryDto.getAddress())
                         .recipient(addDeliveryDto.getRecipient())
@@ -55,8 +56,8 @@ public class DeliveryController {
 
     @PutMapping
     public void updateDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDeliveryDto addDeliveryDto) {
-        String email = loginUserDto.getEmail();
-        Member member = memberService.findByEmail(email);
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         Delivery delivery = member.getDelivery();
         delivery.updateDeliver(
                 addDeliveryDto.getAddress(), addDeliveryDto.getRecipient(),
@@ -68,8 +69,8 @@ public class DeliveryController {
 
     @DeleteMapping
     public void deleteDelivery(@IfLogin LoginUserDto loginUserDto) {
-        String email = loginUserDto.getEmail();
-        Member member = memberService.findByEmail(email);
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+
         Delivery delivery = member.getDelivery();
         member.emptyDelivery();
 
