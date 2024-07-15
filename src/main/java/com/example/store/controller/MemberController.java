@@ -46,7 +46,7 @@ public class MemberController {
         Member member = Member.builder()
                         .name(memberSignupDto.getName())
                         .email(memberSignupDto.getEmail())
-                        .password(memberSignupDto.getPassword())
+                        .password(passwordEncoder.encode(memberSignupDto.getPassword()))
                         .build();
 
         Member saveMember = memberService.addMember(member);

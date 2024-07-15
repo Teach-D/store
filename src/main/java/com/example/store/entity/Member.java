@@ -39,18 +39,15 @@ public class Member {
     private Delivery delivery;
 
     @ManyToMany
+    @Builder.Default
     @JoinTable(name = "member_role",
         joinColumns = @JoinColumn(name = "member_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "member_discount",
-            joinColumns = @JoinColumn(name = "member_id"),
-            inverseJoinColumns = @JoinColumn(name = "discount_id")
-    )
-    private List<Discount> discounts = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    private List<MemberDiscount> discounts = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -68,7 +65,8 @@ public class Member {
     }
 
     public void addDiscount(Discount discount) {
-        discounts.add(discount);
+        MemberDiscount memberDiscount = new MemberDiscount(this, discount);
+        discounts.add(memberDiscount);
     }
 
     public void addDelivery(Delivery delivery) {

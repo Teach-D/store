@@ -3,6 +3,9 @@ package com.example.store.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -23,6 +26,9 @@ public class Discount {
     private int quantity;
 
     private int discountCondition;
+
+    @OneToMany(mappedBy = "discount")
+    private List<MemberDiscount> discounts = new ArrayList<>();
 
     public void updateQuantity(int quantity) {
         this.quantity = quantity;

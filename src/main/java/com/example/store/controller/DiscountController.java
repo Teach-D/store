@@ -4,6 +4,7 @@ import com.example.store.dto.AddDiscountDto;
 import com.example.store.dto.ResponseDiscountDto;
 import com.example.store.entity.Discount;
 import com.example.store.entity.Member;
+import com.example.store.entity.MemberDiscount;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.DiscountService;
@@ -28,9 +29,16 @@ public class DiscountController {
 
     @GetMapping
     public ResponseEntity allDiscountByMember(@IfLogin LoginUserDto loginUserDto) {
-        Member member = memberService.findByEmail(loginUserDto.getEmail());
 
-        List<Discount> discounts = member.getDiscounts();
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        List<Discount> discounts = new ArrayList<>();
+        List<MemberDiscount> memberDiscounts = member.getDiscounts();
+
+        for (MemberDiscount memberDiscount : memberDiscounts) {
+            Discount discount = memberDiscount.getDiscount();
+            discounts.add(discount);
+        }
+
         List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
 
         discounts.forEach(discount -> {

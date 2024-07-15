@@ -23,6 +23,7 @@ public class ProductController {
 
     @GetMapping
     public Page<Product> getProducts(@RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page) {
+        log.info("a");
         int size = 10;
         if(categoryId == 0)
             return productService.getProducts(page, size);
