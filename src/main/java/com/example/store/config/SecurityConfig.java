@@ -49,7 +49,7 @@ public class SecurityConfig {
 
         // CSRF 보안을 활성
         http.authorizeHttpRequests(authz -> authz
-                .requestMatchers("/members/signup", "/members/login", "/members/refreshToken").permitAll()
+                .requestMatchers("/members/signup", "/members/login", "/members/refreshToken", "/swagger-ui/**").permitAll()
                 .anyRequest().permitAll()
         );
 
