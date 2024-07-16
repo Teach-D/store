@@ -20,6 +20,6 @@ public class ResponseMemberDto {
 
     private LocalDateTime regDate;
 
-    private Set<Role> roles = new HashSet<>();
+    private Role role;
 
 }

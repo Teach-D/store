@@ -38,13 +38,8 @@ public class Member {
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
-    @ManyToMany
-    @Builder.Default
-    @JoinTable(name = "member_role",
-        joinColumns = @JoinColumn(name = "member_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @OneToOne
+    private Role role;
 
     @OneToMany(mappedBy = "member")
     private List<MemberDiscount> discounts = new ArrayList<>();
@@ -61,7 +56,7 @@ public class Member {
     }
 
     public void addRole(Role role) {
-        roles.add(role);
+        this.role = role;
     }
 
     public void addDiscount(Discount discount) {

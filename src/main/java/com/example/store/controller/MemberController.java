@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -77,7 +78,9 @@ public class MemberController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         // List<Role> ===> List<String>
-        List<String> roles = member.getRoles().stream().map(Role::getName).collect(Collectors.toList());
+        List<String> roles = new ArrayList<>();
+        Role role = member.getRole();
+        roles.add(String.valueOf(role));
 
         // JWT토큰을 생성하였다. jwt라이브러리를 이용하여 생성.
         String accessToken = jwtTokenizer.createAccessToken(member.getMemberId(), member.getEmail(), roles);
@@ -135,7 +138,7 @@ public class MemberController {
                         .email(member.getEmail())
                         .name(member.getName())
                         .regDate(member.getRegDate())
-                        .roles(member.getRoles())
+                        .role(member.getRole())
                         .build();
 
         return new ResponseEntity(responseMemberDto, HttpStatus.OK);
