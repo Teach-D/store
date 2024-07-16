@@ -11,5 +11,6 @@ public class ResponseProductDto {
 
     private Product product;
     private int quantity;
-
+    private String productTitle;
+    private int productPrice;
 }

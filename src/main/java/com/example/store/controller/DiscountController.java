@@ -8,6 +8,7 @@ import com.example.store.entity.MemberDiscount;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.DiscountService;
+import com.example.store.service.MemberDiscountService;
 import com.example.store.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class DiscountController {
 
     private final DiscountService discountService;
     private final MemberService memberService;
+    private final MemberDiscountService memberDiscountService;
 
     @GetMapping
     public ResponseEntity allDiscountByMember(@IfLogin LoginUserDto loginUserDto) {
@@ -91,6 +93,7 @@ public class DiscountController {
         discount.updateQuantity(discount.getQuantity() - 1);
 
         member.addDiscount(discount);
+        memberDiscountService.save(new MemberDiscount(member, discount));
         memberService.addMember(member);
 
         return new ResponseEntity(HttpStatus.OK);

@@ -3,9 +3,11 @@ package com.example.store.controller;
 import com.example.store.dto.AddProductDto;
 import com.example.store.dto.EditProductDto;
 import com.example.store.dto.ResponseProductDto;
+import com.example.store.entity.OrderItem;
 import com.example.store.entity.Product;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
+import com.example.store.service.OrderItemService;
 import com.example.store.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final OrderItemService orderItemService;
 
     @GetMapping
     public Page<Product> getProducts(@RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page) {
@@ -55,6 +58,11 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
+        for (OrderItem orderItem : orderItemService.findByProductId(id)) {
+            orderItem.updateProduct();
+            orderItem.deleteProduct();
+        }
+
         productService.deleteProduct(id);
     }
 }

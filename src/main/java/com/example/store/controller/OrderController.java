@@ -46,6 +46,8 @@ public class OrderController {
                 ResponseProductDto responseProductDto = ResponseProductDto.builder()
                         .product(product)
                         .quantity(orderItem.getQuantity())
+                        .productTitle(orderItem.getProductTitle())
+                        .productPrice(orderItem.getProductPrice())
                         .build();
 
                 responseOrderDto.getProducts().add(responseProductDto);
@@ -102,7 +104,6 @@ public class OrderController {
                 .build();
 
         Discount discount = discountService.getDiscount(discountId);
-
         int totalPrice = 0;
 
         for (CartItem cartItem : cartItems) {
@@ -120,12 +121,8 @@ public class OrderController {
             totalPrice = (totalPrice + cartItem.getProduct().getPrice() * cartItem.getQuantity());
         }
 
-        if(member.getDiscounts().contains(discount)) {
-            totalPrice = totalPrice - discount.getDiscountPrice();
-        }
-
+        totalPrice = totalPrice - discount.getDiscountPrice();
         order.updateTotalPrice(totalPrice);
-
         orderService.save(order);
     }
 
@@ -169,8 +166,11 @@ public class OrderController {
         Order order = orderService.findById(orderId);
 
         order.getOrderItems().forEach(orderItem -> {
-            Product product = orderItem.getProduct();
-            product.updateQuantity(product.getQuantity() + orderItem.getQuantity());
+            if (orderItem.getProduct() != null) {
+                Product product = orderItem.getProduct();
+                product.updateQuantity(product.getQuantity() + orderItem.getQuantity());
+
+            }
             orderItemService.delete(orderItem.getOrderId());
         });
 

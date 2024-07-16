@@ -2,12 +2,15 @@ package com.example.store.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
+@Setter
 public class OrderItem {
 
     @Id
@@ -23,5 +26,17 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    private String productTitle;
+    private int productPrice;
     int quantity;
+
+    public void deleteProduct() {
+        this.product = null;
+    }
+
+    public void updateProduct() {
+        this.productTitle = this.product.getTitle();
+        this.productPrice = this.product.getPrice();
+
+    }
 }

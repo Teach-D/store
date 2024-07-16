@@ -22,6 +22,11 @@ public class OrderItemService {
         return orderItemRepository.findByOrderId(orderId);
     }
 
+    public List<OrderItem> findByProductId(Long productId) {
+        return orderItemRepository.findByProductId(productId);
+    }
+
+
     public void delete(Long orderItemId) {
         orderItemRepository.deleteById(orderItemId);
     }
