@@ -35,12 +35,13 @@ public class Product {
         this.quantity = quantity;
     }
 
-    public void updateProduct(Category category, int price, String description, String imageUrl, String title) {
+    public void updateProduct(Category category, int price, String description, String imageUrl, String title, int quantity) {
         this.category = category;
         this.price = price;
         this.description = description;
         this.imageUrl = imageUrl;
         this.title = title;
+        this.quantity = quantity;
     }
 
     public void updateRating(Rating rating) {

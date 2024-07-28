@@ -1,11 +1,10 @@
 package com.example.store.exception;
 
+import com.example.store.exception.ex.*;
 import com.example.store.exception.ex.DeliveryException.NotFoundDeliveryException;
 import com.example.store.exception.ex.DiscountException.NotFoundDiscountException;
-import com.example.store.exception.ex.ErrorCode;
-import com.example.store.exception.ex.ErrorResponse;
 import com.example.store.exception.ex.MemberException.DuplicateEmailException;
-import com.example.store.exception.ex.MemberException.MemberNotFoundException;
+import com.example.store.exception.ex.MemberException.NotFoundMemberException;
 import com.example.store.exception.ex.ProductException.AlreadyDeleteProductException;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
 import org.springframework.http.HttpStatus;
@@ -34,8 +33,8 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleMemberNotFoundException() {
+    @ExceptionHandler(NotFoundMemberException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundMemberException() {
         return new ResponseEntity<>(new ErrorResponse(ErrorCode.MEMBER_NOT_FOUND, ErrorCode.MEMBER_NOT_FOUND.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
@@ -47,8 +46,26 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundProductException.class)
-    public ResponseEntity<ErrorResponse> notFoundProductException() {
+    public ResponseEntity<ErrorResponse> handleNotFoundProductException() {
         return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_PRODUCT, ErrorCode.NOT_FOUND_PRODUCT.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundCartException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundCartException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_CART, ErrorCode.NOT_FOUND_CART.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundCategoryException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundCategoryException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_CATEGORY, ErrorCode.NOT_FOUND_CATEGORY.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundOrderException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundOrderException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_ORDER, ErrorCode.NOT_FOUND_ORDER.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
 }

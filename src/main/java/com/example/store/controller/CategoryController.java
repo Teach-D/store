@@ -1,10 +1,13 @@
 package com.example.store.controller;
 
 import com.example.store.dto.AddCategoryDto;
+import com.example.store.dto.ResponseDto;
+import com.example.store.dto.SuccessDto;
 import com.example.store.entity.Category;
 import com.example.store.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,17 +22,17 @@ public class CategoryController {
 
     @PostMapping
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Category addCategory(@RequestBody AddCategoryDto addCategoryDto) {
+    public ResponseEntity<SuccessDto> addCategory(@RequestBody AddCategoryDto addCategoryDto) {
         return categoryService.addCategory(addCategoryDto);
     }
 
     @GetMapping
-    public List<Category> getAllCategories(){
-        return categoryService.getCategories();
+    public ResponseDto<List<Category>> getAllCategories(){
+        return categoryService.getAllCategories();
     }
 
     @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable Long id) {
-        return categoryService.getCategory(id);
+    public ResponseDto<Category> getCategoryById(@PathVariable Long id) {
+        return categoryService.getCategoryById(id);
     }
 }

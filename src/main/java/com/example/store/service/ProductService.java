@@ -1,28 +1,34 @@
 package com.example.store.service;
 
-import com.example.store.dto.AddProductDto;
-import com.example.store.dto.EditProductDto;
+import com.example.store.dto.*;
 import com.example.store.entity.Category;
+import com.example.store.entity.OrderItem;
 import com.example.store.entity.Product;
 import com.example.store.entity.Rating;
+import com.example.store.exception.ex.ProductException.NotFoundProductException;
+import com.example.store.repository.OrderItemRepository;
 import com.example.store.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final OrderItemRepository orderItemRepository;
 
     @Transactional
-    public Product addProduct(AddProductDto addProductDto) {
+    public ResponseDto<ResponseProductDto> addProduct(AddProductDto addProductDto) {
         Category category = categoryService.getCategory(addProductDto.getCategoryId());
         Product product = Product.builder()
                         .category(category)
@@ -40,7 +46,11 @@ public class ProductService {
 
         product.updateRating(rating);
 
-        return productRepository.save(product);
+        productRepository.save(product);
+
+        ResponseProductDto responseProductDto = ResponseProductDto.builder().product(product).build();
+
+        return ResponseDto.success(responseProductDto);
     }
 
     @Transactional(readOnly = true)
@@ -54,25 +64,56 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Product getProduct(Long id) {
-        return productRepository.findById(id).orElseThrow();
+    public ResponseDto<ResponseProductDto> getProduct(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(NotFoundProductException::new);
+        ResponseProductDto responseProductDto = ResponseProductDto.builder()
+                .product(product)
+                .build();
+
+        return ResponseDto.success(responseProductDto);
     }
 
-    public Product editProduct(EditProductDto editProductDto, Long id) {
+    public ResponseEntity<SuccessDto> editProduct(EditProductDto editProductDto, Long id) {
         Product product = productRepository.findById(id).orElseThrow();
         product.updateProduct(
                 categoryService.getCategory(editProductDto.getCategoryId()),
                 editProductDto.getPrice(),
                 editProductDto.getDescription(),
                 editProductDto.getImageUrl(),
-                editProductDto.getTitle()
+                editProductDto.getTitle(),
+                editProductDto.getQuantity()
         );
 
-        return productRepository.save(product);
+        log.info(String.valueOf(product.getQuantity()));
+
+        productRepository.save(product);
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    public void deleteProduct(Long id) {
+    public ResponseEntity<SuccessDto> deleteProduct(Long id) {
+
+        for (OrderItem orderItem : orderItemRepository.findByProductId(id)) {
+            orderItem.updateProduct();
+            orderItem.deleteProduct();
+        }
+
         Product product = productRepository.findById(id).orElseThrow();
         productRepository.delete(product);
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
+    }
+
+    public ResponseDto<Page<Product>> getProducts(Long categoryId, int page) {
+        int size = 10;
+        Page<Product> product = null;
+
+        if(categoryId == 0) {
+            product = productRepository.findAll(PageRequest.of(page, size));
+        } else {
+            product = productRepository.findProductByCategory_id(categoryId, PageRequest.of(page, size));
+        }
+
+        return ResponseDto.success(product);
     }
 }

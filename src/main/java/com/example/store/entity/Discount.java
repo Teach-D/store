@@ -28,6 +28,7 @@ public class Discount {
     private int discountCondition;
 
     @OneToMany(mappedBy = "discount")
+    @Builder.Default
     private List<MemberDiscount> discounts = new ArrayList<>();
 
     public void updateQuantity(int quantity) {

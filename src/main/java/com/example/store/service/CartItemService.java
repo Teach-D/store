@@ -1,72 +1,122 @@
 package com.example.store.service;
 
-import com.example.store.dto.AddCartItemDto;
+import com.example.store.dto.*;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
+import com.example.store.entity.Member;
 import com.example.store.entity.Product;
+import com.example.store.exception.ex.MemberException.NotFoundMemberException;
+import com.example.store.exception.ex.NotFoundCartException;
+import com.example.store.exception.ex.NotFoundCartItemException;
+import com.example.store.exception.ex.ProductException.NotFoundProductException;
+import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.repository.CartItemRepository;
 import com.example.store.repository.CartRepository;
+import com.example.store.repository.MemberRepository;
+import com.example.store.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
+    private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
 
-    @Transactional
-    public CartItem addCartItem(AddCartItemDto addCartItemDto, Product product) {
-        Cart cart = cartRepository.findById(addCartItemDto.getCartId()).orElseThrow();
+    @Transactional(readOnly = true)
+    public ResponseDto<ResponseCartItemDto> getCartItem(Long cartItemId) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
+        ResponseCartItemDto responseCartItemDto = ResponseCartItemDto.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
+
+        return ResponseDto.success(responseCartItemDto);
+    }
+
+    public ResponseDto<List<ResponseCartItemDto>> getCartItems(LoginUserDto loginUserDto) {
+        Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
+        Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
+
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+
+        List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
+
+        cartItems.forEach(cartItem -> {
+            ResponseCartItemDto responseCartItemDto = ResponseCartItemDto
+                    .builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).id(cartItem.getId()).build();
+            cartItemDtos.add(responseCartItemDto);
+        });
+
+        return ResponseDto.success(cartItemDtos);
+
+    }
+
+    public ResponseEntity<SuccessDto> addCartItem(LoginUserDto loginUserDto, AddCartItemDto addCartItemDto, Long productId) {
+        Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
+        Product product = productRepository.findById(productId).orElseThrow(NotFoundProductException::new);
+
+        if (cartItemRepository.existsByCartIdAndProductId(addCartItemDto.getCartId(), productId)) {
+            CartItem cartItem = cartItemRepository.findCartItemByCartIdAndProductId(addCartItemDto.getCartId(), productId).orElseThrow(NotFoundCartItemException::new);
+            cartItem.updateQuantity(cartItem.getQuantity() + addCartItemDto.getQuantity());
+            product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
+            return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
+            //updateCartItem(cartItem);
+        }
+
+        product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
+
+        Cart cart = cartRepository.findById(addCartItemDto.getCartId()).orElseThrow(NotFoundCartException::new);
 
         CartItem cartItem = CartItem.builder()
-                        .cart(cart)
-                        .quantity(addCartItemDto.getQuantity())
-                        .product(product)
-                        .build();
+                .cart(cart)
+                .quantity(addCartItemDto.getQuantity())
+                .product(product)
+                .build();
 
-        return cartItemRepository.save(cartItem);
+        CartItem save = cartItemRepository.save(cartItem);
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    @Transactional(readOnly = true)
-    public CartItem getCartItem(Long cartId, Long productId) {
-        return cartItemRepository.findCartItemByCartIdAndProductId(cartId, productId).orElseThrow();
+    public ResponseEntity<SuccessDto> editCartItem(Long cartItemId, EditCartItemDto editCartItemDto) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
+        cartItem.updateQuantity(editCartItemDto.getQuantity());
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    @Transactional(readOnly = true)
-    public CartItem getCartItem(Long cartItemId) {
-        return cartItemRepository.findById(cartItemId).orElseThrow();
-    }
+    public ResponseEntity<SuccessDto> deleteCartItem(LoginUserDto loginUserDto, Long cartItemId) {
+        Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
-    @Transactional
-    public CartItem updateCartItem(CartItem cartItem) {
-        CartItem findCartItem = cartItemRepository.findById(cartItem.getId()).orElseThrow();
-        findCartItem.updateQuantity(cartItem.getQuantity());
-        return findCartItem;
-    }
+        Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
 
-    @Transactional(readOnly = true)
-    public boolean isCartItemExist(Long cartId, Long productId) {
-        return cartItemRepository.existsByCartIdAndProductId(cartId, productId);
+        Product product = productRepository.findById(cartItem.getProduct().getId()).orElseThrow(NotFoundProductException::new);
+
+        if (isCartItemExistByCartId(cart.getId(), cartItemId) == false)
+            return ResponseEntity.badRequest().build();
+
+        product.updateQuantity(product.getQuantity() + cartItem.getQuantity());
+        cartItemRepository.deleteById(cartItemId);
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
     @Transactional
     public void deleteCartItem(Long memberId, Long cartItemId) {
-        cartItemRepository.deleteByCart_memberIdAndId(memberId, cartItemId);
+        cartItemRepository.deleteById(cartItemId);
     }
 
     @Transactional(readOnly = true)
     public List<CartItem> getCartItemsByCartId(Long cartId) {
         return cartItemRepository.findCartItemByCartId(cartId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<CartItem> getCartItems(Long memberId) {
-        return cartItemRepository.findByCart_memberId(memberId);
     }
 
     public boolean isCartItemExistByCartId(Long id, Long cartItemId) {

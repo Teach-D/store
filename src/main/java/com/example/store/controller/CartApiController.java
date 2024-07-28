@@ -1,6 +1,7 @@
 package com.example.store.controller;
 
 import com.example.store.dto.ResponseCartDto;
+import com.example.store.dto.ResponseDto;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Member;
@@ -36,13 +37,7 @@ public class CartApiController {
             responseCode = "200",
             description = "장바구니 조회 성공"
     )
-    public ResponseCartDto getCart(@IfLogin LoginUserDto loginUserDto) {
-        Member member = memberService.findByEmail(loginUserDto.getEmail());
-        Cart cart = cartService.getCart(member.getMemberId());
-
-        ResponseCartDto responseCartDto = ResponseCartDto.builder().id(cart.getId()).build();
-
-        return responseCartDto;
+    public ResponseDto<ResponseCartDto> getCart(@IfLogin LoginUserDto loginUserDto) {
+        return cartService.getCart(loginUserDto);
     }
-
 }

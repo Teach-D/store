@@ -19,8 +19,19 @@ public enum ErrorCode {
     NOT_FOUNT_DELIVERY("DE001", "배송정보가 없습니다"),
 
     // Discount
-    NOT_FOUND_DISCOUNT("DI002", "할인쿠폰이 없습니다");
+    NOT_FOUND_DISCOUNT("DI002", "할인쿠폰이 없습니다"),
 
+    // Cart
+    NOT_FOUND_CART("C001", "해당 유저의 카트가 없습니다"),
+
+    // CartItem
+    NOT_FOUND_CART_ITEM("CI001", "카트 아이템이 없습니다."),
+
+    // Category
+    NOT_FOUND_CATEGORY("CT001", "해당 카테고리가 없습니다."),
+
+    // Order
+    NOT_FOUND_ORDER("O001", "해당 주문이 없습니다.");
 
     private String code;
     private String message;

@@ -39,9 +39,14 @@ public class Member {
     private Delivery delivery;
 
     @OneToOne
+    @JoinColumn(name = "cart_id")
+    private Cart cart;
+
+    @OneToOne
     private Role role;
 
     @OneToMany(mappedBy = "member")
+    @Builder.Default
     private List<MemberDiscount> discounts = new ArrayList<>();
 
     @Override

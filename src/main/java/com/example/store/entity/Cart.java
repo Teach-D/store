@@ -17,10 +17,13 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long memberId;
+    @OneToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     private String date;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<CartItem> cartItemList = new ArrayList<>();
 }
