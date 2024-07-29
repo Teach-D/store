@@ -61,7 +61,8 @@ public class OrderService {
                     .build();
 
             order.getOrderItems().forEach(orderItem -> {
-                Product product = orderItem.getProduct();
+                Product product = new Product(orderItem.getProduct());
+
                 ResponseProductDto responseProductDto = ResponseProductDto.builder()
                         .product(product)
                         .quantity(orderItem.getQuantity())
@@ -145,6 +146,43 @@ public class OrderService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
+    public ResponseEntity<SuccessDto> addOrderByNoDiscount(LoginUserDto loginUserDto) {
+        Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
+        Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        Delivery delivery = member.getDelivery();
+
+        LocalDate localDate = LocalDate.now();
+        String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
+
+        Order order = Order.builder()
+                .member(member)
+                .delivery(delivery)
+                .date(date)
+                .build();
+
+        int totalPrice = 0;
+
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = OrderItem.builder()
+                    .product(cartItem.getProduct())
+                    .order(order)
+                    .quantity(cartItem.getQuantity())
+                    .build();
+
+            order.getOrderItems().add(orderItem);
+
+            cartItemRepository.delete(cartItem);
+            orderItemRepository.save(orderItem);
+            totalPrice = (totalPrice + cartItem.getProduct().getPrice() * cartItem.getQuantity());
+        }
+
+        order.updateTotalPrice(totalPrice);
+        orderRepository.save(order);
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
+    }
+
     public ResponseEntity<SuccessDto> deleteOrder(LoginUserDto loginUserDto, Long orderId) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Order order = orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
@@ -155,11 +193,12 @@ public class OrderService {
                 product.updateQuantity(product.getQuantity() + orderItem.getQuantity());
 
             }
-            orderItemRepository.delete(orderItem);
         });
 
         orderRepository.delete(order);
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
+
+
 }

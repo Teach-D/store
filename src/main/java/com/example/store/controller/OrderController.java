@@ -44,6 +44,11 @@ public class OrderController {
         return orderService.addOrderByDiscount(loginUserDto, discountId);
     }
 
+    @PostMapping
+    public ResponseEntity<SuccessDto> addOrderByNoDiscount(@IfLogin LoginUserDto loginUserDto) {
+        return orderService.addOrderByNoDiscount(loginUserDto);
+    }
+
     @DeleteMapping("/{orderId}")
     public ResponseEntity<SuccessDto> deleteOrder(@IfLogin LoginUserDto loginUserDto, @PathVariable Long orderId) {
         return orderService.deleteOrder(loginUserDto, orderId);
