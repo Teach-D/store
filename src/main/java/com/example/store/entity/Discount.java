@@ -27,7 +27,7 @@ public class Discount {
 
     private int discountCondition;
 
-    @OneToMany(mappedBy = "discount")
+    @OneToMany(mappedBy = "discount", orphanRemoval = true)
     @Builder.Default
     private List<MemberDiscount> discounts = new ArrayList<>();
 

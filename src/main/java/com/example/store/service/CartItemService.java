@@ -15,6 +15,7 @@ import com.example.store.repository.CartRepository;
 import com.example.store.repository.MemberRepository;
 import com.example.store.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
@@ -45,12 +47,18 @@ public class CartItemService {
         Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        for (CartItem cartItem : cartItems) {
+            log.info("+++++++++++++++");
+
+        }
 
         List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
 
         cartItems.forEach(cartItem -> {
+            Product product = new Product(cartItem.getProduct());
+
             ResponseCartItemDto responseCartItemDto = ResponseCartItemDto
-                    .builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).id(cartItem.getId()).build();
+                    .builder().quantity(cartItem.getQuantity()).product(product).id(cartItem.getId()).build();
             cartItemDtos.add(responseCartItemDto);
         });
 

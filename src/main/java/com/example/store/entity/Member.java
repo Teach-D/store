@@ -1,5 +1,6 @@
 package com.example.store.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,18 +35,16 @@ public class Member {
     @CreationTimestamp
     private LocalDateTime regDate;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
-    @OneToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
-
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Role role;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", orphanRemoval = true)
     @Builder.Default
     private List<MemberDiscount> discounts = new ArrayList<>();
 

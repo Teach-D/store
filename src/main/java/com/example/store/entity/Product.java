@@ -1,5 +1,6 @@
 package com.example.store.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +23,8 @@ public class Product {
 
     private int quantity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -30,6 +32,17 @@ public class Product {
 
     @Embedded
     private Rating rating;
+
+    public Product(Product p) {
+        this.id = p.getId();
+        this.title = p.getTitle();
+        this.price = p.getPrice();
+        this.description = p.getDescription();
+        this.quantity = p.getQuantity();
+        this.category = p.getCategory();
+        this.imageUrl = p.getImageUrl();
+        this.rating = p.getRating();
+    }
 
     public void updateQuantity(int quantity) {
         this.quantity = quantity;

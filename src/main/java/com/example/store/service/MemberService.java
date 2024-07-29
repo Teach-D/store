@@ -121,11 +121,14 @@ public class MemberService {
 
     public ResponseDto<ResponseMemberDto> userInfo(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
+
+        Role role = new Role(member.getRole());
+
         ResponseMemberDto responseMemberDto = ResponseMemberDto.builder()
                 .email(member.getEmail())
                 .name(member.getName())
                 .regDate(member.getRegDate())
-                .role(member.getRole())
+                .role(role)
                 .build();
         log.info("a" + responseMemberDto.getEmail());
 
