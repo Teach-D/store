@@ -1,9 +1,9 @@
-jwt:
-  secretKey: 12345678901234567890123456789876
-  refreshKey: 12345678901234567890123456789876
-
-
+# redis
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/store?useUnicode=true&serverTimezone=Asia/Seoul
     username: root
@@ -16,3 +16,10 @@ spring:
         show_sql: true
         format_sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
+
+jwt:
+  secretKey: 12345678901234567890123456789876
+  refreshKey: 12345678901234567890123456789876
+
+
+

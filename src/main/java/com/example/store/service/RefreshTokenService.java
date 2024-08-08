@@ -24,11 +24,11 @@ public class RefreshTokenService {
     @Transactional
     public void deleteRefreshToken(String refreshToken) {
         log.info(refreshToken);
-        refreshTokenRepository.findByValue(refreshToken).ifPresent(refreshTokenRepository::delete);
+        refreshTokenRepository.findByTokenName(refreshToken).ifPresent(refreshTokenRepository::delete);
     }
 
     @Transactional(readOnly = true)
     public Optional<RefreshToken> findRefreshToken(String refreshToken) {
-        return refreshTokenRepository.findByValue(refreshToken);
+        return refreshTokenRepository.findByTokenName(refreshToken);
     }
 }

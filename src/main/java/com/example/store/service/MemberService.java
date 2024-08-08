@@ -13,6 +13,8 @@ import com.example.store.repository.RoleRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,7 @@ public class MemberService {
     private final CartRepository cartRepository;
     private final JwtTokenizer jwtTokenizer;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisTemplate<String, RefreshToken> redisTemplate;
 
     @Transactional
     public ResponseEntity<SuccessDto> createMember(MemberSignupDto memberSignupDto) {
@@ -64,6 +68,7 @@ public class MemberService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
+    @Transactional
     public ResponseDto<MemberLoginResponseDto> login(MemberLoginDto loginDto) {
 
         // email이 없을 경우 Exception이 발생한다. Global Exception에 대한 처리가 필요하다.
@@ -82,8 +87,9 @@ public class MemberService {
         String refreshToken = jwtTokenizer.createRefreshToken(member.getMemberId(), member.getEmail(),  roles);
 
         // RefreshToken을 DB에 저장한다. 성능 때문에 DB가 아니라 Redis에 저장하는 것이 좋다.
-        RefreshToken refreshTokenEntity = RefreshToken.builder().value(refreshToken).memberId(member.getMemberId()).build();
-        refreshTokenRepository.save(refreshTokenEntity);
+        RefreshToken refreshTokenEntity = RefreshToken.builder().tokenName(refreshToken).memberId(member.getMemberId()).build();
+
+        RefreshToken save = refreshTokenRepository.save(refreshTokenEntity);
 
         MemberLoginResponseDto loginResponse = MemberLoginResponseDto.builder()
                 .accessToken(accessToken)
@@ -96,9 +102,11 @@ public class MemberService {
     }
 
     public ResponseDto<MemberLoginResponseDto> refreshToken(RefreshTokenDto refreshTokenDto) {
-        RefreshToken refreshToken = refreshTokenRepository.findByValue(refreshTokenDto.getRefreshToken()).orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
 
-        Claims claims = jwtTokenizer.parseRefreshToken(refreshToken.getValue());
+        log.info(String.valueOf(refreshTokenDto.getRefreshToken()));
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenName(refreshTokenDto.getRefreshToken()).orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+        log.info(String.valueOf(refreshToken));
+        Claims claims = jwtTokenizer.parseRefreshToken(refreshToken.getTokenName());
 
         Long userId = Long.valueOf((Integer) claims.get("userId"));
 
