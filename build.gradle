@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.1'
-	id 'io.spring.dependency-management' version '1.1.5'
+	id 'io.spring.dependency-management' version '1.1.4'
 	id "org.springdoc.openapi-gradle-plugin" version "1.8.0"
 
 }
@@ -41,11 +41,11 @@ dependencies {
 	implementation 'org.springframework.data:spring-data-commons:3.3.1'
 
 	//jwts
-    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
 
-    //gson - json 메시지를 다루기 위한 라이브러리
+	//gson - json 메시지를 다루기 위한 라이브러리
 	implementation 'com.google.code.gson:gson'
 
 	// dto validation
@@ -58,6 +58,6 @@ dependencies {
 	implementation 'org.springframework.session:spring-session-data-redis'
 }
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
 }
