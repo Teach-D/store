@@ -40,7 +40,7 @@ public class Member {
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Role role;
 
