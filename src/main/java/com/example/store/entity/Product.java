@@ -23,6 +23,8 @@ public class Product {
 
     private int quantity;
 
+    private int saleQuantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinColumn(name = "category_id")
@@ -42,19 +44,25 @@ public class Product {
         this.category = p.getCategory();
         this.imageUrl = p.getImageUrl();
         this.rating = p.getRating();
+        this.saleQuantity = p.getSaleQuantity();
     }
 
     public void updateQuantity(int quantity) {
         this.quantity = quantity;
     }
 
-    public void updateProduct(Category category, int price, String description, String imageUrl, String title, int quantity) {
+    public void updateSaleQuantity(int saleQuantity) {
+        this.saleQuantity = saleQuantity;
+    }
+
+    public void updateProduct(Category category, int price, String description, String imageUrl, String title, int quantity, int saleQuantity) {
         this.category = category;
         this.price = price;
         this.description = description;
         this.imageUrl = imageUrl;
         this.title = title;
         this.quantity = quantity;
+        this.saleQuantity = saleQuantity;
     }
 
     public void updateRating(Rating rating) {

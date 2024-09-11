@@ -23,14 +23,49 @@ public class ProductController {
     private final ProductService productService;
     private final OrderItemService orderItemService;
 
-    @GetMapping
+/*    @GetMapping
     public ResponseDto<Page<Product>> getProducts(@RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page) {
         return productService.getProducts(categoryId, page);
+    }*/
+
+    @GetMapping()
+    public ResponseDto<Page<Product>> getProductsByOption(
+            @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
+    ) {
+        log.info(sort + "-" + order);
+        if (sort.equals("0") && order.equals("0")) {
+            return productService.getProducts(categoryId, page);
+        }
+
+        log.info(categoryId + " - " + sort);
+        if (sort.equals("sale")) {
+            if (order.equals("asc")) {
+                log.info("aa");
+                return productService.getProductsBySaleAsc(categoryId, page);
+            } else {
+                return productService.getProductsBySaleDesc(categoryId, page);
+            }
+        } else if (sort.equals("price")) {
+            if (order.equals("asc")) {
+                log.info("aa");
+                return productService.getProductsByPriceAsc(categoryId, page);
+            } else {
+                return productService.getProductsByPriceDesc(categoryId, page);
+            }
+        }
+
+        return productService.getProductsBySaleDesc(categoryId, page);
     }
 
     @GetMapping("/{id}")
     public ResponseDto<ResponseProductDto> getProduct(@PathVariable Long id) {
         return productService.getProduct(id);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseDto<ResponseProductDto> getProductByName(@PathVariable String name) {
+        return productService.getProductByName(name);
     }
 
     @PostMapping

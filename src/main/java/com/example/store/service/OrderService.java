@@ -191,7 +191,7 @@ public class OrderService {
             if (orderItem.getProduct() != null) {
                 Product product = orderItem.getProduct();
                 product.updateQuantity(product.getQuantity() + orderItem.getQuantity());
-
+                product.updateSaleQuantity(product.getSaleQuantity() - orderItem.getQuantity());
             }
         });
 

@@ -18,4 +18,6 @@ public class EditProductDto {
     private String imageUrl;
 
     private int quantity;
+
+    private int saleQuantity;
 }

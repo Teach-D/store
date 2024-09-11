@@ -74,6 +74,7 @@ public class CartItemService {
             CartItem cartItem = cartItemRepository.findCartItemByCartIdAndProductId(addCartItemDto.getCartId(), productId).orElseThrow(NotFoundCartItemException::new);
             cartItem.updateQuantity(cartItem.getQuantity() + addCartItemDto.getQuantity());
             product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
+            product.updateSaleQuantity(product.getSaleQuantity() + addCartItemDto.getQuantity());
             return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
             //updateCartItem(cartItem);
         }
@@ -112,6 +113,7 @@ public class CartItemService {
             return ResponseEntity.badRequest().build();
 
         product.updateQuantity(product.getQuantity() + cartItem.getQuantity());
+        product.updateSaleQuantity(product.getSaleQuantity() - cartItem.getQuantity());
         cartItemRepository.deleteById(cartItemId);
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
