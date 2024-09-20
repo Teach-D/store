@@ -80,6 +80,7 @@ public class CartItemService {
         }
 
         product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
+        product.updateSaleQuantity(product.getSaleQuantity() + addCartItemDto.getQuantity());
 
         Cart cart = cartRepository.findById(addCartItemDto.getCartId()).orElseThrow(NotFoundCartException::new);
 
