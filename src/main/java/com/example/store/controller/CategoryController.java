@@ -1,6 +1,7 @@
 package com.example.store.controller;
 
 import com.example.store.dto.AddCategoryDto;
+import com.example.store.dto.ResponseCategoryDto;
 import com.example.store.dto.ResponseDto;
 import com.example.store.dto.SuccessDto;
 import com.example.store.entity.Category;
@@ -27,12 +28,22 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseDto<List<Category>> getAllCategories(){
+    public ResponseDto<List<ResponseCategoryDto>> getAllCategories(){
         return categoryService.getAllCategories();
     }
 
     @GetMapping("/{id}")
-    public ResponseDto<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseDto<ResponseCategoryDto> getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessDto> updateCategory(@PathVariable Long id, @RequestBody AddCategoryDto editCategoryDto) {
+        return categoryService.updateCategory(id, editCategoryDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessDto> deleteCategory(@PathVariable Long id) {
+        return categoryService.deleteCategory(id);
     }
 }
