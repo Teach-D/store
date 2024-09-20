@@ -9,6 +9,7 @@ import com.example.store.exception.ex.MemberException.NotFoundMemberException;
 import com.example.store.exception.ex.NotFoundCartException;
 import com.example.store.exception.ex.NotFoundCartItemException;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
+import com.example.store.exception.ex.ProductException.OutOfProductException;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.repository.CartItemRepository;
 import com.example.store.repository.CartRepository;
@@ -69,6 +70,13 @@ public class CartItemService {
     public ResponseEntity<SuccessDto> addCartItem(LoginUserDto loginUserDto, AddCartItemDto addCartItemDto, Long productId) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Product product = productRepository.findById(productId).orElseThrow(NotFoundProductException::new);
+
+        int orderQuantity = addCartItemDto.getQuantity();
+
+        if (product.getQuantity() < orderQuantity) {
+            throw new OutOfProductException();
+        }
+
 
         if (cartItemRepository.existsByCartIdAndProductId(addCartItemDto.getCartId(), productId)) {
             CartItem cartItem = cartItemRepository.findCartItemByCartIdAndProductId(addCartItemDto.getCartId(), productId).orElseThrow(NotFoundCartItemException::new);

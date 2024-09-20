@@ -7,6 +7,7 @@ import com.example.store.exception.ex.MemberException.DuplicateEmailException;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
 import com.example.store.exception.ex.ProductException.AlreadyDeleteProductException;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
+import com.example.store.exception.ex.ProductException.OutOfProductException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFoundProductException() {
         return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_PRODUCT, ErrorCode.NOT_FOUND_PRODUCT.getMessage()),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OutOfProductException.class)
+    public ResponseEntity<ErrorResponse> handleOutOfProductException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.OUT_OF_PRODUCT, ErrorCode.OUT_OF_PRODUCT.getMessage()),
+                HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(NotFoundCartException.class)

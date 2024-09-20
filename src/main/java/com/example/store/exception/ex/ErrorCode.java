@@ -14,6 +14,7 @@ public enum ErrorCode {
     // Product
     NOT_FOUND_PRODUCT("P001", "존재하지 않는 제품입니다"),
     ALREADY_DELETE_PRODUCT("P002", "존재하지 않는 제품입니다"),
+    OUT_OF_PRODUCT("P003", "제품의 수량이 부족합니다."),
 
     // Delivery
     NOT_FOUNT_DELIVERY("DE001", "배송정보가 없습니다"),
