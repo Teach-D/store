@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequestMapping("/discount")
+@RequestMapping("/discounts")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -62,8 +62,10 @@ public class DiscountController {
     }
 
     // discount 삭제 안됨, 관련된 것까지 한번에 같이 삭제해야 함
-    @DeleteMapping("/cancel/{id}")
-    public void cancelDiscount(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<SuccessDto> cancelDiscount(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
+
+        return memberDiscountService.cancelDiscount(member, id);
     }
 }
