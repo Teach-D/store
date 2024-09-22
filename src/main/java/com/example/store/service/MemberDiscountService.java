@@ -1,6 +1,6 @@
 package com.example.store.service;
 
-import com.example.store.dto.SuccessDto;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Member;
 import com.example.store.entity.MemberDiscount;
 import com.example.store.repository.MemberDiscountRepository;

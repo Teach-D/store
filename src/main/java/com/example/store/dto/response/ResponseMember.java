@@ -1,18 +1,21 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
+import com.example.store.entity.Role;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberSignupResponseDto {
-
-    private Long memberId;
+public class ResponseMember {
     private String email;
+
     private String name;
+
     private LocalDateTime regDate;
+
+    private Role role;
+
 }

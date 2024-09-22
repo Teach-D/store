@@ -1,8 +1,9 @@
 package com.example.store.controller;
 
-import com.example.store.dto.*;
-import com.example.store.entity.Delivery;
-import com.example.store.entity.Member;
+import com.example.store.dto.request.RequestDelivery;
+import com.example.store.dto.response.ResponseDelivery;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.DeliveryService;
@@ -22,18 +23,18 @@ public class DeliveryController {
     private final MemberService memberService;
 
     @GetMapping
-    public ResponseDto<ResponseDeliveryDto> getDelivery(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseDto<ResponseDelivery> getDelivery(@IfLogin LoginUserDto loginUserDto) {
         return deliveryService.getDelivery(loginUserDto);
     }
 
     @PostMapping
-    public ResponseEntity<SuccessDto> setDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDeliveryDto addDeliveryDto) {
-         return deliveryService.setDelivery(loginUserDto, addDeliveryDto);
+    public ResponseEntity<SuccessDto> setDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestDelivery requestDelivery) {
+         return deliveryService.setDelivery(loginUserDto, requestDelivery);
     }
 
     @PutMapping
-    public ResponseEntity<SuccessDto> updateDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody AddDeliveryDto addDeliveryDto) {
-        return deliveryService.updateDelivery(loginUserDto, addDeliveryDto);
+    public ResponseEntity<SuccessDto> updateDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestDelivery requestDelivery) {
+        return deliveryService.updateDelivery(loginUserDto, requestDelivery);
     }
 
     @DeleteMapping

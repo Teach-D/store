@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
 import com.example.store.entity.Product;
 import lombok.*;
@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseCartItemDto {
+public class ResponseCartItem {
 
     private Long id;
     private Product product;

@@ -1,9 +1,9 @@
 package com.example.store.service;
 
-import com.example.store.dto.AddDiscountDto;
-import com.example.store.dto.ResponseDiscountDto;
-import com.example.store.dto.ResponseDto;
-import com.example.store.dto.SuccessDto;
+import com.example.store.dto.request.RequestDiscount;
+import com.example.store.dto.response.ResponseDiscount;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Discount;
 import com.example.store.entity.Member;
 import com.example.store.entity.MemberDiscount;
@@ -41,13 +41,13 @@ public class DiscountService {
         return discountRepository.findById(discountId).get();
     }
 
-    public ResponseDto<List<ResponseDiscountDto>> getAllDiscount() {
+    public ResponseDto<List<ResponseDiscount>> getAllDiscount() {
 
         List<Discount> allDiscount = discountRepository.findAll();
-        List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
+        List<ResponseDiscount> responseDiscounts = new ArrayList<>();
 
         allDiscount.forEach(discount -> {
-            ResponseDiscountDto responseDiscountDto = ResponseDiscountDto.builder()
+            ResponseDiscount responseDiscount = ResponseDiscount.builder()
                     .discountName(discount.getDiscountName())
                     .discountPrice(discount.getDiscountPrice())
                     .quantity(discount.getQuantity())
@@ -55,10 +55,10 @@ public class DiscountService {
                     .discountCondition(discount.getDiscountCondition())
                     .expirationDate(discount.getExpirationDate())
                     .build();
-            responseDiscountDtos.add(responseDiscountDto);
+            responseDiscounts.add(responseDiscount);
         });
 
-        return ResponseDto.success(responseDiscountDtos);
+        return ResponseDto.success(responseDiscounts);
     }
 
     public ResponseEntity<SuccessDto> setDiscountByMember(LoginUserDto loginUserDto, Long id) {
@@ -86,14 +86,14 @@ public class DiscountService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    public ResponseEntity<SuccessDto> editDiscount(Long discountId, AddDiscountDto addDiscountDto) {
+    public ResponseEntity<SuccessDto> editDiscount(Long discountId, RequestDiscount requestDiscount) {
         Discount discount = discountRepository.findById(discountId).get();
 
         discount.updateDiscount(
-                addDiscountDto.getDiscountName(),
-                addDiscountDto.getDiscountPrice(),
-                addDiscountDto.getExpirationDate(),
-                addDiscountDto.getQuantity()
+                requestDiscount.getDiscountName(),
+                requestDiscount.getDiscountPrice(),
+                requestDiscount.getExpirationDate(),
+                requestDiscount.getQuantity()
         );
 
         discountRepository.save(discount);
@@ -101,7 +101,7 @@ public class DiscountService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    public ResponseDto<List<ResponseDiscountDto>> getAllDiscountByMember(LoginUserDto loginUserDto) {
+    public ResponseDto<List<ResponseDiscount>> getAllDiscountByMember(LoginUserDto loginUserDto) {
 
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundDeliveryException::new);
 
@@ -113,10 +113,10 @@ public class DiscountService {
             discounts.add(discount);
         }
 
-        List<ResponseDiscountDto> responseDiscountDtos = new ArrayList<>();
+        List<ResponseDiscount> responseDiscounts = new ArrayList<>();
 
         discounts.forEach(discount -> {
-            ResponseDiscountDto responseDiscountDto = ResponseDiscountDto.builder()
+            ResponseDiscount responseDiscount = ResponseDiscount.builder()
                     .discountName(discount.getDiscountName())
                     .discountPrice(discount.getDiscountPrice())
                     .quantity(discount.getQuantity())
@@ -125,19 +125,19 @@ public class DiscountService {
                     .expirationDate(discount.getExpirationDate())
                     .build();
 
-            responseDiscountDtos.add(responseDiscountDto);
+            responseDiscounts.add(responseDiscount);
         });
 
-        return ResponseDto.success(responseDiscountDtos);
+        return ResponseDto.success(responseDiscounts);
     }
 
-    public ResponseEntity<SuccessDto> addDiscount(LoginUserDto loginUserDto, AddDiscountDto addDiscountDto) {
+    public ResponseEntity<SuccessDto> addDiscount(LoginUserDto loginUserDto, RequestDiscount requestDiscount) {
         Discount discount = Discount.builder()
-                .discountName(addDiscountDto.getDiscountName())
-                .discountPrice(addDiscountDto.getDiscountPrice())
-                .quantity(addDiscountDto.getQuantity())
-                .expirationDate(addDiscountDto.getExpirationDate())
-                .discountCondition(addDiscountDto.getDiscountCondition())
+                .discountName(requestDiscount.getDiscountName())
+                .discountPrice(requestDiscount.getDiscountPrice())
+                .quantity(requestDiscount.getQuantity())
+                .expirationDate(requestDiscount.getExpirationDate())
+                .discountCondition(requestDiscount.getDiscountCondition())
                 .build();
 
         discountRepository.save(discount);

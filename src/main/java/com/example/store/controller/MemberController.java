@@ -1,6 +1,12 @@
 package com.example.store.controller;
 
-import com.example.store.dto.*;
+import com.example.store.dto.request.RefreshTokenDto;
+import com.example.store.dto.request.RequestSignIn;
+import com.example.store.dto.request.RequestSignUp;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.ResponseMember;
+import com.example.store.dto.response.ResponseSignIn;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.CartService;
@@ -27,22 +33,22 @@ public class MemberController {
     private final CartService cartService;
 
     @GetMapping("/info")
-    public ResponseDto<ResponseMemberDto> userInfo(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseDto<ResponseMember> userInfo(@IfLogin LoginUserDto loginUserDto) {
         return memberService.userInfo(loginUserDto);
 
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<SuccessDto> signup(@RequestBody @Valid MemberSignupDto memberSignupDto, BindingResult bindingResult) {
+    public ResponseEntity<SuccessDto> signup(@RequestBody @Valid RequestSignUp requestSignUp, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        return memberService.createMember(memberSignupDto);
+        return memberService.createMember(requestSignUp);
     }
 
     @PostMapping("/login")
-    public ResponseDto<MemberLoginResponseDto> login(@RequestBody @Valid MemberLoginDto loginDto, BindingResult bindingResult) {
+    public ResponseDto<ResponseSignIn> login(@RequestBody @Valid RequestSignIn loginDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new IllegalArgumentException();
         }
@@ -51,7 +57,7 @@ public class MemberController {
     }
 
     @PostMapping("/refreshToken")
-    public ResponseDto<MemberLoginResponseDto> requestRefresh(@RequestBody RefreshTokenDto refreshTokenDto) {
+    public ResponseDto<ResponseSignIn> requestRefresh(@RequestBody RefreshTokenDto refreshTokenDto) {
         return memberService.refreshToken(refreshTokenDto);
     }
 

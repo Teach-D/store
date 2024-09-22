@@ -1,7 +1,8 @@
 package com.example.store.controller;
 
-import com.example.store.dto.*;
-import com.example.store.entity.*;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.ResponseOrder;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.repository.OrderRepository;
@@ -11,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,12 +29,12 @@ public class OrderController {
     private final OrderRepository orderRepository;
 
     @GetMapping
-    public ResponseDto<List<ResponseOrderDto>> getOrders(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseDto<List<ResponseOrder>> getOrders(@IfLogin LoginUserDto loginUserDto) {
         return orderService.getOrders(loginUserDto);
     }
 
     @GetMapping("/{orderId}")
-    public ResponseDto<ResponseOrderDto> getOrder(@IfLogin LoginUserDto loginUserDto, @PathVariable Long orderId) {
+    public ResponseDto<ResponseOrder> getOrder(@IfLogin LoginUserDto loginUserDto, @PathVariable Long orderId) {
         return orderService.getOrders(loginUserDto, orderId);
     }
 

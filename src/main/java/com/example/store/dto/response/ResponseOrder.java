@@ -1,7 +1,5 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
-import com.example.store.entity.Product;
-import jakarta.persistence.Column;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -11,10 +9,10 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseOrderDto {
+public class ResponseOrder {
 
     @Builder.Default
-    private List<ResponseProductDto> products = new ArrayList<>();
+    private List<ResponseProduct> products = new ArrayList<>();
     private String date;
     private Long id;
     private int totalPrice;
