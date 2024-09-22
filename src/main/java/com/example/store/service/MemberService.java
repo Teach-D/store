@@ -1,6 +1,9 @@
 package com.example.store.service;
 
-import com.example.store.dto.*;
+import com.example.store.dto.request.RefreshTokenDto;
+import com.example.store.dto.request.RequestSignIn;
+import com.example.store.dto.request.RequestSignUp;
+import com.example.store.dto.response.*;
 import com.example.store.entity.*;
 import com.example.store.exception.ex.NotFoundCartException;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
@@ -14,7 +17,6 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -41,19 +42,19 @@ public class MemberService {
     private final RedisTemplate<String, RefreshToken> redisTemplate;
 
     @Transactional
-    public ResponseEntity<SuccessDto> createMember(MemberSignupDto memberSignupDto) {
+    public ResponseEntity<SuccessDto> createMember(RequestSignUp requestSignUp) {
 
         Member member = Member.builder()
-                .name(memberSignupDto.getName())
-                .email(memberSignupDto.getEmail())
-                .password(passwordEncoder.encode(memberSignupDto.getPassword()))
+                .name(requestSignUp.getName())
+                .email(requestSignUp.getEmail())
+                .password(passwordEncoder.encode(requestSignUp.getPassword()))
                 .build();
 
         Optional<Role> userRole = roleRepository.findByName("ROLE_USER");
         member.addRole(userRole.get());
         Member saveMember = memberRepository.save(member);
 
-        MemberSignupResponseDto memberSignupResponseDto = MemberSignupResponseDto.builder()
+        ResponseSignUp responseSignUp = ResponseSignUp.builder()
                 .memberId(saveMember.getMemberId())
                 .email(saveMember.getEmail())
                 .name(saveMember.getName())
@@ -69,7 +70,7 @@ public class MemberService {
     }
 
     @Transactional
-    public ResponseDto<MemberLoginResponseDto> login(MemberLoginDto loginDto) {
+    public ResponseDto<ResponseSignIn> login(RequestSignIn loginDto) {
 
         // email이 없을 경우 Exception이 발생한다. Global Exception에 대한 처리가 필요하다.
         Member member = memberRepository.findByEmail(loginDto.getEmail()).orElseThrow(NotFoundMemberException::new);
@@ -91,7 +92,7 @@ public class MemberService {
 
         RefreshToken save = refreshTokenRepository.save(refreshTokenEntity);
 
-        MemberLoginResponseDto loginResponse = MemberLoginResponseDto.builder()
+        ResponseSignIn loginResponse = ResponseSignIn.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .memberId(member.getMemberId())
@@ -101,7 +102,7 @@ public class MemberService {
         return ResponseDto.success(loginResponse);
     }
 
-    public ResponseDto<MemberLoginResponseDto> refreshToken(RefreshTokenDto refreshTokenDto) {
+    public ResponseDto<ResponseSignIn> refreshToken(RefreshTokenDto refreshTokenDto) {
 
         log.info(String.valueOf(refreshTokenDto.getRefreshToken()));
         RefreshToken refreshToken = refreshTokenRepository.findByTokenName(refreshTokenDto.getRefreshToken()).orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
@@ -117,7 +118,7 @@ public class MemberService {
 
         String accessToken = jwtTokenizer.createAccessToken(userId, email, roles);
 
-        MemberLoginResponseDto loginResponse = MemberLoginResponseDto.builder()
+        ResponseSignIn loginResponse = ResponseSignIn.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenDto.getRefreshToken())
                 .nickname(member.getName())
@@ -127,20 +128,20 @@ public class MemberService {
         return ResponseDto.success(loginResponse);
     }
 
-    public ResponseDto<ResponseMemberDto> userInfo(LoginUserDto loginUserDto) {
+    public ResponseDto<ResponseMember> userInfo(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
         Role role = new Role(member.getRole());
 
-        ResponseMemberDto responseMemberDto = ResponseMemberDto.builder()
+        ResponseMember responseMember = ResponseMember.builder()
                 .email(member.getEmail())
                 .name(member.getName())
                 .regDate(member.getRegDate())
                 .role(role)
                 .build();
-        log.info("a" + responseMemberDto.getEmail());
+        log.info("a" + responseMember.getEmail());
 
-        return ResponseDto.success(responseMemberDto);
+        return ResponseDto.success(responseMember);
     }
 
     public ResponseEntity<SuccessDto> signout(LoginUserDto loginUserDto) {

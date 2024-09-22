@@ -1,9 +1,9 @@
 package com.example.store.service;
 
-import com.example.store.dto.ResponseDto;
-import com.example.store.dto.ResponseOrderDto;
-import com.example.store.dto.ResponseProductDto;
-import com.example.store.dto.SuccessDto;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.ResponseOrder;
+import com.example.store.dto.response.ResponseProduct;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.*;
 import com.example.store.exception.ex.DiscountException.NotFoundDiscountException;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
@@ -48,13 +48,13 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
-    public ResponseDto<List<ResponseOrderDto>> getOrders(LoginUserDto loginUserDto) {
+    public ResponseDto<List<ResponseOrder>> getOrders(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         List<Order> orders = orderRepository.findAllByMember_MemberId(member.getMemberId());
-        List<ResponseOrderDto> responseOrderDtos = new ArrayList<>();
+        List<ResponseOrder> responseOrders = new ArrayList<>();
 
         orders.forEach(order -> {
-            ResponseOrderDto responseOrderDto = ResponseOrderDto.builder()
+            ResponseOrder responseOrder = ResponseOrder.builder()
                     .date(order.getDate())
                     .id(order.getOrderId())
                     .totalPrice(order.getTotalPrice())
@@ -63,28 +63,28 @@ public class OrderService {
             order.getOrderItems().forEach(orderItem -> {
                 Product product = new Product(orderItem.getProduct());
 
-                ResponseProductDto responseProductDto = ResponseProductDto.builder()
+                ResponseProduct responseProduct = ResponseProduct.builder()
                         .product(product)
                         .quantity(orderItem.getQuantity())
                         .productTitle(orderItem.getProductTitle())
                         .productPrice(orderItem.getProductPrice())
                         .build();
 
-                responseOrderDto.getProducts().add(responseProductDto);
+                responseOrder.getProducts().add(responseProduct);
             });
 
-            responseOrderDtos.add(responseOrderDto);
+            responseOrders.add(responseOrder);
         });
 
-        return ResponseDto.success(responseOrderDtos);
+        return ResponseDto.success(responseOrders);
     }
 
-    public ResponseDto<ResponseOrderDto> getOrders(LoginUserDto loginUserDto, Long orderId) {
+    public ResponseDto<ResponseOrder> getOrders(LoginUserDto loginUserDto, Long orderId) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Order order = orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
 
         order.updateMember(member);
-        ResponseOrderDto responseOrderDto = ResponseOrderDto
+        ResponseOrder responseOrder = ResponseOrder
                 .builder()
                 .date(order.getDate())
                 .totalPrice(order.getTotalPrice())
@@ -94,14 +94,14 @@ public class OrderService {
 
             order.getOrderItems().forEach(orderItem -> {
                 Product product = orderItem.getProduct();
-                ResponseProductDto responseProductDto = ResponseProductDto.builder()
+                ResponseProduct responseProduct = ResponseProduct.builder()
                         .product(product)
                         .quantity(orderItem.getQuantity())
                         .build();
-                responseOrderDto.getProducts().add(responseProductDto);
+                responseOrder.getProducts().add(responseProduct);
             });
 
-            return ResponseDto.success(responseOrderDto);
+            return ResponseDto.success(responseOrder);
         } else {
             return null;
         }

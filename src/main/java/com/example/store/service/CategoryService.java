@@ -1,9 +1,9 @@
 package com.example.store.service;
 
-import com.example.store.dto.AddCategoryDto;
-import com.example.store.dto.ResponseCategoryDto;
-import com.example.store.dto.ResponseDto;
-import com.example.store.dto.SuccessDto;
+import com.example.store.dto.request.RequestCategory;
+import com.example.store.dto.response.ResponseCategory;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Category;
 import com.example.store.exception.ex.NotFoundCartException;
 import com.example.store.exception.ex.NotFoundCategoryException;
@@ -24,8 +24,8 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public ResponseEntity<SuccessDto> addCategory(AddCategoryDto addCategoryDto) {
-        Category category = Category.builder().name(addCategoryDto.getName()).build();
+    public ResponseEntity<SuccessDto> addCategory(RequestCategory requestCategory) {
+        Category category = Category.builder().name(requestCategory.getName()).build();
         categoryRepository.save(category);
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
@@ -40,25 +40,25 @@ public class CategoryService {
         return categoryRepository.findById(id).orElseThrow();
     }
 
-    public ResponseDto<List<ResponseCategoryDto>> getAllCategories() {
+    public ResponseDto<List<ResponseCategory>> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        List<ResponseCategoryDto> responseCategories = new ArrayList<>();
+        List<ResponseCategory> responseCategories = new ArrayList<>();
 
         categories.forEach(category -> {
-            ResponseCategoryDto result = ResponseCategoryDto.builder().id(category.getId()).name(category.getName()).build();
+            ResponseCategory result = ResponseCategory.builder().id(category.getId()).name(category.getName()).build();
             responseCategories.add(result);
         });
 
         return ResponseDto.success(responseCategories);
     }
 
-    public ResponseDto<ResponseCategoryDto> getCategoryById(Long id) {
+    public ResponseDto<ResponseCategory> getCategoryById(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(NotFoundCartException::new);
-        ResponseCategoryDto result = ResponseCategoryDto.builder().id(category.getId()).name(category.getName()).build();
+        ResponseCategory result = ResponseCategory.builder().id(category.getId()).name(category.getName()).build();
         return ResponseDto.success(result);
     }
 
-    public ResponseEntity<SuccessDto> updateCategory(Long id, AddCategoryDto editCategoryDto) {
+    public ResponseEntity<SuccessDto> updateCategory(Long id, RequestCategory editCategoryDto) {
         Category category = categoryRepository.findById(id).orElseThrow(NotFoundCategoryException::new);
         category.updateName(editCategoryDto.getName());
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));

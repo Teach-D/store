@@ -1,7 +1,10 @@
 package com.example.store.controller;
 
-import com.example.store.dto.*;
-import com.example.store.entity.OrderItem;
+import com.example.store.dto.request.EditProductDto;
+import com.example.store.dto.request.RequestProduct;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.ResponseProduct;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Product;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
@@ -11,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,19 +61,19 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseDto<ResponseProductDto> getProduct(@PathVariable Long id) {
+    public ResponseDto<ResponseProduct> getProduct(@PathVariable Long id) {
         return productService.getProduct(id);
     }
 
     @GetMapping("/name/{name}")
-    public ResponseDto<ResponseProductDto> getProductByName(@PathVariable String name) {
+    public ResponseDto<ResponseProduct> getProductByName(@PathVariable String name) {
         return productService.getProductByName(name);
     }
 
     @PostMapping
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseDto<ResponseProductDto> addProduct(@IfLogin LoginUserDto loginUserDto, @RequestBody AddProductDto addProductDto) {
-        return productService.addProduct(addProductDto);
+    public ResponseDto<ResponseProduct> addProduct(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestProduct requestProduct) {
+        return productService.addProduct(requestProduct);
     }
 
     @PutMapping("/{id}")

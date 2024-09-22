@@ -1,13 +1,12 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
-import com.example.store.entity.Product;
 import lombok.*;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseDiscountDto {
+public class ResponseDiscount {
     private Long id;
 
     private String discountName;

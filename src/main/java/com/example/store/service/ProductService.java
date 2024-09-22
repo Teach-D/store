@@ -1,6 +1,10 @@
 package com.example.store.service;
 
-import com.example.store.dto.*;
+import com.example.store.dto.request.EditProductDto;
+import com.example.store.dto.request.RequestProduct;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.ResponseProduct;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Category;
 import com.example.store.entity.OrderItem;
 import com.example.store.entity.Product;
@@ -13,13 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,15 +33,15 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public ResponseDto<ResponseProductDto> addProduct(AddProductDto addProductDto) {
-        Category category = categoryService.getCategory(addProductDto.getCategoryId());
+    public ResponseDto<ResponseProduct> addProduct(RequestProduct requestProduct) {
+        Category category = categoryService.getCategory(requestProduct.getCategoryId());
         Product product = Product.builder()
                         .category(category)
-                        .quantity(addProductDto.getQuantity())
-                        .price(addProductDto.getPrice())
-                        .description(addProductDto.getDescription())
-                        .imageUrl(addProductDto.getImageUrl())
-                        .title(addProductDto.getTitle())
+                        .quantity(requestProduct.getQuantity())
+                        .price(requestProduct.getPrice())
+                        .description(requestProduct.getDescription())
+                        .imageUrl(requestProduct.getImageUrl())
+                        .title(requestProduct.getTitle())
                         .build();
 
         Rating rating = Rating.builder()
@@ -53,9 +53,9 @@ public class ProductService {
 
         productRepository.save(product);
 
-        ResponseProductDto responseProductDto = ResponseProductDto.builder().product(product).build();
+        ResponseProduct responseProduct = ResponseProduct.builder().product(product).build();
 
-        return ResponseDto.success(responseProductDto);
+        return ResponseDto.success(responseProduct);
     }
 
     @Transactional(readOnly = true)
@@ -69,14 +69,14 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseDto<ResponseProductDto> getProduct(Long id) {
+    public ResponseDto<ResponseProduct> getProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(NotFoundProductException::new);
-        ResponseProductDto responseProductDto = ResponseProductDto.builder()
+        ResponseProduct responseProduct = ResponseProduct.builder()
                 .product(product)
                 .categoryId(product.getCategory().getId())
                 .build();
 
-        return ResponseDto.success(responseProductDto);
+        return ResponseDto.success(responseProduct);
     }
 
     public ResponseEntity<SuccessDto> editProduct(EditProductDto editProductDto, Long id) {
@@ -179,12 +179,12 @@ public class ProductService {
         return ResponseDto.success(product);
     }
 
-    public ResponseDto<ResponseProductDto> getProductByName(String name) {
+    public ResponseDto<ResponseProduct> getProductByName(String name) {
         Product product = productRepository.findByTitle(name);
-        ResponseProductDto responseProductDto = ResponseProductDto.builder()
+        ResponseProduct responseProduct = ResponseProduct.builder()
                 .product(product)
                 .build();
 
-        return ResponseDto.success(responseProductDto);
+        return ResponseDto.success(responseProduct);
     }
 }

@@ -1,13 +1,12 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
-import com.example.store.entity.Product;
 import lombok.*;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseDeliveryDto {
+public class ResponseDelivery {
 
     private String recipient;
     private String address;

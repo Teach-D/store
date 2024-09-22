@@ -1,9 +1,9 @@
 package com.example.store.service;
 
-import com.example.store.dto.AddDeliveryDto;
-import com.example.store.dto.ResponseDeliveryDto;
-import com.example.store.dto.ResponseDto;
-import com.example.store.dto.SuccessDto;
+import com.example.store.dto.request.RequestDelivery;
+import com.example.store.dto.response.ResponseDelivery;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Delivery;
 import com.example.store.entity.Member;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
@@ -41,7 +41,7 @@ public class DeliveryService {
         deliveryRepository.delete(delivery);
     }
 
-    public ResponseDto<ResponseDeliveryDto> getDelivery(LoginUserDto loginUserDto) {
+    public ResponseDto<ResponseDelivery> getDelivery(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
         Delivery delivery = member.getDelivery();
@@ -50,23 +50,23 @@ public class DeliveryService {
             return null;
         }
 
-        ResponseDeliveryDto responseDeliveryDto = ResponseDeliveryDto
+        ResponseDelivery responseDelivery = ResponseDelivery
                 .builder().address(delivery.getAddress())
                 .recipient(delivery.getRecipient())
                 .request(delivery.getRequest())
                 .phoneNumber(delivery.getPhoneNumber()).build();
 
-        return ResponseDto.success(responseDeliveryDto);
+        return ResponseDto.success(responseDelivery);
     }
 
-    public ResponseEntity<SuccessDto> setDelivery(LoginUserDto loginUserDto, AddDeliveryDto addDeliveryDto) {
+    public ResponseEntity<SuccessDto> setDelivery(LoginUserDto loginUserDto, RequestDelivery requestDelivery) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
         Delivery delivery = Delivery.builder()
-                .address(addDeliveryDto.getAddress())
-                .recipient(addDeliveryDto.getRecipient())
-                .request(addDeliveryDto.getRequest())
-                .phoneNumber(addDeliveryDto.getPhoneNumber()).build();
+                .address(requestDelivery.getAddress())
+                .recipient(requestDelivery.getRecipient())
+                .request(requestDelivery.getRequest())
+                .phoneNumber(requestDelivery.getPhoneNumber()).build();
 
         deliveryRepository.save(delivery);
         member.addDelivery(delivery);
@@ -76,13 +76,13 @@ public class DeliveryService {
 
     }
 
-    public ResponseEntity<SuccessDto> updateDelivery(LoginUserDto loginUserDto, AddDeliveryDto addDeliveryDto) {
+    public ResponseEntity<SuccessDto> updateDelivery(LoginUserDto loginUserDto, RequestDelivery requestDelivery) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
         Delivery delivery = member.getDelivery();
         delivery.updateDeliver(
-                addDeliveryDto.getAddress(), addDeliveryDto.getRecipient(),
-                addDeliveryDto.getRequest(), addDeliveryDto.getPhoneNumber()
+                requestDelivery.getAddress(), requestDelivery.getRecipient(),
+                requestDelivery.getRequest(), requestDelivery.getPhoneNumber()
         );
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));

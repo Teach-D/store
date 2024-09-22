@@ -1,8 +1,7 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
