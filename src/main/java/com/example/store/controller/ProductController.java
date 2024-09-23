@@ -31,33 +31,36 @@ public class ProductController {
     }*/
 
     @GetMapping()
-    public ResponseDto<Page<Product>> getProductsByOption(
+    public ResponseDto<Page<ResponseProduct>> getProductsByOption(
             @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
     ) {
+        Page<ResponseProduct> responseProducts = null;
+        Page<Product> products = null;
+
         log.info(sort + "-" + order);
         if (sort.equals("0") && order.equals("0")) {
-            return productService.getProducts(categoryId, page);
-        }
-
-        log.info(categoryId + " - " + sort);
-        if (sort.equals("sale")) {
+            products = productService.getProducts(categoryId, page);
+        } else if (sort.equals("sale")) {
             if (order.equals("asc")) {
                 log.info("aa");
-                return productService.getProductsBySaleAsc(categoryId, page);
+                products = productService.getProductsBySaleAsc(categoryId, page);
             } else {
-                return productService.getProductsBySaleDesc(categoryId, page);
+                products = productService.getProductsBySaleDesc(categoryId, page);
             }
         } else if (sort.equals("price")) {
             if (order.equals("asc")) {
                 log.info("aa");
-                return productService.getProductsByPriceAsc(categoryId, page);
+                products = productService.getProductsByPriceAsc(categoryId, page);
             } else {
-                return productService.getProductsByPriceDesc(categoryId, page);
+                products = productService.getProductsByPriceDesc(categoryId, page);
             }
+        } else {
+            products = productService.getProductsBySaleDesc(categoryId, page);
         }
 
-        return productService.getProductsBySaleDesc(categoryId, page);
+        Page<ResponseProduct> resultProducts = new ResponseProduct().toDtoPage(products);
+        return ResponseDto.success(resultProducts);
     }
 
     @GetMapping("/{id}")
