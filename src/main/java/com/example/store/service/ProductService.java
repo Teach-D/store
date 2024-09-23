@@ -111,7 +111,7 @@ public class ProductService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    public ResponseDto<Page<Product>> getProducts(Long categoryId, int page) {
+    public Page<Product> getProducts(Long categoryId, int page) {
         int size = 10;
         Page<Product> product = null;
         log.info("aa");
@@ -121,10 +121,10 @@ public class ProductService {
             product = productRepository.findProductsByCategory_id(categoryId, PageRequest.of(page, size));
         }
 
-        return ResponseDto.success(product);
+        return product;
     }
 
-    public ResponseDto<Page<Product>> getProductsBySaleAsc(Long categoryId, int page) {
+    public Page<Product> getProductsBySaleAsc(Long categoryId, int page) {
         int size = 10;
         Page<Product> product = null;
 
@@ -134,10 +134,10 @@ public class ProductService {
             product = productRepository.findProductsByCategory_idOrderBySaleQuantityAsc(categoryId, PageRequest.of(page, size));
         }
 
-        return ResponseDto.success(product);
+        return product;
     }
 
-    public ResponseDto<Page<Product>> getProductsBySaleDesc(Long categoryId, int page) {
+    public Page<Product> getProductsBySaleDesc(Long categoryId, int page) {
         int size = 10;
         Page<Product> product = null;
 
@@ -147,10 +147,10 @@ public class ProductService {
             product = productRepository.findProductsByCategory_idOrderBySaleQuantityDesc(categoryId, PageRequest.of(page, size));
         }
 
-        return ResponseDto.success(product);
+        return product;
     }
 
-    public ResponseDto<Page<Product>> getProductsByPriceAsc(Long categoryId, int page) {
+    public Page<Product> getProductsByPriceAsc(Long categoryId, int page) {
         int size = 10;
         Page<Product> product = null;
 
@@ -163,10 +163,10 @@ public class ProductService {
 
         }
 
-        return ResponseDto.success(product);
+        return product;
     }
 
-    public ResponseDto<Page<Product>> getProductsByPriceDesc(Long categoryId, int page) {
+    public Page<Product> getProductsByPriceDesc(Long categoryId, int page) {
         int size = 10;
         Page<Product> product = null;
 
@@ -176,7 +176,7 @@ public class ProductService {
             product = productRepository.findProductsByCategory_idOrderByPriceDesc(categoryId, PageRequest.of(page, size));
         }
 
-        return ResponseDto.success(product);
+        return product;
     }
 
     public ResponseDto<ResponseProduct> getProductByName(String name) {
