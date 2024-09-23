@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.request;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddProductDto {
+public class RequestProduct {
     private String title;
 
     private int price;

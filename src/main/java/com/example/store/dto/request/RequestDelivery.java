@@ -1,13 +1,12 @@
-package com.example.store.dto;
+package com.example.store.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddDeliveryDto {
+public class RequestDelivery {
     private String recipient;
 
     private String address;

@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.request;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddCartItemDto {
+public class RequestCartItem {
     private Long cartId;
     private int quantity;
 }

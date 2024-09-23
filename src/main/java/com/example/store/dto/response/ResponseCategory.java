@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseCategoryDto {
+public class ResponseCategory {
     private Long id;
     private String name;
 }

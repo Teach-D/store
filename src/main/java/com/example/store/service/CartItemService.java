@@ -1,6 +1,10 @@
 package com.example.store.service;
 
-import com.example.store.dto.*;
+import com.example.store.dto.request.EditCartItemDto;
+import com.example.store.dto.request.RequestCartItem;
+import com.example.store.dto.response.ResponseCartItem;
+import com.example.store.dto.response.ResponseDto;
+import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Member;
@@ -36,14 +40,14 @@ public class CartItemService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public ResponseDto<ResponseCartItemDto> getCartItem(Long cartItemId) {
+    public ResponseDto<ResponseCartItem> getCartItem(Long cartItemId) {
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
-        ResponseCartItemDto responseCartItemDto = ResponseCartItemDto.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
+        ResponseCartItem responseCartItem = ResponseCartItem.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
 
-        return ResponseDto.success(responseCartItemDto);
+        return ResponseDto.success(responseCartItem);
     }
 
-    public ResponseDto<List<ResponseCartItemDto>> getCartItems(LoginUserDto loginUserDto) {
+    public ResponseDto<List<ResponseCartItem>> getCartItems(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
 
@@ -53,48 +57,48 @@ public class CartItemService {
 
         }
 
-        List<ResponseCartItemDto> cartItemDtos = new ArrayList<>();
+        List<ResponseCartItem> cartItemDtos = new ArrayList<>();
 
         cartItems.forEach(cartItem -> {
             Product product = new Product(cartItem.getProduct());
 
-            ResponseCartItemDto responseCartItemDto = ResponseCartItemDto
+            ResponseCartItem responseCartItem = ResponseCartItem
                     .builder().quantity(cartItem.getQuantity()).product(product).id(cartItem.getId()).build();
-            cartItemDtos.add(responseCartItemDto);
+            cartItemDtos.add(responseCartItem);
         });
 
         return ResponseDto.success(cartItemDtos);
 
     }
 
-    public ResponseEntity<SuccessDto> addCartItem(LoginUserDto loginUserDto, AddCartItemDto addCartItemDto, Long productId) {
+    public ResponseEntity<SuccessDto> addCartItem(LoginUserDto loginUserDto, RequestCartItem requestCartItem, Long productId) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Product product = productRepository.findById(productId).orElseThrow(NotFoundProductException::new);
 
-        int orderQuantity = addCartItemDto.getQuantity();
+        int orderQuantity = requestCartItem.getQuantity();
 
         if (product.getQuantity() < orderQuantity) {
             throw new OutOfProductException();
         }
 
 
-        if (cartItemRepository.existsByCartIdAndProductId(addCartItemDto.getCartId(), productId)) {
-            CartItem cartItem = cartItemRepository.findCartItemByCartIdAndProductId(addCartItemDto.getCartId(), productId).orElseThrow(NotFoundCartItemException::new);
-            cartItem.updateQuantity(cartItem.getQuantity() + addCartItemDto.getQuantity());
-            product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
-            product.updateSaleQuantity(product.getSaleQuantity() + addCartItemDto.getQuantity());
+        if (cartItemRepository.existsByCartIdAndProductId(requestCartItem.getCartId(), productId)) {
+            CartItem cartItem = cartItemRepository.findCartItemByCartIdAndProductId(requestCartItem.getCartId(), productId).orElseThrow(NotFoundCartItemException::new);
+            cartItem.updateQuantity(cartItem.getQuantity() + requestCartItem.getQuantity());
+            product.updateQuantity(product.getQuantity() - requestCartItem.getQuantity());
+            product.updateSaleQuantity(product.getSaleQuantity() + requestCartItem.getQuantity());
             return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
             //updateCartItem(cartItem);
         }
 
-        product.updateQuantity(product.getQuantity() - addCartItemDto.getQuantity());
-        product.updateSaleQuantity(product.getSaleQuantity() + addCartItemDto.getQuantity());
+        product.updateQuantity(product.getQuantity() - requestCartItem.getQuantity());
+        product.updateSaleQuantity(product.getSaleQuantity() + requestCartItem.getQuantity());
 
-        Cart cart = cartRepository.findById(addCartItemDto.getCartId()).orElseThrow(NotFoundCartException::new);
+        Cart cart = cartRepository.findById(requestCartItem.getCartId()).orElseThrow(NotFoundCartException::new);
 
         CartItem cartItem = CartItem.builder()
                 .cart(cart)
-                .quantity(addCartItemDto.getQuantity())
+                .quantity(requestCartItem.getQuantity())
                 .product(product)
                 .build();
 
