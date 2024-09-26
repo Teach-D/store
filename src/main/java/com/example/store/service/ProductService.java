@@ -1,6 +1,5 @@
 package com.example.store.service;
 
-import com.example.store.dto.request.EditProductDto;
 import com.example.store.dto.request.RequestProduct;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
@@ -79,16 +78,15 @@ public class ProductService {
         return ResponseDto.success(responseProduct);
     }
 
-    public ResponseEntity<SuccessDto> editProduct(EditProductDto editProductDto, Long id) {
+    public ResponseEntity<SuccessDto> editProduct(RequestProduct requestProduct, Long id) {
         Product product = productRepository.findById(id).orElseThrow();
         product.updateProduct(
-                categoryService.getCategory(editProductDto.getCategoryId()),
-                editProductDto.getPrice(),
-                editProductDto.getDescription(),
-                editProductDto.getImageUrl(),
-                editProductDto.getTitle(),
-                editProductDto.getQuantity(),
-                editProductDto.getSaleQuantity()
+                categoryService.getCategory(requestProduct.getCategoryId()),
+                requestProduct.getPrice(),
+                requestProduct.getDescription(),
+                requestProduct.getImageUrl(),
+                requestProduct.getTitle(),
+                requestProduct.getQuantity()
         );
 
         log.info(String.valueOf(product.getQuantity()));
