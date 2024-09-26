@@ -1,6 +1,5 @@
 package com.example.store.service;
 
-import com.example.store.dto.request.EditCartItemDto;
 import com.example.store.dto.request.RequestCartItem;
 import com.example.store.dto.response.ResponseCartItem;
 import com.example.store.dto.response.ResponseDto;
@@ -107,9 +106,9 @@ public class CartItemService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    public ResponseEntity<SuccessDto> editCartItem(Long cartItemId, EditCartItemDto editCartItemDto) {
+    public ResponseEntity<SuccessDto> editCartItem(Long cartItemId, int quantity) {
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
-        cartItem.updateQuantity(editCartItemDto.getQuantity());
+        cartItem.updateQuantity(quantity);
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }

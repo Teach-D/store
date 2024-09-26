@@ -1,6 +1,5 @@
 package com.example.store.controller;
 
-import com.example.store.dto.request.EditProductDto;
 import com.example.store.dto.request.RequestBoard;
 import com.example.store.dto.response.ResponseBoard;
 import com.example.store.dto.response.ResponseCartItem;

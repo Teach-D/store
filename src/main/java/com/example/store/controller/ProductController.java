@@ -1,6 +1,5 @@
 package com.example.store.controller;
 
-import com.example.store.dto.request.EditProductDto;
 import com.example.store.dto.request.RequestProduct;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
@@ -81,8 +80,8 @@ public class ProductController {
 
     @PutMapping("/{id}")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<SuccessDto> editProduct(@RequestBody EditProductDto editProductDto, @PathVariable Long id) {
-        return productService.editProduct(editProductDto, id);
+    public ResponseEntity<SuccessDto> editProduct(@RequestBody RequestProduct requestProduct, @PathVariable Long id) {
+        return productService.editProduct(requestProduct, id);
     }
 
     @DeleteMapping("/{id}")
