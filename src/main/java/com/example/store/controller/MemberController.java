@@ -39,21 +39,46 @@ public class MemberController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<SuccessDto> signup(@RequestBody @Valid RequestSignUp requestSignUp, BindingResult bindingResult) {
+    public ResponseEntity signup(@RequestBody @Valid RequestSignUp requestSignUp, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
         }
 
         return memberService.createMember(requestSignUp);
     }
 
-    @PostMapping("/login")
-    public ResponseDto<ResponseSignIn> login(@RequestBody @Valid RequestSignIn loginDto, BindingResult bindingResult) {
+/*    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody @Valid RequestSignIn loginDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new IllegalArgumentException();
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
         }
 
         return memberService.login(loginDto);
+    }*/
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid RequestSignIn loginDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message: ").append(message).append(" ");
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
+        ResponseDto<ResponseSignIn> response = memberService.login(loginDto);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refreshToken")

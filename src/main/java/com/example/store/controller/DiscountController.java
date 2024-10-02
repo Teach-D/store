@@ -10,9 +10,12 @@ import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.DiscountService;
 import com.example.store.service.MemberDiscountService;
 import com.example.store.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,13 +46,31 @@ public class DiscountController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessDto> addDiscount(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestDiscount requestDiscount) {
+    public ResponseEntity addDiscount(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody RequestDiscount requestDiscount, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
         return discountService.addDiscount(loginUserDto, requestDiscount);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SuccessDto> editDiscount(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestDiscount requestDiscount, @PathVariable Long id) {
-       return discountService.editDiscount(id, requestDiscount);
+    public ResponseEntity editDiscount(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody RequestDiscount requestDiscount, BindingResult bindingResult, @PathVariable Long id) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
+        return discountService.editDiscount(id, requestDiscount);
     }
 
     @DeleteMapping("/{id}")

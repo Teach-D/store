@@ -12,10 +12,13 @@ import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.BoardService;
 import com.example.store.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -42,14 +45,32 @@ public class BoardController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessDto> createBoard(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestBoard requestBoard) {
+    public ResponseEntity createBoard(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody RequestBoard requestBoard, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
         Member member = memberService.findByEmail(loginUserDto.getEmail());
 
         return boardService.createBoard(member.getMemberId(), requestBoard);
     }
 
     @PutMapping("/{boardId}")
-    public ResponseEntity<SuccessDto> updateBoard(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestBoard requestBoard, @PathVariable Long boardId) {
+    public ResponseEntity updateBoard(@IfLogin LoginUserDto loginUserDto, @PathVariable Long boardId, @Valid @RequestBody RequestBoard requestBoard, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
         Member member = memberService.findByEmail(loginUserDto.getEmail());
 
         return boardService.updateBoard(member.getMemberId(), boardId, requestBoard);
