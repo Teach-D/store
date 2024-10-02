@@ -8,9 +8,12 @@ import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.DeliveryService;
 import com.example.store.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -28,12 +31,29 @@ public class DeliveryController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessDto> setDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestDelivery requestDelivery) {
-         return deliveryService.setDelivery(loginUserDto, requestDelivery);
+    public ResponseEntity setDelivery(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody RequestDelivery requestDelivery, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+        return deliveryService.setDelivery(loginUserDto, requestDelivery);
     }
 
     @PutMapping
-    public ResponseEntity<SuccessDto> updateDelivery(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestDelivery requestDelivery) {
+    public ResponseEntity updateDelivery(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody RequestDelivery requestDelivery, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
         return deliveryService.updateDelivery(loginUserDto, requestDelivery);
     }
 

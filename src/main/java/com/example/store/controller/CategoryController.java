@@ -5,9 +5,12 @@ import com.example.store.dto.response.ResponseCategory;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +24,16 @@ public class CategoryController {
 
     @PostMapping
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<SuccessDto> addCategory(@RequestBody RequestCategory requestCategory) {
+    public ResponseEntity addCategory(@Valid @RequestBody RequestCategory requestCategory, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
         return categoryService.addCategory(requestCategory);
     }
 
@@ -36,7 +48,16 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SuccessDto> updateCategory(@PathVariable Long id, @RequestBody RequestCategory editCategoryDto) {
+    public ResponseEntity updateCategory(@PathVariable Long id, @Valid @RequestBody RequestCategory editCategoryDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
         return categoryService.updateCategory(id, editCategoryDto);
     }
 

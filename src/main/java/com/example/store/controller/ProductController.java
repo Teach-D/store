@@ -1,6 +1,5 @@
 package com.example.store.controller;
 
-import com.example.store.dto.request.EditProductDto;
 import com.example.store.dto.request.RequestProduct;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
@@ -10,10 +9,14 @@ import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.OrderItemService;
 import com.example.store.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,19 +41,16 @@ public class ProductController {
         Page<ResponseProduct> responseProducts = null;
         Page<Product> products = null;
 
-        log.info(sort + "-" + order);
         if (sort.equals("0") && order.equals("0")) {
             products = productService.getProducts(categoryId, page);
         } else if (sort.equals("sale")) {
             if (order.equals("asc")) {
-                log.info("aa");
                 products = productService.getProductsBySaleAsc(categoryId, page);
             } else {
                 products = productService.getProductsBySaleDesc(categoryId, page);
             }
         } else if (sort.equals("price")) {
             if (order.equals("asc")) {
-                log.info("aa");
                 products = productService.getProductsByPriceAsc(categoryId, page);
             } else {
                 products = productService.getProductsByPriceDesc(categoryId, page);
@@ -75,14 +75,30 @@ public class ProductController {
 
     @PostMapping
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseDto<ResponseProduct> addProduct(@IfLogin LoginUserDto loginUserDto, @RequestBody RequestProduct requestProduct) {
+    public ResponseEntity addProduct(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody RequestProduct requestProduct, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
         return productService.addProduct(requestProduct);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<SuccessDto> editProduct(@RequestBody EditProductDto editProductDto, @PathVariable Long id) {
-        return productService.editProduct(editProductDto, id);
+    public ResponseEntity editProduct(@Valid @RequestBody RequestProduct requestProduct, BindingResult bindingResult, @PathVariable Long id) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(objectError -> {
+                String message = objectError.getDefaultMessage();
+                sb.append("message :" + message);
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+        return productService.editProduct(requestProduct, id);
     }
 
     @DeleteMapping("/{id}")

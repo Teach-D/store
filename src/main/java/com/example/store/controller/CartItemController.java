@@ -1,6 +1,5 @@
 package com.example.store.controller;
 
-import com.example.store.dto.request.EditCartItemDto;
 import com.example.store.dto.request.RequestCartItem;
 import com.example.store.dto.response.ResponseCartItem;
 import com.example.store.dto.response.ResponseDto;
@@ -44,9 +43,9 @@ public class CartItemController {
         return cartItemService.addCartItem(loginUserDto, requestCartItem, productId);
     }
 
-    @PutMapping("/{cartItemId}")
-    public ResponseEntity<SuccessDto> editCartItem(@PathVariable Long cartItemId, @RequestBody EditCartItemDto editCartItemDto) {
-        return cartItemService.editCartItem(cartItemId, editCartItemDto);
+    @PutMapping("/{cartItemId}/{quantity}")
+    public ResponseEntity<SuccessDto> updateCartItemQuantity(@PathVariable Long cartItemId, @PathVariable int quantity) {
+        return cartItemService.editCartItem(cartItemId, quantity);
     }
 
     @DeleteMapping("/{cartItemId}")
