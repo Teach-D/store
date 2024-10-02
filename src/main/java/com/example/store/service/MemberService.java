@@ -69,8 +69,8 @@ public class MemberService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    @Transactional
-    public ResponseDto<ResponseSignIn> login(RequestSignIn loginDto) {
+/*    @Transactional
+    public ResponseEntity login(RequestSignIn loginDto) {
 
         // email이 없을 경우 Exception이 발생한다. Global Exception에 대한 처리가 필요하다.
         Member member = memberRepository.findByEmail(loginDto.getEmail()).orElseThrow(NotFoundMemberException::new);
@@ -99,8 +99,40 @@ public class MemberService {
                 .nickname(member.getName())
                 .build();
 
-        return ResponseDto.success(loginResponse);
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
+    }*/
+@Transactional
+public ResponseDto<ResponseSignIn> login(RequestSignIn loginDto) {
+
+    // email이 없을 경우 Exception이 발생한다. Global Exception에 대한 처리가 필요하다.
+    Member member = memberRepository.findByEmail(loginDto.getEmail()).orElseThrow(NotFoundMemberException::new);
+
+    if(!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())){
+        throw new NotFoundMemberException();
     }
+    // List<Role> ===> List<String>
+    List<String> roles = new ArrayList<>();
+    Role role = member.getRole();
+    roles.add(String.valueOf(role));
+
+    // JWT토큰을 생성하였다. jwt라이브러리를 이용하여 생성.
+    String accessToken = jwtTokenizer.createAccessToken(member.getMemberId(), member.getEmail(), roles);
+    String refreshToken = jwtTokenizer.createRefreshToken(member.getMemberId(), member.getEmail(),  roles);
+
+    // RefreshToken을 DB에 저장한다. 성능 때문에 DB가 아니라 Redis에 저장하는 것이 좋다.
+    RefreshToken refreshTokenEntity = RefreshToken.builder().tokenName(refreshToken).memberId(member.getMemberId()).build();
+
+    RefreshToken save = refreshTokenRepository.save(refreshTokenEntity);
+
+    ResponseSignIn loginResponse = ResponseSignIn.builder()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .memberId(member.getMemberId())
+            .nickname(member.getName())
+            .build();
+
+    return ResponseDto.success(loginResponse);
+}
 
     public ResponseDto<ResponseSignIn> refreshToken(RefreshTokenDto refreshTokenDto) {
 

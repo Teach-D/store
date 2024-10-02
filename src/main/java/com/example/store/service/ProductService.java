@@ -32,7 +32,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public ResponseDto<ResponseProduct> addProduct(RequestProduct requestProduct) {
+    public ResponseEntity<SuccessDto> addProduct(RequestProduct requestProduct) {
         Category category = categoryService.getCategory(requestProduct.getCategoryId());
         Product product = Product.builder()
                         .category(category)
@@ -54,7 +54,7 @@ public class ProductService {
 
         ResponseProduct responseProduct = ResponseProduct.builder().product(product).build();
 
-        return ResponseDto.success(responseProduct);
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
     @Transactional(readOnly = true)
