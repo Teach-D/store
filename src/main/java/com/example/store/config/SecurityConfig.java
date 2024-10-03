@@ -49,10 +49,21 @@ public class SecurityConfig {
 
         // CSRF 보안을 활성
         http.authorizeHttpRequests(authz -> authz
-                .requestMatchers("/members/signup", "/members/login", "/members/refreshToken", "/swagger-ui/**").permitAll()
-                .anyRequest().permitAll()
-        );
+                // 로그인 없이 접근 가능한 엔드포인트
+                .requestMatchers(HttpMethod.GET, "/boards/**", "/categories/**", "/discounts/**", "/products/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/members/signup", "/members/login").permitAll()
 
+                // user 권한만 접근 가능한 엔드포인트
+                .requestMatchers(HttpMethod.POST, "/boards/**", "/cartItems/**", "/delivery", "/discounts/{id}", "/orders").hasAnyAuthority("USER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/boards/**", "/cartItems/**", "/delivery").hasAnyAuthority("USER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/boards/**", "/cartItems/**", "/delivery", "/discounts/users/**", "/orders/**").hasAnyAuthority("USER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/carts", "/members/info", "/orders/**").hasAnyAuthority("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/members/refreshToken").hasAnyAuthority("USER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/members/logout", "/members/signout").hasAnyAuthority("USER", "ADMIN")
+
+                // admin 권한만 접근 가능한 나머지 엔드포인트
+                .anyRequest().hasAuthority("ADMIN")
+        );
         return http.build();
     }
 
