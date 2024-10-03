@@ -40,8 +40,7 @@ public class Member {
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "member", orphanRemoval = true)

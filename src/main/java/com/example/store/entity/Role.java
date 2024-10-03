@@ -1,32 +1,13 @@
 package com.example.store.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Entity
 @Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class Role {
+@RequiredArgsConstructor
+public enum Role {
+    ADMIN("ROLE_ADMIN"),
+    USER("ROLE_USER");
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roleId;
-
-    @Column(length = 20)
-    private String name;
-
-    public Role(Role role) {
-        this.roleId = role.getRoleId();
-        this.name = role.getName();
-    }
-
-    @Override
-    public String toString() {
-        return "Role{" +
-                "roleId=" + roleId +
-                ", name='" + name + '\'' +
-                '}';
-    }
+    private final String roles;
 }
