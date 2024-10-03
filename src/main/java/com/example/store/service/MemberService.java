@@ -12,7 +12,6 @@ import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.repository.CartRepository;
 import com.example.store.repository.MemberRepository;
 import com.example.store.repository.RefreshTokenRepository;
-import com.example.store.repository.RoleRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,6 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final CartRepository cartRepository;
     private final JwtTokenizer jwtTokenizer;
@@ -50,8 +48,7 @@ public class MemberService {
                 .password(passwordEncoder.encode(requestSignUp.getPassword()))
                 .build();
 
-        Optional<Role> userRole = roleRepository.findByName("ROLE_USER");
-        member.addRole(userRole.get());
+        member.addRole(Role.USER);
         Member saveMember = memberRepository.save(member);
 
         ResponseSignUp responseSignUp = ResponseSignUp.builder()
@@ -163,13 +160,11 @@ public ResponseDto<ResponseSignIn> login(RequestSignIn loginDto) {
     public ResponseDto<ResponseMember> userInfo(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
-        Role role = new Role(member.getRole());
-
         ResponseMember responseMember = ResponseMember.builder()
                 .email(member.getEmail())
                 .name(member.getName())
                 .regDate(member.getRegDate())
-                .role(role)
+                .role(member.getRole())
                 .build();
         log.info("a" + responseMember.getEmail());
 
