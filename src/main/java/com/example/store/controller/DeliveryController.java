@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/delivery")
+@RequestMapping("/deliveries")
 @RequiredArgsConstructor
 public class DeliveryController {
 
