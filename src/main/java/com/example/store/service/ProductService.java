@@ -62,6 +62,7 @@ public class ProductService {
         return productRepository.findProductsByCategory_id(categoryId, PageRequest.of(page, size));
     }
 
+
     @Transactional(readOnly = true)
     public Page<Product> getProducts(int page, int size) {
         return productRepository.findAll(PageRequest.of(page, size));
