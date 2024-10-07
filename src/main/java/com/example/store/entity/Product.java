@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -29,6 +32,9 @@ public class Product {
     @JsonIgnore
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(mappedBy = "product")
+    private List<Review> reviews = new ArrayList<>();
 
     private String imageUrl;
 
