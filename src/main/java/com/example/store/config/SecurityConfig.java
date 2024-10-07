@@ -50,7 +50,7 @@ public class SecurityConfig {
         // CSRF 보안을 활성
         http.authorizeHttpRequests(authz -> authz
                 // 로그인 없이 접근 가능한 엔드포인트
-                .requestMatchers(HttpMethod.GET, "/boards/**", "/categories/**", "/discounts/**", "/products/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/boards/**", "/categories/**", "/discounts/**", "/products/**", "/reviews/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/members/signup", "/members/login").permitAll()
 
                 // user 권한만 접근 가능한 엔드포인트
@@ -62,7 +62,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/members/logout", "/members/signout").hasAnyAuthority("USER", "ADMIN")
 
                 // admin 권한만 접근 가능한 나머지 엔드포인트
-                .anyRequest().hasAuthority("ADMIN")
+                // 잠시 review 권한 부여 전에 다 허용
+                //.anyRequest().hasAuthority("ADMIN")
+                .anyRequest().permitAll()
         );
         return http.build();
     }
