@@ -80,7 +80,6 @@ public class DiscountService {
     }
 
     public ResponseEntity<SuccessDto> deleteDiscount(Long discountId) {
-        memberDiscountRepository.deleteByDiscount_id(discountId);
         discountRepository.deleteById(discountId);
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
