@@ -36,6 +36,9 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", orphanRemoval = true)
+    private List<ProductTag> productTags = new ArrayList<>();
+
     private String imageUrl;
 
     @Embedded
