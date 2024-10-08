@@ -22,10 +22,25 @@ public class Delivery {
 
     private String request;
 
+    @Enumerated(EnumType.STRING)
+    private DeliveryChecked deliveryChecked;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     public void updateDeliver(String address, String recipient, String request, String phoneNumber) {
         this.address = address;
         this.recipient = recipient;
         this.request = request;
         this.phoneNumber = phoneNumber;
+    }
+
+    public void setChecked() {
+        this.deliveryChecked = DeliveryChecked.CHECKED;
+    }
+
+    public void setUnChecked() {
+        this.deliveryChecked = DeliveryChecked.UNCHECKED;
     }
 }
