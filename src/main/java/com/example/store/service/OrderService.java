@@ -111,7 +111,9 @@ public class OrderService {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
-        Delivery delivery = member.getDelivery();
+        Delivery delivery = member.getDeliveries().stream()
+                .filter(d -> d.getDeliveryChecked().equals(DeliveryChecked.CHECKED))
+                .findFirst().get();
 
         LocalDate localDate = LocalDate.now();
         String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
@@ -150,7 +152,9 @@ public class OrderService {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
         Cart cart = cartRepository.findByMember(member).orElseThrow(NotFoundCartException::new);
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
-        Delivery delivery = member.getDelivery();
+        Delivery delivery = member.getDeliveries().stream()
+                .filter(d -> d.getDeliveryChecked().equals(DeliveryChecked.CHECKED))
+                .findFirst().get();
 
         LocalDate localDate = LocalDate.now();
         String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());

@@ -5,6 +5,7 @@ import com.example.store.dto.response.ResponseDelivery;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Delivery;
+import com.example.store.entity.DeliveryChecked;
 import com.example.store.entity.Member;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
 import com.example.store.jwt.util.LoginUserDto;
@@ -16,6 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,12 +30,18 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final MemberRepository memberRepository;
 
+    public Delivery getDeliveryById(Long id) {
+        return deliveryRepository.findById(id).orElse(null);
+    }
+
     public void addDelivery(Delivery delivery) {
         deliveryRepository.save(delivery);
     }
 
-    public Delivery getDelivery(Delivery delivery) {
-        return deliveryRepository.findById(delivery.getId()).get();
+    public ResponseDto<ResponseDelivery> getDelivery(Member member, Delivery delivery) {
+        ResponseDelivery responseDelivery = ResponseDelivery.builder().request(delivery.getRequest()).phoneNumber(delivery.getPhoneNumber())
+                .recipient(delivery.getRecipient()).address(delivery.getAddress()).checked(delivery.getDeliveryChecked()).build();
+        return ResponseDto.success(responseDelivery);
     }
 
     public void updateDelivery(Delivery delivery) {
@@ -41,22 +52,24 @@ public class DeliveryService {
         deliveryRepository.delete(delivery);
     }
 
-    public ResponseDto<ResponseDelivery> getDelivery(LoginUserDto loginUserDto) {
+    public ResponseDto<List<ResponseDelivery>> getDeliveries(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
-        Delivery delivery = member.getDelivery();
+        List<ResponseDelivery> responseDeliveries = new ArrayList<>();
+        List<Delivery> deliveries = member.getDeliveries();
 
-        if (delivery == null) {
+        if (deliveries == null) {
             return null;
         }
 
-        ResponseDelivery responseDelivery = ResponseDelivery
-                .builder().address(delivery.getAddress())
-                .recipient(delivery.getRecipient())
-                .request(delivery.getRequest())
-                .phoneNumber(delivery.getPhoneNumber()).build();
+        for (Delivery delivery : deliveries) {
+            ResponseDelivery build = ResponseDelivery.builder().recipient(delivery.getRecipient()).address(delivery.getAddress())
+                    .phoneNumber(delivery.getPhoneNumber()).request(delivery.getRequest()).checked(delivery.getDeliveryChecked()).build();
+            responseDeliveries.add(build);
+        }
 
-        return ResponseDto.success(responseDelivery);
+
+        return ResponseDto.success(responseDeliveries);
     }
 
     public ResponseEntity<SuccessDto> setDelivery(LoginUserDto loginUserDto, RequestDelivery requestDelivery) {
@@ -66,20 +79,23 @@ public class DeliveryService {
                 .address(requestDelivery.getAddress())
                 .recipient(requestDelivery.getRecipient())
                 .request(requestDelivery.getRequest())
+                .member(member)
+                .deliveryChecked(DeliveryChecked.UNCHECKED)
                 .phoneNumber(requestDelivery.getPhoneNumber()).build();
 
+
         deliveryRepository.save(delivery);
-        member.addDelivery(delivery);
+        member.getDeliveries().add(delivery);
         //memberRepository.save(member);
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
 
     }
 
-    public ResponseEntity<SuccessDto> updateDelivery(LoginUserDto loginUserDto, RequestDelivery requestDelivery) {
+    public ResponseEntity<SuccessDto> updateDelivery(LoginUserDto loginUserDto, RequestDelivery requestDelivery, Long id) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
-        Delivery delivery = member.getDelivery();
+        Delivery delivery = deliveryRepository.findById(id).orElse(null);
         delivery.updateDeliver(
                 requestDelivery.getAddress(), requestDelivery.getRecipient(),
                 requestDelivery.getRequest(), requestDelivery.getPhoneNumber()
@@ -88,13 +104,37 @@ public class DeliveryService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
-    public ResponseEntity<SuccessDto> deleteDelivery(LoginUserDto loginUserDto) {
+    public ResponseEntity<SuccessDto> deleteDelivery(LoginUserDto loginUserDto, Long id) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
 
-        Delivery delivery = member.getDelivery();
-        member.emptyDelivery();
-
+        Delivery delivery = deliveryRepository.findById(id).orElseThrow();
         deliveryRepository.delete(delivery);
+
+        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
+    }
+
+    public ResponseDto<ResponseDelivery> getDeliveryByIdChecked(Member member) {
+        Delivery delivery = member.getDeliveries().stream()
+                .filter(d -> d.getDeliveryChecked().equals(DeliveryChecked.CHECKED))
+                .findFirst().get();
+
+        ResponseDelivery responseDelivery = ResponseDelivery.builder().request(delivery.getRequest()).phoneNumber(delivery.getPhoneNumber())
+                .recipient(delivery.getRecipient()).address(delivery.getAddress()).checked(delivery.getDeliveryChecked()).build();
+
+        return ResponseDto.success(responseDelivery);
+    }
+
+    public ResponseEntity updateDeliveryCheck(Member member, Long id) {
+        Delivery delivery = deliveryRepository.findById(id).orElseThrow();
+
+        member.getDeliveries().stream()
+                .forEach(d -> {
+                    if (d.getDeliveryChecked() == DeliveryChecked.CHECKED) {
+                        d.setUnChecked();
+                    }
+                });
+
+        delivery.setChecked();
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
