@@ -35,10 +35,8 @@ public class Member {
     @CreationTimestamp
     private LocalDateTime regDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinColumn(name = "delivery_id")
-    private Delivery delivery;
+    @OneToMany(mappedBy = "member")
+    private List<Delivery> deliveries = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -68,10 +66,7 @@ public class Member {
     }
 
     public void addDelivery(Delivery delivery) {
-        this.delivery = delivery;
+        this.deliveries.add(delivery);
     }
 
-    public void emptyDelivery() {
-        this.delivery = null;
-    }
 }
