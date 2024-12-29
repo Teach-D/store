@@ -18,6 +18,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - uses: actions/checkout@v3
+      - run: |
+          mkdir -p ./src/main/resources
+          touch ./src/main/resources/application.yml
+      - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+      - run: cat ./src/main/resources/application.yml
+
       - uses: mirromutth/mysql-action@v1.1
         with:
           host port: 3306
