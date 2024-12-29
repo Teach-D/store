@@ -1,14 +1,14 @@
 # redis
 spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password:
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
+#      password:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/store?useUnicode=true&serverTimezone=Asia/Seoul
     username: root
-    password: 0619
+    password: hhm0310@@
   jpa:
     hibernate:
       ddl-auto: update
