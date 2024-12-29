@@ -172,6 +172,8 @@ public class OrderService {
                     .product(cartItem.getProduct())
                     .order(order)
                     .quantity(cartItem.getQuantity())
+                    .productTitle(cartItem.getProduct().getTitle())
+                    .productPrice(cartItem.getProduct().getPrice())
                     .build();
 
             order.getOrderItems().add(orderItem);
