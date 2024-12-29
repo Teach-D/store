@@ -18,17 +18,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - uses: actions/checkout@v3
+      - run: |
+          mkdir -p ./src/main/resources
+          touch ./src/main/resources/application.yml
+      - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+      - run: cat ./src/main/resources/application.yml
+
       - uses: mirromutth/mysql-action@v1.1
         with:
           host port: 3306
           container port: 3306
           mysql database: 'store'
           mysql root password: ${{ secrets.MYSQL_PASSWORD }}
-
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.1.0
-        with:
-          redis-version: 6
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3.4.2
