@@ -25,8 +25,17 @@ jobs:
           touch ./src/main/resources/application.yml
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3.4.2
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean --stacktrace --info build
+
+      - name: Test with Gradle
+        run: ./gradlew --info test
 
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
