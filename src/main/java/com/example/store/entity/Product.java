@@ -34,10 +34,10 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product")
-    private List<Review> reviews = new ArrayList<>();
+    private final List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", orphanRemoval = true)
-    private List<ProductTag> productTags = new ArrayList<>();
+    private final List<ProductTag> productTags = new ArrayList<>();
 
     private String imageUrl;
 
