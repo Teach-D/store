@@ -37,7 +37,6 @@ public class MemberService {
     private final CartRepository cartRepository;
     private final JwtTokenizer jwtTokenizer;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final RedisTemplate<String, RefreshToken> redisTemplate;
 
     @Transactional
     public ResponseEntity<SuccessDto> createMember(RequestSignUp requestSignUp) {
