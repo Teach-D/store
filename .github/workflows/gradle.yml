@@ -48,6 +48,17 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            sudo docker rm -f $(sudo docker ps -qa) # Remove all running containers
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/{{ secrets.DOCKER_REPO }}
-            sudo docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/{{ secrets.DOCKER_REPO }}
+            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}"
+            
+            echo "Removing old containers..."
+            sudo docker ps -qa | xargs -r sudo docker rm -f
+            
+            echo "Pulling the latest image: $IMAGE"
+            if [ -z "$IMAGE" ]; then
+              echo "Error: Docker image name is empty."
+              exit 1
+            fi
+            sudo docker pull $IMAGE
+            
+            echo "Starting the new container..."
+            sudo docker run -d -p 8080:8080 $IMAGE
