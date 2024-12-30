@@ -24,7 +24,7 @@ public class Tag {
     private String name;
 
     @OneToMany(mappedBy = "tag", orphanRemoval = true)
-    private List<ProductTag> productTags = new ArrayList<>();
+    private final List<ProductTag> productTags = new ArrayList<>();
 
     public void updateTag(RequestTag requestTag) {
         this.name = requestTag.getName();
