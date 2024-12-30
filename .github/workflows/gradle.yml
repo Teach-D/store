@@ -47,18 +47,18 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
+          port: 22
+          debug: true
           script: |
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}"
+            echo "EC2 서버 연결 테스트..."
+            uname -a
             
-            echo "Removing old containers..."
+            echo "기존 컨테이너 제거 중..."
             sudo docker ps -qa | xargs -r sudo docker rm -f
             
-            echo "Pulling the latest image: $IMAGE"
-            if [ -z "$IMAGE" ]; then
-              echo "Error: Docker image name is empty."
-              exit 1
-            fi
+            echo "최신 Docker 이미지 가져오기..."
+            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}"
             sudo docker pull $IMAGE
             
-            echo "Starting the new container..."
+            echo "새 컨테이너 실행 중..."
             sudo docker run -d -p 8080:8080 $IMAGE
