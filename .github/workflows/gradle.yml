@@ -34,31 +34,31 @@ jobs:
         run: ./gradlew build
 
       ## Build and Push to Docker Hub
-      - name: Docker build & push to Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+#      - name: Docker build & push to Hub
+#        run: |
+#          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+#          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
+#          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
 
       ## Deploy EC2
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
-          port: 22
-          debug: true
-          script: |
-            echo "EC2 서버 연결 테스트..."
-            uname -a
-            
-            echo "기존 컨테이너 제거 중..."
-            sudo docker ps -qa | xargs -r sudo docker rm -f
-            
-            echo "최신 Docker 이미지 가져오기..."
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}"
-            sudo docker pull $IMAGE
-            
-            echo "새 컨테이너 실행 중..."
-            sudo docker run -d -p 8080:8080 $IMAGE
+#      - name: Deploy to EC2
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ubuntu
+#          key: ${{ secrets.EC2_KEY }}
+#          port: 22
+#          debug: true
+#          script: |
+#            echo "EC2 서버 연결 테스트..."
+#            uname -a
+#
+#            echo "기존 컨테이너 제거 중..."
+#            sudo docker ps -qa | xargs -r sudo docker rm -f
+#
+#            echo "최신 Docker 이미지 가져오기..."
+#            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}"
+#            sudo docker pull $IMAGE
+#
+#            echo "새 컨테이너 실행 중..."
+#            sudo docker run -d -p 8080:8080 $IMAGE
