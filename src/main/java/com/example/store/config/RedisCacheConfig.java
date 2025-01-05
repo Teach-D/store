@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 
-@Configuration
+//@Configuration
 public class RedisCacheConfig {
 
-    @Value("${spring.data.redis.host}")
+/*    @Value("${spring.data.redis.host}")
     private String redisHost;
 
     @Value("${spring.data.redis.port}")
@@ -80,5 +80,5 @@ public class RedisCacheConfig {
 
         template.afterPropertiesSet();
         return template;
-    }
+    }*/
 }
