@@ -15,7 +15,6 @@ import com.example.store.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class MemberService {
     private final CartRepository cartRepository;
     private final JwtTokenizer jwtTokenizer;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final RedisTemplate<String, RefreshToken> redisTemplate;
 
     @Transactional
     public ResponseEntity<SuccessDto> createMember(RequestSignUp requestSignUp) {

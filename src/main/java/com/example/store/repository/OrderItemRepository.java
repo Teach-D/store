@@ -2,11 +2,11 @@ package com.example.store.repository;
 
 import com.example.store.entity.OrderItem;
 import com.example.store.entity.Product;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface OrderItemRepository extends CrudRepository<OrderItem, Long> {
+public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     public List<OrderItem> findByOrderId(Long orderId);
 
     public List<OrderItem> findByProductId(Long productId);

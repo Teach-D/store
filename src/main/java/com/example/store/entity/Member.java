@@ -33,7 +33,7 @@ public class Member {
     private LocalDateTime regDate;
 
     @OneToMany(mappedBy = "member")
-    private List<Delivery> deliveries = new ArrayList<>();
+    private final List<Delivery> deliveries = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Role role;
