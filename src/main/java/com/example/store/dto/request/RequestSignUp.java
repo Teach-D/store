@@ -24,7 +24,7 @@ public class RequestSignUp {
     private String password;
 
     @NotEmpty
-    @Pattern(regexp = "^[a-zA-Z가-힣\\\\s]{2,15}",
-            message = "이름은 영문자, 한글, 공백포함 2글자부터 15글자까지 가능합니다.")
+    @Pattern(regexp = "^[a-zA-Z가-힣0-9\\s]{2,15}$",
+            message = "이름은 영문자, 한글, 숫자, 공백 포함 2글자부터 15글자까지 가능합니다.")
     private String name;
 }
