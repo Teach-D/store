@@ -55,6 +55,16 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.3.4'
+
+	// test
+	runtimeOnly 'com.h2database:h2'
+
+	// json
+	testImplementation 'com.jayway.jsonpath:json-path:2.8.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine' // JUnit 4 비활성화
+	}
 }
 
 test {

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -53,6 +54,7 @@ public class JwtTokenizer {
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expire))
+                .setId(UUID.randomUUID().toString()) // 고유한 식별자 추가
                 .signWith(getSigningKey(secretKey))
                 .compact();
     }
