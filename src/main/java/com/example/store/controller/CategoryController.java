@@ -48,14 +48,14 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateCategory(@PathVariable Long id, @Valid @RequestBody RequestCategory editCategoryDto, BindingResult bindingResult) {
+    public ResponseDto updateCategory(@PathVariable Long id, @Valid @RequestBody RequestCategory editCategoryDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(objectError -> {
-                String message = objectError.getDefaultMessage();
-                sb.append("message :" + message);
-            });
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(objectError -> objectError.getDefaultMessage())
+                    .reduce((msg1, msg2) -> msg1 + "; " + msg2)
+                    .orElse("Invalid input");
+
+            return ResponseDto.error(HttpStatus.BAD_REQUEST, errorMessage);
         }
 
         return categoryService.updateCategory(id, editCategoryDto);

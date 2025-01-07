@@ -58,10 +58,13 @@ public class CategoryService {
         return ResponseDto.success(result);
     }
 
-    public ResponseEntity<SuccessDto> updateCategory(Long id, RequestCategory editCategoryDto) {
+    public ResponseDto<ResponseCategory> updateCategory(Long id, RequestCategory editCategoryDto) {
         Category category = categoryRepository.findById(id).orElseThrow(NotFoundCategoryException::new);
         category.updateName(editCategoryDto.getName());
-        return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
+
+        ResponseCategory responseCategory = ResponseCategory.builder().id(category.getId()).name(category.getName()).build();
+
+        return ResponseDto.success(responseCategory);
     }
 
     public ResponseEntity<SuccessDto> deleteCategory(Long id) {
