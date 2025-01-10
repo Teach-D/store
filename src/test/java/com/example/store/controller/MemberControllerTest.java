@@ -4,17 +4,23 @@ import com.example.store.dto.request.RefreshTokenDto;
 import com.example.store.dto.request.RequestSignIn;
 import com.example.store.dto.request.RequestSignUp;
 import com.example.store.entity.Member;
+import com.example.store.repository.CartRepository;
 import com.example.store.repository.MemberRepository;
 import com.example.store.repository.RefreshTokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.NestedTestConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -24,9 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
+@DirtiesContext
 class MemberControllerTest {
 
     @Autowired
@@ -40,10 +47,15 @@ class MemberControllerTest {
 
     private static String accessToken;
     private static String refreshToken;
+
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @Test
     @Order(1)
@@ -153,4 +165,5 @@ class MemberControllerTest {
 
         assertTrue(memberRepository.findByEmail(email).isEmpty());
     }
+
 }

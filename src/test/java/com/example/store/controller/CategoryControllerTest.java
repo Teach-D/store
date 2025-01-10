@@ -5,6 +5,7 @@ import com.example.store.dto.request.RequestSignIn;
 import com.example.store.dto.request.RequestSignUp;
 import com.example.store.entity.Category;
 import com.example.store.repository.CategoryRepository;
+import com.example.store.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.*;
@@ -12,9 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.NestedTestConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -26,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
+@DirtiesContext
 class CategoryControllerTest {
 
     @Autowired
@@ -38,6 +44,8 @@ class CategoryControllerTest {
     private CategoryRepository categoryRepository;
 
     private static String accessToken;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeAll
     static void beforeLogin(@Autowired MockMvc mockMvc, @Autowired ObjectMapper objectMapper) throws Exception {
@@ -191,4 +199,5 @@ class CategoryControllerTest {
         // then
         assertTrue(categoryRepository.findById(categoryId).isEmpty());
     }
+
 }
