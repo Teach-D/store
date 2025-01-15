@@ -127,7 +127,7 @@ public class DeliveryService {
     public ResponseEntity updateDeliveryCheck(Member member, Long id) {
         Delivery delivery = deliveryRepository.findById(id).orElseThrow();
 
-        member.getDeliveries().stream()
+        member.getDeliveries()
                 .forEach(d -> {
                     if (d.getDeliveryChecked() == DeliveryChecked.CHECKED) {
                         d.setUnChecked();
