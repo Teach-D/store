@@ -11,19 +11,17 @@ import org.springframework.data.domain.Page;
 @NoArgsConstructor
 public class ResponseProduct {
 
-    private Product product;
     private Long categoryId;
     private int quantity;
-    private String productTitle;
-    private int productPrice;
+    private String title;
+    private int price;
 
     public Page<ResponseProduct> toDtoPage(Page<Product> productPage) {
         return productPage.map(m -> ResponseProduct.builder()
-                .product(m)
                 .categoryId(m.getCategory().getId())
                 .quantity(m.getQuantity())
-                .productTitle(m.getTitle())
-                .productPrice(m.getPrice())
+                .title(m.getTitle())
+                .price(m.getPrice())
                 .build());
     }
 }

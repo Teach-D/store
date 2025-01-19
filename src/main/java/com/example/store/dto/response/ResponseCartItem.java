@@ -10,6 +10,6 @@ import lombok.*;
 public class ResponseCartItem {
 
     private Long id;
-    private Product product;
+    private Long productId;
     private int quantity;
 }

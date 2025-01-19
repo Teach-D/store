@@ -41,7 +41,7 @@ public class CartItemService {
     @Transactional(readOnly = true)
     public ResponseDto<ResponseCartItem> getCartItem(Long cartItemId) {
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
-        ResponseCartItem responseCartItem = ResponseCartItem.builder().quantity(cartItem.getQuantity()).product(cartItem.getProduct()).build();
+        ResponseCartItem responseCartItem = ResponseCartItem.builder().quantity(cartItem.getQuantity()).productId(cartItem.getProduct().getId()).build();
 
         return ResponseDto.success(responseCartItem);
     }
@@ -62,7 +62,7 @@ public class CartItemService {
             Product product = new Product(cartItem.getProduct());
 
             ResponseCartItem responseCartItem = ResponseCartItem
-                    .builder().quantity(cartItem.getQuantity()).product(product).id(cartItem.getId()).build();
+                    .builder().quantity(cartItem.getQuantity()).productId(product.getId()).id(cartItem.getId()).build();
             cartItemDtos.add(responseCartItem);
         });
 
@@ -108,7 +108,14 @@ public class CartItemService {
 
     public ResponseEntity<SuccessDto> editCartItem(Long cartItemId, int quantity) {
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(NotFoundCartItemException::new);
+
+        int originalQuantity = cartItem.getQuantity();
+
         cartItem.updateQuantity(quantity);
+
+        Product product = cartItem.getProduct();
+        product.updateQuantity(product.getQuantity() + originalQuantity - quantity);
+        product.updateSaleQuantity(product.getSaleQuantity() - originalQuantity + quantity);
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }

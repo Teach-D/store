@@ -52,7 +52,7 @@ public class ProductService {
 
         productRepository.save(product);
 
-        ResponseProduct responseProduct = ResponseProduct.builder().product(product).build();
+        ResponseProduct responseProduct = ResponseProduct.builder().title(product.getTitle()).price(product.getPrice()).build();
 
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
@@ -72,7 +72,8 @@ public class ProductService {
     public ResponseDto<ResponseProduct> getProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(NotFoundProductException::new);
         ResponseProduct responseProduct = ResponseProduct.builder()
-                .product(product)
+                .title(product.getTitle())
+                .price(product.getPrice())
                 .categoryId(product.getCategory().getId())
                 .build();
 
@@ -181,7 +182,8 @@ public class ProductService {
     public ResponseDto<ResponseProduct> getProductByName(String name) {
         Product product = productRepository.findByTitle(name);
         ResponseProduct responseProduct = ResponseProduct.builder()
-                .product(product)
+                .title(product.getTitle())
+                .price(product.getPrice())
                 .build();
 
         return ResponseDto.success(responseProduct);
