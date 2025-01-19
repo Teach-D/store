@@ -64,10 +64,9 @@ public class OrderService {
                 Product product = new Product(orderItem.getProduct());
 
                 ResponseProduct responseProduct = ResponseProduct.builder()
-                        .product(product)
                         .quantity(orderItem.getQuantity())
-                        .productTitle(orderItem.getProductTitle())
-                        .productPrice(orderItem.getProductPrice())
+                        .title(orderItem.getProductTitle())
+                        .price(orderItem.getProductPrice())
                         .build();
 
                 responseOrder.getProducts().add(responseProduct);
@@ -95,7 +94,8 @@ public class OrderService {
             order.getOrderItems().forEach(orderItem -> {
                 Product product = orderItem.getProduct();
                 ResponseProduct responseProduct = ResponseProduct.builder()
-                        .product(product)
+                        .title(product.getTitle())
+                        .price(product.getPrice())
                         .quantity(orderItem.getQuantity())
                         .build();
                 responseOrder.getProducts().add(responseProduct);

@@ -195,8 +195,8 @@ class ProductControllerTest {
                         .param("order", "asc"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.result.content[0].product.title").value("product1"))
-                .andExpect(jsonPath("$.result.content[1].product.title").value("product2"));
+                .andExpect(jsonPath("$.result.content[0].title").value("product1"))
+                .andExpect(jsonPath("$.result.content[1].title").value("product2"));
     }
 
     @Test
@@ -214,7 +214,7 @@ class ProductControllerTest {
         // Then
         resultActions.andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.result.product.title").value("product1"));
+                .andExpect(jsonPath("$.result.title").value("product1"));
 
     }
 
@@ -233,8 +233,8 @@ class ProductControllerTest {
         // Then
         resultActions.andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.result.product.title").value("product1"))
-                .andExpect(jsonPath("$.result.product.price").value("10000"));
+                .andExpect(jsonPath("$.result.title").value("product1"))
+                .andExpect(jsonPath("$.result.price").value("10000"));
     }
 
     @Test
