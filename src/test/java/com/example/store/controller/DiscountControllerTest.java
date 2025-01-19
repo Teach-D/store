@@ -193,13 +193,6 @@ class DiscountControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        // then1
-/*        Member member1 = memberRepository.findByEmail("test1234@example.com").orElseThrow();
-        MemberDto memberDto1 = new MemberDto(member1);
-        log.info("------------");
-        log.info(memberDto1.getDiscounts().toString());
-        assertTrue(memberDto1.getDiscounts().contains(discount1));*/
-
         // given2
         Discount discount2 = discountRepository.findByDiscountName("discount2").orElseThrow();
         Long discount2Id = discount2.getId();
@@ -211,10 +204,12 @@ class DiscountControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        // then2
-/*        Member member2 = memberRepository.findByEmail("test1234@example.com").orElseThrow();
-        MemberDto memberDto2 = new MemberDto(member2);
-        assertTrue(memberDto2.getDiscounts().contains(discount2));*/
+        // then
+        Discount updateDiscount1 = discountRepository.findByDiscountName("discount1").orElseThrow();
+        Discount updateDiscount2 = discountRepository.findByDiscountName("discount2").orElseThrow();
+
+        assertEquals(updateDiscount1.getQuantity(), discount1.getQuantity()-1);
+        assertEquals(updateDiscount2.getQuantity(), discount2.getQuantity()-1);
     }
 
     @Test
