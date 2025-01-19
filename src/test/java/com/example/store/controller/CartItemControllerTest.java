@@ -259,5 +259,9 @@ class CartItemControllerTest {
 
         // then
         assertTrue(cartItemRepository.findById(cartItemId).isEmpty());
+
+        Product updateProduct = productRepository.findByTitle("product1");
+        assertEquals(updateProduct.getSaleQuantity(), product.getSaleQuantity() - cartItem.getQuantity());
+        assertEquals(updateProduct.getQuantity(), product.getQuantity() + cartItem.getQuantity());
     }
 }
