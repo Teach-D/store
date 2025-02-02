@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  master:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: master  # Worker가 찾을 수 있도록 명시적으로 설정
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./:/mnt/locust  # 호스트와 컨테이너 간 공유
+    environment:
+      - LOCUST_MODE=master
+      - LOCUST_HOST=http://host.docker.internal:8080
+    command: -f /mnt/locust/locust.py --master
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - master  # master가 먼저 실행되도록 설정
+    volumes:
+      - ./:/mnt/locust  # 호스트와 컨테이너 간 공유
+    environment:
+      - LOCUST_MODE=worker
+      - LOCUST_MASTER_HOST=master
+    command: -f /mnt/locust/locust.py --worker --master-host master

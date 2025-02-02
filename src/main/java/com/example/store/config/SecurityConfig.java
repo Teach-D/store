@@ -51,7 +51,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authz -> authz
                 // 로그인 없이 접근 가능한 엔드포인트
                 .requestMatchers(HttpMethod.GET, "/boards/**", "/categories/**", "/discounts/**", "/products/**", "/reviews/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/members/signup", "/members/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/members/signup", "/members/login", "/coupons/**").permitAll()
 
                 // user 권한만 접근 가능한 엔드포인트
                 .requestMatchers(HttpMethod.POST, "/boards/**", "/cartItems/**", "/delivery", "/discounts/{id}", "/orders").hasAnyAuthority("USER", "ADMIN")
