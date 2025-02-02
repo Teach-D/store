@@ -28,7 +28,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
     private final CartItemRepository cartItemRepository;
-    private final DiscountRepository discountRepository;
+    private final CouponRepository couponRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
 
@@ -37,7 +37,7 @@ public class OrderService {
     }
 
     public List<Order> findByMember(Member member) {
-        return orderRepository.findAllByMember_MemberId(member.getMemberId());
+        return orderRepository.findAllByMember_Id(member.getId());
     }
 
     public Order findById(Long id) {
@@ -50,7 +50,7 @@ public class OrderService {
 
     public ResponseDto<List<ResponseOrder>> getOrders(LoginUserDto loginUserDto) {
         Member member = memberRepository.findByEmail(loginUserDto.getEmail()).orElseThrow(NotFoundMemberException::new);
-        List<Order> orders = orderRepository.findAllByMember_MemberId(member.getMemberId());
+        List<Order> orders = orderRepository.findAllByMember_Id(member.getId());
         List<ResponseOrder> responseOrders = new ArrayList<>();
 
         orders.forEach(order -> {
@@ -124,7 +124,7 @@ public class OrderService {
                 .date(date)
                 .build();
 
-        Discount discount = discountRepository.findById(discountId).orElseThrow(NotFoundDiscountException::new);
+        Coupon coupon = couponRepository.findById(discountId).orElseThrow(NotFoundDiscountException::new);
         int totalPrice = 0;
 
         for (CartItem cartItem : cartItems) {
@@ -141,7 +141,7 @@ public class OrderService {
             totalPrice = (totalPrice + cartItem.getProduct().getPrice() * cartItem.getQuantity());
         }
 
-        totalPrice = totalPrice - discount.getDiscountPrice();
+        totalPrice = totalPrice - coupon.getDiscountAmount();
         order.updateTotalPrice(totalPrice);
         orderRepository.save(order);
 

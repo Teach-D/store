@@ -25,7 +25,7 @@ public class OrderController {
     private final MemberService memberService;
     private final OrderItemService orderItemService;
     private final DeliveryService deliveryService;
-    private final DiscountService discountService;
+    private final CouponService couponService;
     private final OrderRepository orderRepository;
 
     @GetMapping
