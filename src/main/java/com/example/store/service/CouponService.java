@@ -5,7 +5,6 @@ import com.example.store.dto.response.ResponseCoupon;
 import com.example.store.entity.Coupon;
 import com.example.store.entity.Member;
 import com.example.store.entity.MemberCoupon;
-import com.example.store.exception.ex.MemberException.DuplicateEmailException;
 import com.example.store.exception.ex.couponException.CouponException;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.repository.CouponRepository;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.store.exception.ex.ErrorCode.*;
@@ -80,6 +78,16 @@ public class CouponService {
         return null;
     }
 
+    public void issue(Long id, Long memberId) {
+        Coupon coupon = getExistsCoupon(id); // 해당 쿠폰이 있는지 확인
+        coupon.issue(); // 쿠폰수량, 발급기간을 확인
+
+        Member member = memberRepository.findById(memberId).orElseThrow();
+
+        saveMemberCoupon(member, coupon);
+
+    }
+
     public Void issueLoadTest(Long couponId, Long memberId) {
         Coupon coupon = getExistsCoupon(couponId); // 해당 쿠폰이 있는지 확인
         coupon.issue(); // 쿠폰수량, 발급기간을 확인
@@ -97,6 +105,12 @@ public class CouponService {
 
         memberCouponRepository.save(memberCoupon);
         coupon.addMemberCoupon(memberCoupon); // orphanremoval을 위한 양방향 매핑
+    }
+
+    public Coupon findCoupon(Long id) {
+        return couponRepository.findById(id).orElseThrow(() -> {
+            throw new CouponException(NOT_FOUND_COUPON, "쿠폰 정책이 존재하지 않습니다. %s".formatted(id));
+        });
     }
 
     private Coupon getExistsCoupon(Long id) {

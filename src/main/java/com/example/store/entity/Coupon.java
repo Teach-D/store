@@ -2,6 +2,7 @@ package com.example.store.entity;
 
 import com.example.store.dto.request.RequestCoupon;
 import com.example.store.exception.ex.couponException.CouponException;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 

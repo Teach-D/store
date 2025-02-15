@@ -197,8 +197,10 @@ public class MemberService {
 
 
     @Transactional(readOnly = true)
-    public Optional<Member> getMember(Long memberId) {
-        return memberRepository.findById(memberId);
+    public Member getMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> {
+            throw new NotFoundMemberException();
+        });
     }
 
     @Transactional(readOnly = true)

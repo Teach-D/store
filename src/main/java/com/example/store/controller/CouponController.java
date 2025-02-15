@@ -5,6 +5,7 @@ import com.example.store.dto.response.ResponseCoupon;
 import com.example.store.entity.Coupon;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
+import com.example.store.service.CouponIssueService;
 import com.example.store.service.CouponService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 public class CouponController {
 
     private final CouponService couponService;
+    private final CouponIssueService couponIssueService;
 
     @GetMapping
     public ResponseEntity<List<ResponseCoupon>> getAllCoupons() {
@@ -57,5 +59,11 @@ public class CouponController {
     @PostMapping("/load-test/{couponId}/issue/{memberId}")
     public ResponseEntity<Void> issueCouponLoadTest(@PathVariable Long couponId, @PathVariable Long memberId) {
         return ResponseEntity.status(HttpStatus.OK).body(couponService.issueLoadTest(couponId, memberId));
+    }
+
+    @PostMapping("/load-test/{couponId}/issue/{memberId}/redis")
+    public ResponseEntity issueCouponLoadTestRedis(@PathVariable Long couponId, @PathVariable Long memberId) {
+        couponIssueService.issue(couponId, memberId);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }

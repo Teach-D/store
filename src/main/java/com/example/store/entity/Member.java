@@ -1,5 +1,6 @@
 package com.example.store.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,6 +35,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member")
     private final List<Delivery> deliveries = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<MemberCoupon> memberCoupons = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Role role;
