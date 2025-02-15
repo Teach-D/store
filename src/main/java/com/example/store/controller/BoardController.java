@@ -41,7 +41,7 @@ public class BoardController {
     @GetMapping("/{boardId}")
     public ResponseDto<ResponseBoard> getBoardById(@IfLogin LoginUserDto loginUserDto,  @PathVariable Long boardId) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
-        return boardService.getBoard(boardId, member.getMemberId());
+        return boardService.getBoard(boardId, member.getId());
     }
 
     @PostMapping
@@ -57,7 +57,7 @@ public class BoardController {
 
         Member member = memberService.findByEmail(loginUserDto.getEmail());
 
-        return boardService.createBoard(member.getMemberId(), requestBoard);
+        return boardService.createBoard(member.getId(), requestBoard);
     }
 
     @PutMapping("/{boardId}")
@@ -73,13 +73,13 @@ public class BoardController {
 
         Member member = memberService.findByEmail(loginUserDto.getEmail());
 
-        return boardService.updateBoard(member.getMemberId(), boardId, requestBoard);
+        return boardService.updateBoard(member.getId(), boardId, requestBoard);
     }
 
     @DeleteMapping("/{boardId}")
     public ResponseEntity<SuccessDto> deleteBoard(@IfLogin LoginUserDto loginUserDto, @PathVariable Long boardId) {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
 
-        return boardService.deleteBoard(member.getMemberId(), boardId);
+        return boardService.deleteBoard(member.getId(), boardId);
     }
 }

@@ -8,6 +8,7 @@ import com.example.store.entity.DeliveryChecked;
 import com.example.store.repository.DeliveryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
 @DirtiesContext
+@Slf4j
 class DeliveryControllerTest {
 
     @Autowired
@@ -85,10 +87,10 @@ class DeliveryControllerTest {
     void setDelivery() throws Exception {
         // given
         RequestDelivery requestDelivery1 = RequestDelivery.builder()
-                        .recipient("recipientA")
-                                .address("addressA")
-                                        .phoneNumber("phoneNumberA")
-                                                .request("requestA").build();
+                .recipient("recipientA")
+                .address("addressA")
+                .phoneNumber("phoneNumberA")
+                .request("requestA").build();
 
         // When
         mockMvc.perform(post("/deliveries")
@@ -190,11 +192,13 @@ class DeliveryControllerTest {
         Delivery delivery = deliveryRepository.findByRecipient("recipientA").orElseThrow();
         Long deliveryId = delivery.getId();
 
-        Delivery updateDelivery = Delivery.builder()
+        RequestDelivery updateDelivery = RequestDelivery.builder()
                 .recipient("recipientA-update")
                 .address("addressA-update")
                 .build();
 
+
+        log.info(String.valueOf(deliveryId));
         // When
         ResultActions resultActions = mockMvc.perform(patch("/deliveries/" + deliveryId)
                 .header("Authorization", "Bearer " + accessToken) // 토큰 추가

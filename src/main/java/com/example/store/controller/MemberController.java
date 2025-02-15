@@ -21,6 +21,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -35,8 +37,12 @@ public class MemberController {
     @GetMapping("/info")
     public ResponseDto<ResponseMember> userInfo(@IfLogin LoginUserDto loginUserDto) {
         return memberService.userInfo(loginUserDto);
-
     }
+
+/*    @GetMapping
+    public ResponseDto<List<ResponseMember>> getAllUser() {
+        return memberService.userInfo(loginUserDto);
+    }*/
 
     @PostMapping("/signup")
     public ResponseEntity signup(@RequestBody @Valid RequestSignUp requestSignUp, BindingResult bindingResult) {

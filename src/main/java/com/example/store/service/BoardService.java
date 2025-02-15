@@ -96,7 +96,7 @@ public class BoardService {
     }
 
     public boolean isWrittenBy(Board board, Long memberId) {
-        if (board.getMember().getMemberId().equals(memberId)) {
+        if (board.getMember().getId().equals(memberId)) {
             return true;
         } else {
             return false;

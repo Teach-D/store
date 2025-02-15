@@ -1,5 +1,6 @@
 package com.example.store.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,7 +19,7 @@ public class Member {
     @Id
     @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberId;
+    private Long id;
 
     @Column(length = 255)
     private String email;
@@ -35,17 +36,17 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private final List<Delivery> deliveries = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<MemberCoupon> memberCoupons = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @OneToMany(mappedBy = "member", orphanRemoval = true)
-    @Builder.Default
-    private List<MemberDiscount> discounts = new ArrayList<>();
 
     @Override
     public String toString() {
         return "User{" +
-                "memberId=" + memberId +
+                "id=" + id +
                 ", email='" + email + '\'' +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
@@ -55,11 +56,6 @@ public class Member {
 
     public void addRole(Role role) {
         this.role = role;
-    }
-
-    public void addDiscount(Discount discount) {
-        MemberDiscount memberDiscount = new MemberDiscount(this, discount);
-        discounts.add(memberDiscount);
     }
 
     public void addDelivery(Delivery delivery) {

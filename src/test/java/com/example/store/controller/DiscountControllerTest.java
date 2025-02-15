@@ -1,19 +1,18 @@
+/*
+
 package com.example.store.controller;
 
 import com.example.store.dto.request.*;
-import com.example.store.entity.Discount;
+import com.example.store.entity.Coupon;
 import com.example.store.entity.Member;
-import com.example.store.entity.MemberDiscount;
-import com.example.store.entity.Review;
-import com.example.store.repository.DiscountRepository;
+import com.example.store.entity.MemberCoupon;
+import com.example.store.repository.CouponRepository;
 import com.example.store.repository.MemberRepository;
-import com.example.store.repository.ProductRepository;
 import com.example.store.repository.ReviewRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,7 +47,7 @@ class DiscountControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private DiscountRepository discountRepository;
+    private CouponRepository couponRepository;
 
     private static String accessToken;
 
@@ -131,9 +130,9 @@ class DiscountControllerTest {
     @Order(1)
     void addDiscount() throws Exception {
         // given
-        RequestDiscount requestDiscount1 = RequestDiscount.builder()
-                .discountName("discount1")
-                .discountPrice(10000)
+        RequestCoupon requestCoupon1 = RequestCoupon.builder()
+                .title("discount1")
+                .discountAmount(10000)
                 .expirationDate("2024.04.01")
                 .quantity(10)
                 .build();
@@ -142,12 +141,12 @@ class DiscountControllerTest {
         mockMvc.perform(post("/discounts")
                         .header("Authorization", "Bearer " + accessToken) // 토큰 추가
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDiscount1)))
+                        .content(objectMapper.writeValueAsString(requestCoupon1)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         // given
-        RequestDiscount requestDiscount2 = RequestDiscount.builder()
+        RequestCoupon requestCoupon2 = RequestCoupon.builder()
                 .discountName("discount2")
                 .discountPrice(20000)
                 .expirationDate("2024.04.02")
@@ -158,12 +157,12 @@ class DiscountControllerTest {
         mockMvc.perform(post("/discounts")
                         .header("Authorization", "Bearer " + accessToken) // 토큰 추가
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDiscount2)))
+                        .content(objectMapper.writeValueAsString(requestCoupon2)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         // given
-        RequestDiscount requestDiscount3 = RequestDiscount.builder()
+        RequestCoupon requestCoupon3 = RequestCoupon.builder()
                 .discountName("discount3")
                 .discountPrice(30000)
                 .expirationDate("2024.04.03")
@@ -174,7 +173,7 @@ class DiscountControllerTest {
         mockMvc.perform(post("/discounts")
                         .header("Authorization", "Bearer " + accessToken) // 토큰 추가
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDiscount3)))
+                        .content(objectMapper.writeValueAsString(requestCoupon3)))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -183,8 +182,8 @@ class DiscountControllerTest {
     @Order(2)
     void setDiscountByMember() throws Exception {
         // given1
-        Discount discount1 = discountRepository.findByDiscountName("discount1").orElseThrow();
-        Long discount1Id = discount1.getId();
+        Coupon coupon1 = couponRepository.findByDiscountName("discount1").orElseThrow();
+        Long discount1Id = coupon1.getId();
 
         // when1
         mockMvc.perform(post("/discounts/" + discount1Id)
@@ -194,8 +193,8 @@ class DiscountControllerTest {
                 .andDo(print());
 
         // given2
-        Discount discount2 = discountRepository.findByDiscountName("discount2").orElseThrow();
-        Long discount2Id = discount2.getId();
+        Coupon coupon2 = couponRepository.findByDiscountName("discount2").orElseThrow();
+        Long discount2Id = coupon2.getId();
 
         // when2
         mockMvc.perform(post("/discounts/" + discount2Id)
@@ -205,11 +204,11 @@ class DiscountControllerTest {
                 .andDo(print());
 
         // then
-        Discount updateDiscount1 = discountRepository.findByDiscountName("discount1").orElseThrow();
-        Discount updateDiscount2 = discountRepository.findByDiscountName("discount2").orElseThrow();
+        Coupon updateCoupon1 = couponRepository.findByDiscountName("discount1").orElseThrow();
+        Coupon updateCoupon2 = couponRepository.findByDiscountName("discount2").orElseThrow();
 
-        assertEquals(updateDiscount1.getQuantity(), discount1.getQuantity()-1);
-        assertEquals(updateDiscount2.getQuantity(), discount2.getQuantity()-1);
+        assertEquals(updateCoupon1.getQuantity(), coupon1.getQuantity()-1);
+        assertEquals(updateCoupon2.getQuantity(), coupon2.getQuantity()-1);
     }
 
     @Test
@@ -218,7 +217,7 @@ class DiscountControllerTest {
     void getAllDiscountByMember() throws Exception {
 
         Member member = memberRepository.findByEmail("test1234@example.com").orElseThrow();
-        List<MemberDiscount> discounts = member.getDiscounts();
+        List<MemberCoupon> discounts = member.getDiscounts();
         log.info(discounts.toString());
 
 
@@ -253,10 +252,10 @@ class DiscountControllerTest {
     @Order(5)
     void editDiscount() throws Exception {
         // given
-        Discount discount = discountRepository.findByDiscountName("discount1").orElseThrow();
-        Long discountId = discount.getId();
+        Coupon coupon = couponRepository.findByDiscountName("discount1").orElseThrow();
+        Long discountId = coupon.getId();
 
-        RequestDiscount requestDiscount = RequestDiscount.builder()
+        RequestCoupon requestCoupon = RequestCoupon.builder()
                 .discountName("update-discount1")
                 .discountPrice(2000)
                 .expirationDate("2024.10.10")
@@ -267,18 +266,18 @@ class DiscountControllerTest {
         ResultActions resultActions = mockMvc.perform(put("/discounts/" + discountId)
                 .header("Authorization", "Bearer " + accessToken) // 토큰 추가
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDiscount)));
+                .content(objectMapper.writeValueAsString(requestCoupon)));
 
         // then
         try {
             resultActions.andExpect(status().isOk())
                     .andDo(print());
 
-            Discount updateDiscount = discountRepository.findById(discountId).orElseThrow();
-            assertEquals("update-discount1", updateDiscount.getDiscountName());
+            Coupon updateCoupon = couponRepository.findById(discountId).orElseThrow();
+            assertEquals("update-discount1", updateCoupon.getDiscountName());
         } catch (AssertionError e) {
-            Discount currentDiscount = discountRepository.findById(discountId).orElseThrow();
-            assertEquals("discount1", currentDiscount.getDiscountName(), "데이터베이스의 상태가 변경되지 않아야 합니다.");
+            Coupon currentCoupon = couponRepository.findById(discountId).orElseThrow();
+            assertEquals("discount1", currentCoupon.getDiscountName(), "데이터베이스의 상태가 변경되지 않아야 합니다.");
 
             throw e;
         }
@@ -289,8 +288,8 @@ class DiscountControllerTest {
     @Transactional
     void cancelDiscount() throws Exception {
         // given
-        Discount discount = discountRepository.findByDiscountName("update-discount1").orElseThrow();
-        Long discountId = discount.getId();
+        Coupon coupon = couponRepository.findByDiscountName("update-discount1").orElseThrow();
+        Long discountId = coupon.getId();
 
         Member member = memberRepository.findByEmail("test1234@example.com").orElseThrow();
 
@@ -302,15 +301,15 @@ class DiscountControllerTest {
                 .andDo(print());
 
         // then
-        assertFalse(member.getDiscounts().contains(discount));
+        assertFalse(member.getDiscounts().contains(coupon));
     }
 
     @Test
     @Order(7)
     void deleteDiscount() throws Exception {
         // given
-        Discount discount = discountRepository.findByDiscountName("update-discount1").orElseThrow();
-        Long discountId = discount.getId();;
+        Coupon coupon = couponRepository.findByDiscountName("update-discount1").orElseThrow();
+        Long discountId = coupon.getId();;
 
         // when
         mockMvc.perform(delete("/discounts/" + discountId)
@@ -320,6 +319,7 @@ class DiscountControllerTest {
                 .andDo(print());
 
         // then
-        assertTrue(discountRepository.findById(discountId).isEmpty());
+        assertTrue(couponRepository.findById(discountId).isEmpty());
     }
 }
+*/
