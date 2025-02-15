@@ -37,6 +37,7 @@ public class Member {
     private final List<Delivery> deliveries = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Builder.Default
     private List<MemberCoupon> memberCoupons = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

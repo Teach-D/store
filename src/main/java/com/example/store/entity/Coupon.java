@@ -49,6 +49,7 @@ public class Coupon extends BaseTimeEntity {
     private LocalDateTime dateIssueEnd;
 
     @OneToMany(mappedBy = "coupon", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Builder.Default
     private List<MemberCoupon> memberCoupons = new ArrayList<>();
 
     public void update(RequestCoupon requestCoupon) {
