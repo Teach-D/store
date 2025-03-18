@@ -28,5 +28,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Product findByTitle(String title);
 
-
+    List<Product> findByCategory_id(Long categoryId);
 }

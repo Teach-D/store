@@ -19,6 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -72,6 +74,19 @@ public class ProductController {
     public ResponseDto<ResponseProduct> getProductByName(@PathVariable String name) {
         return productService.getProductByName(name);
     }
+
+    // categoryId에 속해 있는 product list 조회
+    @GetMapping("/category/{categoryId}")
+    public ResponseDto<List<ResponseProduct>> getProductByCategoryId(@PathVariable Long categoryId) {
+        return productService.getProductsByCategoryId(categoryId);
+    }
+
+    // tagId에 속해 있는 product list 조회
+    @GetMapping("/tag/{tagId}")
+    public ResponseDto<List<ResponseProduct>> getProductByTagId(@PathVariable Long tagId) {
+        return productService.getProductsByTagId(tagId);
+    }
+
 
     @PostMapping
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
