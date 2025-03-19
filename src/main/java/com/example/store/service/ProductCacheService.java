@@ -1,5 +1,6 @@
 package com.example.store.service;
 
+import com.example.store.dto.ProductRedisDto;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.entity.Product;
@@ -53,15 +54,15 @@ public class ProductCacheService {
 
         // redis에 tagId에 연관되어 있는 product list가 있는 경우
         if (cachedProducts != null) {
-            log.info("cahedProducts: {}", cachedProducts);
+            log.info("cachedProducts: {}", cachedProducts);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            List<Product> productList = objectMapper.convertValue(cachedProducts, new TypeReference<List<Product>>() {});
+            // ProductRedisDto로 변환
+            List<ProductRedisDto> productRedisDtos = objectMapper.convertValue(cachedProducts, new TypeReference<List<ProductRedisDto>>() {});
 
-            return ResponseDto.success(ResponseProductListUtils.productListToResponseProductList(productList));
+            return ResponseDto.success(ResponseProductListUtils.redisProductListToResponseProductList(productRedisDtos));
         }
-
         // DB에서 tagId로 product list 조회
         Tag tag = tagRepository.findById(tagId).get();
         List<ProductTag> productTags = tag.getProductTags();
@@ -84,7 +85,14 @@ public class ProductCacheService {
 
     // 하루동안 조회수가 100회가 넘어서 cache에 product list 저장
     private void setCacheProductList(String key, List<Product> products) {
-        redisTemplate.opsForValue().set(key, products, TTL, TimeUnit.SECONDS);
+        List<ProductRedisDto> productRedisDtos = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductRedisDto productRedisDto = ProductRedisDto.entityToDto(product);
+            productRedisDtos.add(productRedisDto);
+        }
+
+        redisTemplate.opsForValue().set(key, productRedisDtos, TTL, TimeUnit.SECONDS);
     }
 
     // 하루동안 tagId가 조회된 횟수 조회

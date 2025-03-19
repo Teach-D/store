@@ -49,11 +49,6 @@ public class Product {
     @Embedded
     private Rating rating;
 
-    @JsonProperty("categoryId")  // JSON 데이터와 필드 매칭
-    public Long getCategoryId() {
-        return (category != null) ? category.getId() : null;
-    }
-
     public Product(Product p) {
         this.id = p.getId();
         this.title = p.getTitle();
