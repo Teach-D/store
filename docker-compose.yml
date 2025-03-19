@@ -9,17 +9,29 @@ services:
       - "mode=standalone"
     ports:
       - 6380:6379
-  mariadb:
-    container_name: store-mariadb
-    image: mariadb:latest
-    command: mariadbd --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp=1
+#  mariadb:
+#    container_name: store-mariadb
+#    image: mariadb:latest
+#    command: mariadbd --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp=1
+#    ports:
+#      - 3307:3306
+#    environment:
+#      - MYSQL_DATABASE=store
+#      - MYSQL_PASSWORD=1234
+#      - MYSQL_ROOT_PASSWORD=1234
+#      - TZ=UTC
+#    volumes:
+#      - ./mysql/init:/docker-entrypoint-initdb.d
+  db:
+    image: mysql:8.0
+    container_name: store-mysql
+    restart: always
     ports:
       - 3307:3306
     environment:
-      - MYSQL_DATABASE=store
-      - MYSQL_PASSWORD=1234
-      - MYSQL_ROOT_PASSWORD=1234
-      - TZ=UTC
+      MYSQL_ROOT_PASSWORD: 1234
+      TZ: Asia/Seoul
     volumes:
-      - ./mysql/init:/docker-entrypoint-initdb.d
-
+      - ./db/mysql/data:/var/lib/mysql
+      - ./db/mysql/init:/docker-entrypoint-initdb.d
+    platform: linux/x86_64

@@ -5,7 +5,6 @@ import com.example.store.dto.response.ResponseProduct;
 import com.example.store.entity.Product;
 import com.example.store.entity.ProductTag;
 import com.example.store.entity.Tag;
-import com.example.store.repository.ProductRepository;
 import com.example.store.repository.TagRepository;
 import com.example.store.utils.ResponseProductListUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,6 +47,8 @@ public class ProductCacheService {
         List<Product> cachedProducts = getCachedProducts(key);
 
         log.info("increment");
+
+        // tag가 조회되었다고 cached에서 조회수를 1씩 증가
         incrementTagViewCount(tagId);
 
         // redis에 tagId에 연관되어 있는 product list가 있는 경우
@@ -60,9 +61,6 @@ public class ProductCacheService {
 
             return ResponseDto.success(ResponseProductListUtils.productListToResponseProductList(productList));
         }
-
-        // tag가 조회되었다고 cached에서 조회수를 1씩 증가
-
 
         // DB에서 tagId로 product list 조회
         Tag tag = tagRepository.findById(tagId).get();
