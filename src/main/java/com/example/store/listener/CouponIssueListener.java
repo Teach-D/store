@@ -17,7 +17,7 @@ import static com.example.store.utils.CouponRedisUtils.*;
 
 @RequiredArgsConstructor
 @EnableScheduling
-@Component
+//@Component
 @Slf4j
 public class CouponIssueListener {
 

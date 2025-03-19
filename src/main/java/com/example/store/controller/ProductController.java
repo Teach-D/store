@@ -8,6 +8,7 @@ import com.example.store.entity.Product;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.OrderItemService;
+import com.example.store.service.ProductCacheService;
 import com.example.store.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final OrderItemService orderItemService;
-
+    private final ProductCacheService productCacheService;
 /*    @GetMapping
     public ResponseDto<Page<Product>> getProducts(@RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page) {
         return productService.getProducts(categoryId, page);
@@ -71,6 +74,24 @@ public class ProductController {
     @GetMapping("/name/{name}")
     public ResponseDto<ResponseProduct> getProductByName(@PathVariable String name) {
         return productService.getProductByName(name);
+    }
+
+    // categoryId에 속해 있는 product list 조회
+    @GetMapping("/category/{categoryId}")
+    public ResponseDto<List<ResponseProduct>> getProductByCategoryId(@PathVariable Long categoryId) {
+        return productService.getProductsByCategoryId(categoryId);
+    }
+
+    // tagId에 속해 있는 product list 조회
+    @GetMapping("/tag/{tagId}")
+    public ResponseDto<List<ResponseProduct>> getProductByTagId(@PathVariable Long tagId) {
+        return productService.getProductsByTagId(tagId);
+    }
+
+    // tagId에 속해 있는 cached product list 조회(하루동안 특정 조회수보다 적은 조회수면 DB에서 product list 조회)
+    @GetMapping("/cached/tag/{tagId}")
+    public ResponseDto<List<ResponseProduct>> getCachedProductByTagId(@PathVariable Long tagId) {
+        return productCacheService.getPopularProductsByTagId(tagId);
     }
 
     @PostMapping

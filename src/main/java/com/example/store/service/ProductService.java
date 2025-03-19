@@ -4,14 +4,12 @@ import com.example.store.dto.request.RequestProduct;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
-import com.example.store.entity.Category;
-import com.example.store.entity.OrderItem;
-import com.example.store.entity.Product;
-import com.example.store.entity.Rating;
+import com.example.store.entity.*;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
 import com.example.store.repository.CategoryRepository;
 import com.example.store.repository.OrderItemRepository;
 import com.example.store.repository.ProductRepository;
+import com.example.store.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,6 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class ProductService {
     private final CategoryService categoryService;
     private final OrderItemRepository orderItemRepository;
     private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
 
     @Transactional
     public ResponseEntity<SuccessDto> addProduct(RequestProduct requestProduct) {
@@ -57,16 +59,49 @@ public class ProductService {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }
 
+
+    // categoryId로 category에 속해 있는 product list 조회
     @Transactional(readOnly = true)
-    public Page<Product> getProducts(Long categoryId, int page, int size) {
-        return productRepository.findProductsByCategory_id(categoryId, PageRequest.of(page, size));
+    public ResponseDto<List<ResponseProduct>> getProductsByCategoryId(Long categoryId) {
+        List<ResponseProduct> responseProducts = new ArrayList<>();
+
+        List<Product> productsCategoryId = productRepository.findByCategory_id(categoryId);
+        for (Product product : productsCategoryId) {
+            ResponseProduct.builder()
+                    .title(product.getTitle())
+                    .price(product.getPrice())
+                    .quantity(product.getQuantity())
+                    .categoryId(categoryId)
+                    .build();
+        }
+
+        return ResponseDto.success(responseProducts);
     }
 
-
+    // categoryId로 category에 속해 있는 product list 조회
     @Transactional(readOnly = true)
-    public Page<Product> getProducts(int page, int size) {
-        return productRepository.findAll(PageRequest.of(page, size));
+    public ResponseDto<List<ResponseProduct>> getProductsByTagId(Long tagId) {
+        List<ResponseProduct> responseProducts = new ArrayList<>();
+
+        Tag tag = tagRepository.findById(tagId).get();
+        List<ProductTag> productTags = tag.getProductTags();
+        for (ProductTag productTag : productTags) {
+            Product product = productTag.getProduct();
+
+            ResponseProduct responseProduct = ResponseProduct.builder()
+                    .title(product.getTitle())
+                    .price(product.getPrice())
+                    .quantity(product.getQuantity())
+                    .categoryId(product.getCategory().getId())
+                    .build();
+
+            responseProducts.add(responseProduct);
+        }
+
+
+        return ResponseDto.success(responseProducts);
     }
+
 
     @Transactional(readOnly = true)
     public ResponseDto<ResponseProduct> getProduct(Long id) {

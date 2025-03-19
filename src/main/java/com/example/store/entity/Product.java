@@ -1,6 +1,8 @@
 package com.example.store.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,6 +14,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id
@@ -37,6 +41,7 @@ public class Product {
     private final List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", orphanRemoval = true)
+    @JsonIgnore
     private final List<ProductTag> productTags = new ArrayList<>();
 
     private String imageUrl;
