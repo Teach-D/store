@@ -70,9 +70,10 @@ public class ProductCacheServiceTest {
     }
 
     private void clearRedis() {
-        redisTemplate.getConnectionFactory().getConnection().flushDb();
+        if (redisTemplate.getConnectionFactory() != null) {
+            redisTemplate.getConnectionFactory().getConnection().flushDb();
+        }
     }
-
     private void clearDatabase() {
         tagRepository.deleteAll();
     }
