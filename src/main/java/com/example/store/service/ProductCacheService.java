@@ -30,7 +30,7 @@ public class ProductCacheService {
 
     private static final String TAG_POPULAR_PRODUCTS_KEY = "tag:popular:";
     private static final long TTL = 24 * 60 * 60; // 24시간
-    private static final int cacheLeastCount = 3;
+    private static final int cacheLeastCount = 10;
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final TagRepository tagRepository;
@@ -85,11 +85,14 @@ public class ProductCacheService {
 
     // 하루동안 조회수가 100회가 넘어서 cache에 product list 저장
     private void setCacheProductList(String key, List<Product> products) {
+        log.info("setCache key: {}", key);
+        log.info("products: {}", products);
         List<ProductRedisDto> productRedisDtos = new ArrayList<>();
 
         for (Product product : products) {
             ProductRedisDto productRedisDto = ProductRedisDto.entityToDto(product);
             productRedisDtos.add(productRedisDto);
+            log.info("add ProductRedisDto: {}", productRedisDto);
         }
 
         redisTemplate.opsForValue().set(key, productRedisDtos, TTL, TimeUnit.SECONDS);
@@ -127,7 +130,9 @@ public class ProductCacheService {
         if (keys != null) {
             for (String key : keys) {
                 String tagId = key.replace(TAG_POPULAR_PRODUCTS_KEY, "");
+
                 if (getDailyTagViewCount(Long.valueOf(tagId)) < cacheLeastCount) {
+                    log.info("key : {}", key);
                     redisTemplate.delete(key);
                     stringRedisTemplate.delete("tag:viewcount:" + tagId);
                 }
