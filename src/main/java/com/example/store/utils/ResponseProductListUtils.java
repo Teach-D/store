@@ -2,7 +2,7 @@ package com.example.store.utils;
 
 import com.example.store.dto.ProductRedisDto;
 import com.example.store.dto.response.ResponseProduct;
-import com.example.store.entity.Product;
+import com.example.store.entity.product.Product;
 
 import java.util.ArrayList;
 import java.util.List;

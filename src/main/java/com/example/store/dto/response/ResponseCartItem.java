@@ -1,6 +1,5 @@
 package com.example.store.dto.response;
 
-import com.example.store.entity.Product;
 import lombok.*;
 
 @Getter

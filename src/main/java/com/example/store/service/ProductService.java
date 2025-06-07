@@ -5,6 +5,8 @@ import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.*;
+import com.example.store.entity.product.Product;
+import com.example.store.entity.product.ProductTag;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
 import com.example.store.repository.CategoryRepository;
 import com.example.store.repository.OrderItemRepository;

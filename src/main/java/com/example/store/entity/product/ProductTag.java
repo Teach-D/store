@@ -1,6 +1,6 @@
-package com.example.store.entity;
+package com.example.store.entity.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.store.entity.Tag;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

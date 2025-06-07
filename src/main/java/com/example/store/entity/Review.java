@@ -1,19 +1,15 @@
 package com.example.store.entity;
 
 import com.example.store.dto.request.RequestReview;
-import com.example.store.dto.response.ResponseProduct;
-import com.example.store.dto.response.ResponseReview;
+import com.example.store.entity.product.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Getter
