@@ -1,8 +1,10 @@
-package com.example.store.entity;
+package com.example.store.entity.product;
 
+import com.example.store.entity.Category;
+import com.example.store.entity.Rating;
+import com.example.store.entity.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 

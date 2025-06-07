@@ -2,12 +2,9 @@ package com.example.store.controller;
 
 import com.example.store.dto.request.RequestBoard;
 import com.example.store.dto.response.ResponseBoard;
-import com.example.store.dto.response.ResponseCartItem;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.SuccessDto;
-import com.example.store.entity.Board;
 import com.example.store.entity.Member;
-import com.example.store.entity.Product;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.BoardService;
@@ -20,9 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @RestController

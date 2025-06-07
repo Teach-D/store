@@ -1,6 +1,7 @@
 package com.example.store.entity;
 
 import com.example.store.dto.request.RequestTag;
+import com.example.store.entity.product.ProductTag;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

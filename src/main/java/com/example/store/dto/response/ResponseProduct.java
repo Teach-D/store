@@ -1,7 +1,6 @@
 package com.example.store.dto.response;
 
-import com.example.store.entity.Board;
-import com.example.store.entity.Product;
+import com.example.store.entity.product.Product;
 import lombok.*;
 import org.springframework.data.domain.Page;
 

@@ -2,11 +2,10 @@ package com.example.store.service;
 
 import com.example.store.dto.request.RequestReview;
 import com.example.store.dto.response.ResponseDto;
-import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.ResponseReview;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Member;
-import com.example.store.entity.Product;
+import com.example.store.entity.product.Product;
 import com.example.store.entity.Review;
 import com.example.store.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;

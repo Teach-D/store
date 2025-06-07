@@ -5,6 +5,7 @@ import com.example.store.dto.request.RequestSignIn;
 import com.example.store.dto.request.RequestSignUp;
 import com.example.store.dto.response.*;
 import com.example.store.entity.*;
+import com.example.store.entity.product.Product;
 import com.example.store.exception.MemberException1;
 import com.example.store.exception.ex.ErrorCode;
 import com.example.store.exception.ex.NotFoundCartException;

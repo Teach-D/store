@@ -4,7 +4,7 @@ import com.example.store.dto.request.RequestProduct;
 import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
-import com.example.store.entity.Product;
+import com.example.store.entity.product.Product;
 import com.example.store.jwt.util.IfLogin;
 import com.example.store.jwt.util.LoginUserDto;
 import com.example.store.service.OrderItemService;
@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

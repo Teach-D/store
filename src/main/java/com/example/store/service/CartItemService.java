@@ -7,7 +7,7 @@ import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Member;
-import com.example.store.entity.Product;
+import com.example.store.entity.product.Product;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
 import com.example.store.exception.ex.NotFoundCartException;
 import com.example.store.exception.ex.NotFoundCartItemException;
