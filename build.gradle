@@ -62,6 +62,9 @@ dependencies {
 	// test
 	runtimeOnly 'com.h2database:h2'
 
+	// mybatis
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
 	// json
 	testImplementation 'com.jayway.jsonpath:json-path:2.8.0'
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
