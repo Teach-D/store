@@ -6,6 +6,7 @@ import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.*;
 import com.example.store.entity.product.Product;
+import com.example.store.entity.product.ProductDetail;
 import com.example.store.entity.product.ProductTag;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
 import com.example.store.repository.CategoryRepository;
@@ -42,8 +43,6 @@ public class ProductService {
                         .category(category)
                         .quantity(requestProduct.getQuantity())
                         .price(requestProduct.getPrice())
-                        .description(requestProduct.getDescription())
-                        .imageUrl(requestProduct.getImageUrl())
                         .title(requestProduct.getTitle())
                         .build();
 
@@ -52,7 +51,13 @@ public class ProductService {
                         .count(0)
                         .build();
 
-        product.updateRating(rating);
+        ProductDetail productDetail = ProductDetail.builder()
+                .product(product)
+                .description(requestProduct.getDescription())
+                .imageUrl(requestProduct.getImageUrl())
+                .rating(rating)
+                .build();
+
 
         productRepository.save(product);
 
