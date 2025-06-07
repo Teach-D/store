@@ -28,8 +28,6 @@ public class Product {
 
     private int price;
 
-    private String description;
-
     private int quantity;
 
     private int saleQuantity;
@@ -46,20 +44,12 @@ public class Product {
     @JsonIgnore
     private final List<ProductTag> productTags = new ArrayList<>();
 
-    private String imageUrl;
-
-    @Embedded
-    private Rating rating;
-
     public Product(Product p) {
         this.id = p.getId();
         this.title = p.getTitle();
         this.price = p.getPrice();
-        this.description = p.getDescription();
         this.quantity = p.getQuantity();
         this.category = p.getCategory();
-        this.imageUrl = p.getImageUrl();
-        this.rating = p.getRating();
         this.saleQuantity = p.getSaleQuantity();
     }
 
@@ -74,13 +64,7 @@ public class Product {
     public void updateProduct(Category category, int price, String description, String imageUrl, String title, int quantity) {
         this.category = category;
         this.price = price;
-        this.description = description;
-        this.imageUrl = imageUrl;
         this.title = title;
         this.quantity = quantity;
-    }
-
-    public void updateRating(Rating rating) {
-        this.rating = rating;
     }
 }
