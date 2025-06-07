@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.*;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class ProductController {
         return productService.getProducts(categoryId, page);
     }*/
 
-    @GetMapping()
+/*    @GetMapping()
     public ResponseDto<Page<ResponseProduct>> getProductsByOption(
             @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
@@ -63,7 +65,17 @@ public class ProductController {
 
         Page<ResponseProduct> resultProducts = new ResponseProduct().toDtoPage(products);
         return ResponseDto.success(resultProducts);
+    }*/
+
+    @GetMapping
+    public ResponseEntity<List<ResponseProduct>> getProductsByOption(
+            @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") String title,
+            @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
+    ) {
+        return ResponseEntity.status(OK).body(productService.getProductsByOption(categoryId, title, sort, order));
     }
+
+
 
     @GetMapping("/{id}")
     public ResponseDto<ResponseProduct> getProduct(@PathVariable Long id) {
@@ -102,7 +114,7 @@ public class ProductController {
                 String message = objectError.getDefaultMessage();
                 sb.append("message :" + message);
             });
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+            return ResponseEntity.status(BAD_REQUEST).body(sb.toString());
         }
         return productService.addProduct(requestProduct);
     }
@@ -116,7 +128,7 @@ public class ProductController {
                 String message = objectError.getDefaultMessage();
                 sb.append("message :" + message);
             });
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+            return ResponseEntity.status(BAD_REQUEST).body(sb.toString());
         }
         return productService.editProduct(requestProduct, id);
     }

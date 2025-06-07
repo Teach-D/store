@@ -21,4 +21,26 @@
         WHERE p.id = #{id}
     </select>
 
+    <select id="getProductsByOption" resultType="Product">
+        SELECT *
+        FROM product
+        WHERE
+        (#{categoryId} IS NULL OR category_id = #{categoryId})
+        AND (#{title} IS NULL OR title LIKE CONCAT('%', #{title}, '%'))
+
+        <if test="sort != null and order != null">
+            ORDER BY
+            <choose>
+                <when test="sort == 'price'">price</when>
+                <when test="sort == 'orderquantity'">sale_quantity</when>
+                <otherwise>price</otherwise>
+            </choose>
+            <choose>
+                <when test="order == 'asc'">ASC</when>
+                <when test="order == 'desc'">DESC</when>
+                <otherwise>ASC</otherwise>
+            </choose>
+        </if>
+    </select>
+
 </mapper>

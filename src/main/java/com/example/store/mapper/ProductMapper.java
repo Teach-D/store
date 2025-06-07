@@ -4,8 +4,15 @@ import com.example.store.entity.product.Product;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface ProductMapper {
 
     Product findById(@Param("id") Long id);
+    List<Product> getProductsByOption(@Param("categoryId") Long categoryId,
+                                      @Param("title") String title,
+                                      @Param("sort") String sort,
+                                      @Param("order") String order
+                                      );
 }
