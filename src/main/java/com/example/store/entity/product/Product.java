@@ -32,6 +32,12 @@ public class Product {
 
     private int saleQuantity;
 
+    private String description;
+    private String imageUrl;
+
+    @Embedded
+    private Rating rating;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinColumn(name = "category_id")
@@ -66,5 +72,9 @@ public class Product {
         this.price = price;
         this.title = title;
         this.quantity = quantity;
+    }
+
+    public void updateRating(Rating rating) {
+        this.rating = rating;
     }
 }
