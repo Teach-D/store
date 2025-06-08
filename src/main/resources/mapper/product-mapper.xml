@@ -21,7 +21,7 @@
         WHERE p.id = #{id}
     </select>
 
-    <select id="getProductsByOption" resultType="Product">
+    <select id="getProductsByOption" resultMap="ProductResultMap">
         SELECT *
         FROM product
         WHERE

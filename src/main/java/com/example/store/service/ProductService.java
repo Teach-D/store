@@ -46,8 +46,8 @@ public class ProductService {
                         .quantity(requestProduct.getQuantity())
                         .price(requestProduct.getPrice())
                         .title(requestProduct.getTitle())
-                .description(requestProduct.getDescription())
-                .imageUrl(requestProduct.getImageUrl())
+/*                .description(requestProduct.getDescription())
+                .imageUrl(requestProduct.getImageUrl())*/
                         .build();
 
         Rating rating = Rating.builder()
@@ -55,7 +55,9 @@ public class ProductService {
                         .count(0)
                         .build();
 
+/*
         product.updateRating(rating);
+*/
 
 
         productRepository.save(product);

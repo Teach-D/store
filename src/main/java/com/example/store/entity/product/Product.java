@@ -31,12 +31,12 @@ public class Product {
     private int quantity;
 
     private int saleQuantity;
-
+/*
     private String description;
     private String imageUrl;
 
     @Embedded
-    private Rating rating;
+    private Rating rating;*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -74,7 +74,7 @@ public class Product {
         this.quantity = quantity;
     }
 
-    public void updateRating(Rating rating) {
+/*    public void updateRating(Rating rating) {
         this.rating = rating;
-    }
+    }*/
 }
