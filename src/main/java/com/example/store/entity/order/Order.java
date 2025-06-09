@@ -1,5 +1,7 @@
-package com.example.store.entity;
+package com.example.store.entity.order;
 
+import com.example.store.entity.Delivery;
+import com.example.store.entity.Member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +23,6 @@ public class Order {
     private Long orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -32,7 +33,6 @@ public class Order {
     private String date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 

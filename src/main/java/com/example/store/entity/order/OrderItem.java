@@ -1,4 +1,4 @@
-package com.example.store.entity;
+package com.example.store.entity.order;
 
 import com.example.store.entity.product.Product;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,12 +21,10 @@ public class OrderItem {
     private Long orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinColumn(name = "order_id")
     private Order order;
 

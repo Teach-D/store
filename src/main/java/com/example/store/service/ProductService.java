@@ -5,6 +5,7 @@ import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.*;
+import com.example.store.entity.order.OrderItem;
 import com.example.store.entity.product.Product;
 import com.example.store.entity.product.ProductDetail;
 import com.example.store.entity.product.ProductTag;

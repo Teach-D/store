@@ -5,6 +5,9 @@ import com.example.store.dto.response.ResponseOrder;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.*;
+import com.example.store.entity.order.Order;
+import com.example.store.entity.order.OrderItem;
+import com.example.store.entity.order.Rate;
 import com.example.store.entity.product.Product;
 import com.example.store.exception.ex.DiscountException.NotFoundDiscountException;
 import com.example.store.exception.ex.MemberException.NotFoundMemberException;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +36,8 @@ public class OrderService {
     private final CouponRepository couponRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
+    private final RateRepository rateRepository;
 
     public Order save(Order order) {
         return orderRepository.save(order);
@@ -208,4 +214,18 @@ public class OrderService {
     }
 
 
+    public void addOrderByNoCart(Long memberId, Long productId, int score) {
+        Member member = memberRepository.findById(memberId).orElseThrow(NotFoundMemberException::new);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid productId"));
+;
+        Order order = Order.builder().member(member).date(String.valueOf(LocalDateTime.now())).build();
+        orderRepository.save(order);
+
+        OrderItem orderItem = OrderItem.builder().order(order).product(product).build();
+        orderItemRepository.save(orderItem);
+
+        Rate rate = Rate.builder().orderItem(orderItem).score(score).build();
+        rateRepository.save(rate);
+    }
 }
