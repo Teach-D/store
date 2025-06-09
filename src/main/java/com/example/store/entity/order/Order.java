@@ -23,7 +23,6 @@ public class Order {
     private Long orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -34,7 +33,6 @@ public class Order {
     private String date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
