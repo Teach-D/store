@@ -1,6 +1,6 @@
 package com.example.store.service;
 
-import com.example.store.entity.OrderItem;
+import com.example.store.entity.order.OrderItem;
 import com.example.store.repository.OrderItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.example.store.entity;
+package com.example.store.entity.order;
 
 import com.example.store.entity.product.Product;
 import com.fasterxml.jackson.annotation.JsonIgnore;
