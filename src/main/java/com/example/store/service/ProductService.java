@@ -5,9 +5,7 @@ import com.example.store.dto.response.ResponseDto;
 import com.example.store.dto.response.ResponseProduct;
 import com.example.store.dto.response.SuccessDto;
 import com.example.store.entity.*;
-import com.example.store.entity.product.Product;
-import com.example.store.entity.product.ProductDetail;
-import com.example.store.entity.product.ProductTag;
+import com.example.store.entity.product.*;
 import com.example.store.exception.ex.ProductException.NotFoundProductException;
 import com.example.store.mapper.ProductMapper;
 import com.example.store.repository.CategoryRepository;
@@ -247,8 +245,53 @@ public class ProductService {
 
         List<ResponseProduct> responseProductList = new ArrayList<>();
 
-        List<Product> productsByOption = productMapper.getProductsByOption(filteredCategoryId, filteredTitle, filteredSort, filteredOrder);
-        for (Product product : productsByOption) {
+        List<ProductAfterIndex> productsByOption = productMapper.getProductsByOptionBeforeIndex(filteredCategoryId, filteredTitle, filteredSort, filteredOrder);
+        for (ProductAfterIndex product : productsByOption) {
+            ResponseProduct responseProduct = ResponseProduct.entityToDto(product);
+            responseProductList.add(responseProduct);
+        }
+
+        return responseProductList;
+    }
+    public List<ResponseProduct> getProductsByOptionBeforeIndex(Long categoryId, String title, String sort, String order) {
+        // categoryId가 0이면 적용x
+        Long filteredCategoryId = categoryId != 0 ? categoryId : null;
+
+        // title이 0이면 적용x
+        String filteredTitle = "0".equals(title) ? title : null;
+
+        // sort, order가 "0"이면 정렬 제외 처리
+        boolean noSort = "0".equals(sort) || "0".equals(order);
+        String filteredSort = noSort ? null : sort.toLowerCase();
+        String filteredOrder = noSort ? null : order.toLowerCase();
+
+        List<ResponseProduct> responseProductList = new ArrayList<>();
+
+        List<ProductAfterIndex> productsByOption = productMapper.getProductsByOptionBeforeIndex(filteredCategoryId, filteredTitle, filteredSort, filteredOrder);
+        for (ProductAfterIndex product : productsByOption) {
+            ResponseProduct responseProduct = ResponseProduct.entityToDto(product);
+            responseProductList.add(responseProduct);
+        }
+
+        return responseProductList;
+    }
+
+    public List<ResponseProduct> getProductsByOptionAfterIndex(Long categoryId, String title, String sort, String order) {
+        // categoryId가 0이면 적용x
+        Long filteredCategoryId = categoryId != 0 ? categoryId : null;
+
+        // title이 0이면 적용x
+        String filteredTitle = "0".equals(title) ? title : null;
+
+        // sort, order가 "0"이면 정렬 제외 처리
+        boolean noSort = "0".equals(sort) || "0".equals(order);
+        String filteredSort = noSort ? null : sort.toLowerCase();
+        String filteredOrder = noSort ? null : order.toLowerCase();
+
+        List<ResponseProduct> responseProductList = new ArrayList<>();
+
+        List<ProductAfterIndex> productsByOption = productMapper.getProductsByOptionAfterIndex(filteredCategoryId, filteredTitle, filteredSort, filteredOrder);
+        for (ProductAfterIndex product : productsByOption) {
             ResponseProduct responseProduct = ResponseProduct.entityToDto(product);
             responseProductList.add(responseProduct);
         }

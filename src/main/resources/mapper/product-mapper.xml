@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.store.mapper.ProductMapper">
 
-    <resultMap id="ProductResultMap" type="com.example.store.entity.product.Product">
+    <resultMap id="ProductResultMap" type="com.example.store.entity.product.ProductAfterIndex">
         <id property="id" column="id"/>
         <result property="title" column="title"/>
         <result property="price" column="price"/>
@@ -21,9 +21,9 @@
         WHERE p.id = #{id}
     </select>
 
-    <select id="getProductsByOption" resultMap="ProductResultMap">
+    <select id="getProductsByOptionBeforeIndex" resultMap="ProductResultMap">
         SELECT *
-        FROM product
+        FROM product_after_index
         WHERE
         (#{categoryId} IS NULL OR category_id = #{categoryId})
         AND (#{title} IS NULL OR title LIKE CONCAT('%', #{title}, '%'))
@@ -43,4 +43,25 @@
         </if>
     </select>
 
+    <select id="getProductsByOptionAfterIndex" resultMap="ProductResultMap">
+        SELECT *
+        FROM product_after_index FORCE INDEX (idx_category_title_after_index)
+        WHERE
+        (#{categoryId} IS NULL OR category_id = #{categoryId})
+        AND (#{title} IS NULL OR title LIKE CONCAT(#{title}, '%'))
+
+        <if test="sort != null and order != null">
+            ORDER BY
+            <choose>
+                <when test="sort == 'price'">price</when>
+                <when test="sort == 'orderquantity'">sale_quantity</when>
+                <otherwise>price</otherwise>
+            </choose>
+            <choose>
+                <when test="order == 'asc'">ASC</when>
+                <when test="order == 'desc'">DESC</when>
+                <otherwise>ASC</otherwise>
+            </choose>
+        </if>
+    </select>
 </mapper>

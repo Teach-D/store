@@ -75,6 +75,22 @@ public class ProductController {
         return ResponseEntity.status(OK).body(productService.getProductsByOption(categoryId, title, sort, order));
     }
 
+    @GetMapping("/before")
+    public ResponseEntity<List<ResponseProduct>> getProductsByOptionBeforeIndex(
+            @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") String title,
+            @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
+    ) {
+        return ResponseEntity.status(OK).body(productService.getProductsByOptionBeforeIndex(categoryId, title, sort, order));
+    }
+
+    @GetMapping("/after")
+    public ResponseEntity<List<ResponseProduct>> getProductsByOptionAfterIndex(
+            @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") String title,
+            @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
+    ) {
+        return ResponseEntity.status(OK).body(productService.getProductsByOptionAfterIndex(categoryId, title, sort, order));
+    }
+
 
 
     @GetMapping("/{id}")

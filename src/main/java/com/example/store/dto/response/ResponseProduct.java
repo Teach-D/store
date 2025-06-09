@@ -1,6 +1,8 @@
 package com.example.store.dto.response;
 
 import com.example.store.entity.product.Product;
+import com.example.store.entity.product.ProductAfterIndex;
+import com.example.store.entity.product.ProductBeforeIndex;
 import lombok.*;
 import org.springframework.data.domain.Page;
 
@@ -16,6 +18,22 @@ public class ResponseProduct {
     private int price;
 
     public static ResponseProduct entityToDto(Product product) {
+        return ResponseProduct.builder()
+                .quantity(product.getQuantity())
+                .title(product.getTitle())
+                .price(product.getPrice())
+                .build();
+    }
+
+    public static ResponseProduct entityToDto(ProductBeforeIndex product) {
+        return ResponseProduct.builder()
+                .quantity(product.getQuantity())
+                .title(product.getTitle())
+                .price(product.getPrice())
+                .build();
+    }
+
+    public static ResponseProduct entityToDto(ProductAfterIndex product) {
         return ResponseProduct.builder()
                 .quantity(product.getQuantity())
                 .title(product.getTitle())

@@ -1,7 +1,6 @@
 package com.example.store.entity.product;
 
 import com.example.store.entity.Category;
-import com.example.store.entity.Rating;
 import com.example.store.entity.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,12 +18,12 @@ import java.util.List;
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(
-        name = "product",
+        name = "product_after_index",
         indexes = {
-                @Index(name = "idx_title_category", columnList = "title, categoryId")
+                @Index(name = "idx_category_title_after_index", columnList = "category_id, title")
         }
 )
-public class Product {
+public class ProductAfterIndex {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,14 +48,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product")
-    private final List<Review> reviews = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product", orphanRemoval = true)
-    @JsonIgnore
-    private final List<ProductTag> productTags = new ArrayList<>();
-
-    public Product(Product p) {
+    public ProductAfterIndex(ProductAfterIndex p) {
         this.id = p.getId();
         this.title = p.getTitle();
         this.price = p.getPrice();
