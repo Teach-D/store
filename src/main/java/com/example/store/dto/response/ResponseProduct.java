@@ -15,6 +15,15 @@ public class ResponseProduct {
     private String title;
     private int price;
 
+    public static ResponseProduct entityToDto(Product product) {
+        return ResponseProduct.builder()
+                .categoryId(product.getCategory().getId())
+                .quantity(product.getQuantity())
+                .title(product.getTitle())
+                .price(product.getPrice())
+                .build();
+    }
+
     public Page<ResponseProduct> toDtoPage(Page<Product> productPage) {
         return productPage.map(m -> ResponseProduct.builder()
                 .categoryId(m.getCategory().getId())
