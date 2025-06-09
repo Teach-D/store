@@ -9,10 +9,13 @@ import com.example.store.repository.OrderRepository;
 import com.example.store.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/orders")
@@ -46,6 +49,13 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<SuccessDto> addOrderByNoDiscount(@IfLogin LoginUserDto loginUserDto) {
         return orderService.addOrderByNoDiscount(loginUserDto);
+    }
+
+    @PostMapping("/no-cart/product/{productId}/score/{score}")
+    private ResponseEntity<Void> addOrderByNoCart(@IfLogin LoginUserDto loginUserDto, Long productId, int score) {
+        orderService.addOrderByNoCart(loginUserDto.getMemberId(), productId, score);
+
+        return ResponseEntity.status(CREATED).build();
     }
 
     @DeleteMapping("/{orderId}")

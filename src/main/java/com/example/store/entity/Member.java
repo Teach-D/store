@@ -33,6 +33,12 @@ public class Member {
     @CreationTimestamp
     private LocalDateTime regDate;
 
+    // 성별
+    private String gender;
+
+    // 생년월일
+    private LocalDateTime birthDate;
+
     @OneToMany(mappedBy = "member")
     private final List<Delivery> deliveries = new ArrayList<>();
 
