@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.OK;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -30,39 +32,13 @@ public class ProductController {
     private final ProductService productService;
     private final OrderItemService orderItemService;
     private final ProductCacheService productCacheService;
-/*    @GetMapping
-    public ResponseDto<Page<Product>> getProducts(@RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page) {
-        return productService.getProducts(categoryId, page);
-    }*/
 
-    @GetMapping()
-    public ResponseDto<Page<ResponseProduct>> getProductsByOption(
-            @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") int page,
+    @GetMapping
+    public ResponseEntity<List<ResponseProduct>> getProductsByOption(
+            @RequestParam(required = false, defaultValue = "0") Long categoryId, @RequestParam(required = false, defaultValue = "0") String title,
             @RequestParam(required = false, defaultValue = "0") String sort, @RequestParam(required = false, defaultValue = "0") String order
     ) {
-        Page<ResponseProduct> responseProducts = null;
-        Page<Product> products = null;
-
-        if (sort.equals("0") && order.equals("0")) {
-            products = productService.getProducts(categoryId, page);
-        } else if (sort.equals("sale")) {
-            if (order.equals("asc")) {
-                products = productService.getProductsBySaleAsc(categoryId, page);
-            } else {
-                products = productService.getProductsBySaleDesc(categoryId, page);
-            }
-        } else if (sort.equals("price")) {
-            if (order.equals("asc")) {
-                products = productService.getProductsByPriceAsc(categoryId, page);
-            } else {
-                products = productService.getProductsByPriceDesc(categoryId, page);
-            }
-        } else {
-            products = productService.getProductsBySaleDesc(categoryId, page);
-        }
-
-        Page<ResponseProduct> resultProducts = new ResponseProduct().toDtoPage(products);
-        return ResponseDto.success(resultProducts);
+        return ResponseEntity.status(OK).body(productService.getProductsByOption(categoryId, title, sort, order));
     }
 
     @GetMapping("/{id}")
