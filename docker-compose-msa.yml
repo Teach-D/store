@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-board
+    restart: always
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: store
+      TZ: Asia/Seoul
+    volumes:
+      - ./db/mysql/data:/var/lib/mysql
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:latest
+    container_name: msa-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Gateway
+  gateway:
+    build:
+      context: ./gate-way
+      dockerfile: Dockerfile
+    image: store-gateway
+    container_name: gateway-service
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - msa-network
+    depends_on:
+      - member-service
+      - order-service
+      - product-service
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Member Service
+  member-service:
+    build:
+      context: ./member
+      dockerfile: Dockerfile
+    image: store-member-service
+    container_name: member-service
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - PRODUCT_SERVICE_URL=http://product-service:8080
+    networks:
+      - msa-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Order Service
+  order-service:
+    build:
+      context: ./order
+      dockerfile: Dockerfile
+    image: store-order-service
+    container_name: order-service
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - MEMBER_SERVICE_URL=http://member-service:8080
+    networks:
+      - msa-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Product Service
+  product-service:
+    build:
+      context: ./product
+      dockerfile: Dockerfile
+    image: store-product-service
+    container_name: product-service
+    restart: always
+    ports:
+      - "8083:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+    networks:
+      - msa-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+# 네트워크 정의
+networks:
+  msa-network:
+    driver: bridge
+    name: msa-network

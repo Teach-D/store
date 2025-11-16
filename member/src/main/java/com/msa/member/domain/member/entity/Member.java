@@ -1,0 +1,74 @@
+package com.msa.member.domain.member.entity;
+
+import com.msa.member.domain.delivery.entity.Delivery;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Member {
+
+    @Id
+    @Column(name = "member_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length = 255)
+    private String email;
+
+    @Column(length = 50)
+    private String name;
+
+    @Column(length = 500)
+    private String password;
+
+    @CreationTimestamp
+    private LocalDateTime regDate;
+
+    // 성별
+    private String gender;
+
+    // 생년월일
+    private LocalDateTime birthDate;
+
+    @OneToMany(mappedBy = "member")
+    private final List<Delivery> deliveries = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<MemberCoupon> memberCoupons = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                ", regDate=" + regDate +
+                '}';
+    }
+
+    public void addRole(Role role) {
+        this.role = role;
+    }
+
+    public void addDelivery(Delivery delivery) {
+        this.deliveries.add(delivery);
+    }
+
+}
