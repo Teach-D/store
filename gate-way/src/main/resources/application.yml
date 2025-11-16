@@ -1,0 +1,85 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: gateway-service
+  
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 5s
+      
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: false
+            maxAge: 3600
+
+jwt:
+  header: Authorization
+  secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
+  tokenValidityInMilliseconds: 86400000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.gate_way: DEBUG
+    org.springframework.cloud.gateway: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 서비스 URL 설정 (로컬 개발용)
+services:
+  member:
+    url: http://host.docker.internal:8081
+  order:
+    url: http://host.docker.internal:8082
+  product:
+    url: http://host.docker.internal:8083
+
+---
+# Docker 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+# Docker 네트워크 내부 통신
+services:
+  member:
+    url: http://member-service:8080
+  order:
+    url: http://order-service:8080
+  product:
+    url: http://product-service:8080

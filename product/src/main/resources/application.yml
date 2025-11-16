@@ -1,0 +1,63 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3309/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+  # Redis 설정 (기존 Redis 사용)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+
+# 로깅 설정
+logging:
+  level:
+    com.msa.product: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+
+# JWT 설정
+jwt:
+  header: Authorization
+  secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
+  tokenValidityInMilliseconds: 86400000
+
+# Actuator 설정
+management:
+  health:
+    redis:
+      enabled: true
+
+---
+# Docker 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+  data:
+    redis:
+      host: host.docker.internal
+      port: 6379
