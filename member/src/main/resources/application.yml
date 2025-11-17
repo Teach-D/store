@@ -9,7 +9,8 @@ spring:
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  application:
+    name: member-service
   jpa:
     hibernate:
       ddl-auto: update
@@ -49,6 +50,13 @@ management:
   health:
     redis:
       enabled: false
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://host.docker.internal:8761/eureka
 
 ---
 # Docker 환경 설정

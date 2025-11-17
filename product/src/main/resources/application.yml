@@ -16,6 +16,8 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
+  application:
+    name: product-service
   # Redis 설정 (기존 Redis 사용)
   data:
     redis:
@@ -49,6 +51,12 @@ management:
     redis:
       enabled: true
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://host.docker.internal:8761/eureka
 ---
 # Docker 환경 설정
 spring:

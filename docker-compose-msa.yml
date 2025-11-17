@@ -37,6 +37,20 @@ services:
       timeout: 5s
       retries: 5
 
+  # Discovery Gateway
+  discovery:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    image: store-discovery-service
+    container_name: discovery-service
+    restart: always
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - msa-network
   # API Gateway
   gateway:
     build:

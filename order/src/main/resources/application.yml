@@ -16,6 +16,8 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
+  application:
+    name: order-service
 # Feign Client 설정
 member:
   service:
@@ -54,6 +56,12 @@ management:
     redis:
       enabled: false
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://host.docker.internal:8761/eureka
 ---
 # Docker 환경 설정
 spring:
