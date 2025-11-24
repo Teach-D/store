@@ -68,6 +68,13 @@ services:
   product:
     url: http://host.docker.internal:8083
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://host.docker.internal:8761/eureka
+
 ---
 # Docker 환경 설정
 spring:
@@ -83,3 +90,4 @@ services:
     url: http://order-service:8080
   product:
     url: http://product-service:8080
+

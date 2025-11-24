@@ -9,7 +9,8 @@ spring:
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  application:
+    name: member-service
   jpa:
     hibernate:
       ddl-auto: update
@@ -44,12 +45,46 @@ jwt:
   secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
   tokenValidityInMilliseconds: 86400000
 
-# Actuator 설정 - Redis Health Check 비활성화
+# Actuator 설정
 management:
   health:
     redis:
       enabled: false
+    circuitbreakers:
+      enabled: true  # CircuitBreaker Health 활성화
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers,circuitbreakerevents,metrics  # CircuitBreaker 엔드포인트 노출
+  endpoint:
+    health:
+      show-details: always  # Health 상세 정보 표시
+    circuitbreakers:
+      enabled: true
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://host.docker.internal:8761/eureka
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        slowCallRateThreshold: 80
+        slowCallDurationThreshold: 10s
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        maxWaitDurationInHalfOpenState: 0
+        waitDurationInOpenState: 10s
+    instances:
+      product-service-circuit-breaker:
+        base-config: default
 ---
 # Docker 환경 설정
 spring:
