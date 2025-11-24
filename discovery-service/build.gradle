@@ -26,6 +26,12 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Micrometer Tracing (Sleuth 대체)
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+
+    // Zipkin 리포터
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 }
 
 dependencyManagement {

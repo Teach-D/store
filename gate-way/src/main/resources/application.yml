@@ -6,16 +6,18 @@ spring:
     active: local
   application:
     name: gateway-service
-  
+  reactor:
+    context-propagation: auto
+
   cloud:
     gateway:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
-      
+
       httpclient:
         connect-timeout: 3000
         response-timeout: 5s
-      
+
       globalcors:
         cors-configurations:
           '[/**]':
@@ -50,6 +52,13 @@ management:
       enabled: true
     readinessState:
       enabled: true
+  tracing:
+    sampling:
+      probability: 1.0  # 모든 요청 추적 (운영: 0.1 권장)
+  zipkin:
+    tracing:
+      #endpoint: http://localhost:9411/api/v2/spans  # 로컬 환경
+      endpoint: http://zipkin:9411/api/v2/spans   # Docker 환경
 
 logging:
   level:
@@ -57,7 +66,8 @@ logging:
     com.gate_way: DEBUG
     org.springframework.cloud.gateway: INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    level: "%5p 
+[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 # 서비스 URL 설정 (로컬 개발용)
 services:
