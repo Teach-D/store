@@ -30,8 +30,7 @@ public class SecurityConfig {
             .sessionManagement(sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Gateway에서 인증/인가를 처리하므로 모든 요청 허용
-                .anyRequest().permitAll()
+                .anyRequest().permitAll()  // 모든 요청 허용 (Gateway에서 인증 처리)
             );
 
         return http.build();

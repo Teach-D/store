@@ -57,6 +57,10 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://host.docker.internal:8761/eureka
+
+
+
+
 ---
 # Docker 환경 설정
 spring:

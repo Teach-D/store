@@ -32,6 +32,7 @@ import static com.msa.member.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 @Slf4j
 public class MemberService {
 
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final CartRepository cartRepository;

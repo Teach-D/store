@@ -1,6 +1,7 @@
 package com.msa.member.common.client;
 
 import com.msa.member.global.FeignConfig;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
+@CircuitBreaker(name = "product-service-circuit-breaker")
 @Service
 @FeignClient(name = "product-service", url = "${product.service.url}", configuration = FeignConfig.class)
 public interface ProductServiceClient {

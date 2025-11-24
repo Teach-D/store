@@ -50,7 +50,7 @@ public class RouteConfig {
         return builder.routes()
             // ========== Member Service ==========
             .route("member-public", r -> r
-                .path("/members/signup", "/members/login")
+                .path("/members/signup", "/members/login", "/actuator/**")
                 .filters(f -> f.stripPrefix(0))
                 .uri(memberServiceUrl))
             .route("member-public", r -> r
