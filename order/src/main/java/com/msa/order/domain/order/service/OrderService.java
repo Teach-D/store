@@ -8,6 +8,7 @@ import com.msa.order.domain.order.repository.OrderItemRepository;
 import com.msa.order.domain.order.repository.OrderRepository;
 import com.msa.order.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static com.msa.order.global.exception.ErrorCode.ORDER_NOT_FOUND;
 
+@EnableAsync
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -26,6 +28,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartServiceClient cartServiceClient;
     private final ProductServiceClient productServiceClient;
+    private final AsyncCartService asyncCartService;
 
     public List<ResponseOrder> getOrders(Long userId) {
         List<Order> orders = orderRepository.findAllByMemberId(userId);
@@ -116,7 +119,7 @@ public class OrderService {
         Long cartId = cartServiceClient.getCartId(userId);
         List<CartItemDto> cartItems = cartServiceClient.getCartItems(cartId);
         Long delivery = cartServiceClient.getDelivery(userId);
-
+        List<Long> cartItemIds = new ArrayList<>();
 
         LocalDate localDate = LocalDate.now();
         String date = String.valueOf(localDate.getYear()) + (localDate.getMonthValue() < 10 ? "0" :"") + String.valueOf(localDate.getMonthValue()) + (localDate.getDayOfMonth() < 10 ? "0" :"") +String.valueOf(localDate.getDayOfMonth());
@@ -137,7 +140,8 @@ public class OrderService {
                     .build();
 
             orderItemRepository.save(orderItem);
-            cartServiceClient.clearCartItem(cartItem.getCartItemId());
+            cartItemIds.add(cartItem.getCartItemId());
+//            cartServiceClient.clearCartItem(cartItem.getCartItemId());
             totalPrice = (totalPrice + cartItem.getProductPrice() * cartItem.getQuantity());
 
             int productQuantity = productServiceClient.getProductQuantity(cartItem.getProductId());
@@ -150,6 +154,8 @@ public class OrderService {
 
         order.updateTotalPrice(totalPrice);
         orderRepository.save(order);
+
+        asyncCartService.clearCartItems(cartItemIds);
     }
 
     public void deleteOrder(Long orderId) {

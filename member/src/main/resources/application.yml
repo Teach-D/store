@@ -38,6 +38,9 @@ logging:
     com.msa.member: DEBUG
     org.springframework.security: DEBUG
     org.springframework.cloud.openfeign: DEBUG
+  pattern:
+    level: "%5p 
+[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 # JWT 설정
 jwt:
@@ -61,7 +64,13 @@ management:
       show-details: always  # Health 상세 정보 표시
     circuitbreakers:
       enabled: true
-
+  tracing:
+    sampling:
+      probability: 1.0  # 모든 요청 추적 (운영: 0.1 권장)
+  zipkin:
+    tracing:
+      # endpoint: http://localhost:9411/api/v2/spans  # 로컬 환경
+      endpoint: http://zipkin:9411/api/v2/spans   # Docker 환경
 eureka:
   client:
     register-with-eureka: true
