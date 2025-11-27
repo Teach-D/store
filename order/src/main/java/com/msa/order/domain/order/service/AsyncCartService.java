@@ -9,6 +9,7 @@ import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.annotation.Backoff;
@@ -30,6 +31,7 @@ public class AsyncCartService {
     private final CartServiceClient cartServiceClient;
     private final ObjectMapper objectMapper;
     private final FailedTaskRepository failedTaskRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     @Lazy
     @Autowired

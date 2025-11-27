@@ -1,13 +1,16 @@
 package com.msa.order.domain.order.service;
 
 import com.msa.order.common.client.*;
+import com.msa.order.domain.order.dto.OrderCreatedEvent;
 import com.msa.order.domain.order.dto.response.ResponseOrder;
 import com.msa.order.domain.order.entity.Order;
 import com.msa.order.domain.order.entity.OrderItem;
 import com.msa.order.domain.order.repository.OrderItemRepository;
 import com.msa.order.domain.order.repository.OrderRepository;
+import com.msa.order.global.RabbitMQConfig;
 import com.msa.order.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ public class OrderService {
     private final CartServiceClient cartServiceClient;
     private final ProductServiceClient productServiceClient;
     private final AsyncCartService asyncCartService;
+    private final RabbitTemplate rabbitTemplate;
 
     public List<ResponseOrder> getOrders(Long userId) {
         List<Order> orders = orderRepository.findAllByMemberId(userId);
@@ -155,7 +159,20 @@ public class OrderService {
         order.updateTotalPrice(totalPrice);
         orderRepository.save(order);
 
-        asyncCartService.clearCartItemsAsync(cartItemIds);
+//        asyncCartService.clearCartItemsAsync(cartItemIds);
+
+        OrderCreatedEvent event = OrderCreatedEvent.of(
+                order.getOrderId(),
+                userId,
+                cartItemIds
+        );
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.ORDER_EXCHANGE,
+                RabbitMQConfig.ORDER_ROUTING_KEY,
+                event
+        );
+
     }
 
     public void deleteOrder(Long orderId) {

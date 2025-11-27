@@ -83,6 +83,9 @@ dependencies {
 
     implementation 'io.github.openfeign:feign-micrometer'
 
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 }
 
 tasks.named('test') {
