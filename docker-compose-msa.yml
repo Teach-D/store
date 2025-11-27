@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    container_name: store-rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+    networks: # ← 이 2줄 추가
+      - msa-network
   # zipkin
   zipkin:
     image: openzipkin/zipkin
