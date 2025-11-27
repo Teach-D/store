@@ -155,7 +155,7 @@ public class OrderService {
         order.updateTotalPrice(totalPrice);
         orderRepository.save(order);
 
-        asyncCartService.clearCartItems(cartItemIds);
+        asyncCartService.clearCartItemsAsync(cartItemIds);
     }
 
     public void deleteOrder(Long orderId) {
