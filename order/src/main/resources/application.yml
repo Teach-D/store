@@ -40,12 +40,14 @@ feign:
 # 로깅 설정
 logging:
   level:
-    com.msa.order: DEBUG
-    org.springframework.security: DEBUG
+    root: INFO
+    com.msa.order: INFO
+    com.msa.order.domain.order.service.AsyncCartService: INFO
+    org.springframework.security: INFO
+    org.springframework.retry: INFO
     org.springframework.cloud.openfeign: DEBUG
   pattern:
-    level: "%5p 
-[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 # JWT 설정
 jwt:

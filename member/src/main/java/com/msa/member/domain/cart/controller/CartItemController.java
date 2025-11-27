@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RequestMapping("/cartItems")
 @RestController
@@ -23,6 +25,10 @@ public class CartItemController {
     private final CartItemService cartItemService;
     private final MemberService memberService;
     private final CartService cartService;
+
+    private static final Map<Long, Integer>
+            failCountMap = new ConcurrentHashMap<>();
+
 
     @GetMapping
     public ResponseEntity<List<ResponseCartItem>> getCartItems(@RequestHeader("X-User-Id") Long userId) {
@@ -57,6 +63,14 @@ public class CartItemController {
 
     @DeleteMapping("/clear/{cartItemId}")
     public ResponseEntity<Void> clearCartItem(@PathVariable Long cartItemId) {
+        int failCount =
+                failCountMap.getOrDefault(cartItemId, 0);
+
+        if (failCount < 4) {
+            failCountMap.put(cartItemId, failCount + 1);
+            throw new RuntimeException("카트 삭제 실패 - 테스트용 (" + (failCount + 1) + "번째 시도)");
+        }
+
         cartItemService.clearCartItem(cartItemId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

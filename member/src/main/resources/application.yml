@@ -35,9 +35,10 @@ feign:
 # 로깅 설정
 logging:
   level:
-    com.msa.member: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
+    com.msa.member: INFO
+    org.springframework.security: INFO
+    org.springframework.cloud.openfeign: INFO
+    feign: INFO
   pattern:
     level: "%5p 
 [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.msa.member.global.exception.ErrorCode.*;
 
@@ -113,6 +115,8 @@ public class CartItemService {
 
     @Transactional
     public void clearCartItem(Long cartItemId) {
+
+
         cartItemRepository.deleteById(cartItemId);
     }
 
