@@ -66,7 +66,7 @@ public class CartItemController {
         int failCount =
                 failCountMap.getOrDefault(cartItemId, 0);
 
-        if (failCount < 4) {
+        if (failCount < 5) {
             failCountMap.put(cartItemId, failCount + 1);
             throw new RuntimeException("카트 삭제 실패 - 테스트용 (" + (failCount + 1) + "번째 시도)");
         }
