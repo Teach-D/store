@@ -1,0 +1,40 @@
+package com.msa.order.domain.fail.config;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
+import org.springframework.retry.annotation.EnableRetry;
+
+@Slf4j
+@Configuration
+@EnableRetry
+public class RetryConfig {
+
+    @Bean
+    public RetryListener retryListener() {
+        return new RetryListener() {
+            @Override
+            public <T, E extends Throwable> boolean open(RetryContext context, RetryCallback<T, E> callback) {
+                log.info("🔄 재시도 준비");
+                return true;
+            }
+
+            @Override
+            public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                if (throwable != null) {
+                    log.error("🔴 재시도 최종 실패: {}", throwable.getMessage());
+                } else {
+                    log.info("🟢 재시도 성공");
+                }
+            }
+
+            @Override
+            public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                log.warn("⚠️ 재시도 {}회 실패: {}", context.getRetryCount(), throwable.getMessage());
+            }
+        };
+    }
+}
