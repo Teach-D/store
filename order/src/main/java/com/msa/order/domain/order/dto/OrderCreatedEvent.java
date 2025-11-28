@@ -13,12 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderCreatedEvent implements Serializable {
 
-    private Long orderId;
     private Long userId;
     private List<Long> cartItemIds;
     private LocalDateTime createdAt;
 
-    public static OrderCreatedEvent of(Long orderId, Long userId, List<Long> cartItemIds) {
-        return new OrderCreatedEvent(orderId, userId, cartItemIds, LocalDateTime.now());
+    public static OrderCreatedEvent of(Long userId, List<Long> cartItemIds) {
+        return new OrderCreatedEvent(userId, cartItemIds, LocalDateTime.now());
     }
 }

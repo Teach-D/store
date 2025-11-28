@@ -1,5 +1,7 @@
 package com.msa.order.domain.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.msa.order.common.client.*;
 import com.msa.order.domain.order.dto.OrderCreatedEvent;
 import com.msa.order.domain.order.dto.response.ResponseOrder;
@@ -7,9 +9,12 @@ import com.msa.order.domain.order.entity.Order;
 import com.msa.order.domain.order.entity.OrderItem;
 import com.msa.order.domain.order.repository.OrderItemRepository;
 import com.msa.order.domain.order.repository.OrderRepository;
+import com.msa.order.domain.outbox.OutboxEvent;
+import com.msa.order.domain.outbox.OutboxEventRepository;
 import com.msa.order.global.RabbitMQConfig;
 import com.msa.order.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -18,10 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.msa.order.global.exception.ErrorCode.ORDER_NOT_FOUND;
 
-@EnableAsync
+@Slf4j
+//@EnableAsync
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -33,6 +41,12 @@ public class OrderService {
     private final ProductServiceClient productServiceClient;
     private final AsyncCartService asyncCartService;
     private final RabbitTemplate rabbitTemplate;
+    private final OutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
+
+    private static final Map<Long, Integer>
+            failCountMap = new ConcurrentHashMap<>();
+
 
     public List<ResponseOrder> getOrders(Long userId) {
         List<Order> orders = orderRepository.findAllByMemberId(userId);
@@ -156,23 +170,41 @@ public class OrderService {
 
         }
 
-        order.updateTotalPrice(totalPrice);
-        orderRepository.save(order);
-
-//        asyncCartService.clearCartItemsAsync(cartItemIds);
-
         OrderCreatedEvent event = OrderCreatedEvent.of(
-                order.getOrderId(),
                 userId,
                 cartItemIds
         );
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.ORDER_EXCHANGE,
-                RabbitMQConfig.ORDER_ROUTING_KEY,
-                event
+        String payload = null;
+
+        try {
+            payload = objectMapper.writeValueAsString(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        OutboxEvent outboxEvent = new OutboxEvent(
+                "ORDER",
+                "ORDER_CREATED",
+                payload
         );
 
+        outboxEventRepository.save(outboxEvent);
+
+        int failCount =
+                failCountMap.getOrDefault(1L, 0);
+
+        if (failCount < 1) {
+            failCountMap.put(1L, failCount + 1);
+            log.warn("----------오류발생-------------");
+            throw new RuntimeException("주문 저장 실패");
+        }
+
+
+        order.updateTotalPrice(totalPrice);
+        orderRepository.save(order);
+
+//        asyncCartService.clearCartItemsAsync(cartItemIds);
     }
 
     public void deleteOrder(Long orderId) {
