@@ -23,7 +23,7 @@ public class FailedTaskScheduler {
     private final CartServiceClient cartServiceClient;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 6000)
+//    @Scheduled(fixedDelay = 6000)
     @Transactional
     public void retryFailedTasks(){
         log.info("재시도 스케줄링 시작");
