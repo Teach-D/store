@@ -170,6 +170,9 @@ public class OrderService {
 
         }
 
+        order.updateTotalPrice(totalPrice);
+        orderRepository.save(order);
+
         OrderCreatedEvent event = OrderCreatedEvent.of(
                 userId,
                 cartItemIds
@@ -185,6 +188,7 @@ public class OrderService {
 
         OutboxEvent outboxEvent = new OutboxEvent(
                 "ORDER",
+                order.getOrderId().toString(),
                 "ORDER_CREATED",
                 payload
         );
@@ -200,11 +204,6 @@ public class OrderService {
             throw new RuntimeException("주문 저장 실패");
         }
 
-
-        order.updateTotalPrice(totalPrice);
-        orderRepository.save(order);
-
-//        asyncCartService.clearCartItemsAsync(cartItemIds);
     }
 
     public void deleteOrder(Long orderId) {

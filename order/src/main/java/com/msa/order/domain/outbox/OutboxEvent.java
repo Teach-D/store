@@ -26,8 +26,9 @@ public class OutboxEvent {
     private LocalDateTime createdAt = LocalDateTime.now();
     private boolean published = false;
 
-    public OutboxEvent(String aggregateType, String eventType, String payload) {
+    public OutboxEvent(String aggregateType, String aggregateId, String eventType, String payload) {
         this.aggregateType = aggregateType;
+        this.aggregateId = aggregateId;
         this.eventType = eventType;
         this.payload = payload;
     }
