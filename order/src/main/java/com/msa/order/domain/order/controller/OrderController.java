@@ -41,6 +41,12 @@ public class OrderController {
         return ResponseEntity.status(OK).build();
     }
 
+    @PostMapping("/id/{userId}")
+    public ResponseEntity<Void> addOrderByNoDiscountById(@PathVariable Long userId) {
+        orderService.addOrderByNoDiscount(userId);
+        return ResponseEntity.status(OK).build();
+    }
+
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@RequestHeader("X-User-Id") Long userId, @PathVariable Long orderId) {
         orderService.deleteOrder(orderId);

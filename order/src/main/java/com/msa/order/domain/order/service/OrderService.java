@@ -195,14 +195,14 @@ public class OrderService {
 
         outboxEventRepository.save(outboxEvent);
 
-        int failCount =
+/*        int failCount =
                 failCountMap.getOrDefault(1L, 0);
 
         if (failCount < 1) {
             failCountMap.put(1L, failCount + 1);
             log.warn("----------오류발생-------------");
             throw new RuntimeException("주문 저장 실패");
-        }
+        }*/
 
     }
 

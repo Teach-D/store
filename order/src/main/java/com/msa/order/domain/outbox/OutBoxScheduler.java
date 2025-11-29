@@ -25,22 +25,33 @@ public class OutBoxScheduler {
 
     @Scheduled(fixedDelay = 1000)
     public void publishOutboxEvents() {
-        List<OutboxEvent> events = outboxEventRepository.findByPublishedOrderByCreatedAtAsc(false);
+        try {
+            long start = System.currentTimeMillis();
+            List<OutboxEvent> events = outboxEventRepository.findByPublishedOrderByCreatedAtAsc(false);
 
-        if (events.isEmpty()) {
-            return;
-        }
-
-        for (OutboxEvent event : events) {
-            try {
-                publishEvent(event);
-
-                log.info("✅ 이벤트 발행 성공: id={}, type={}", event.getId(), event.getEventType());
-
-                event.changeAsPublished();
-            }  catch (Exception e) {
-                log.error("발행 실패, 다음 스케줄에 재시도", e);
+            if (events.isEmpty()) {
+                return;
             }
+
+            log.info("outbox event 발생 시작, {}", events.size());
+
+            for (OutboxEvent event : events) {
+                try {
+                    publishEvent(event);
+
+                    log.info("이벤트 발행 성공: id={}, type={}", event.getId(), event.getEventType());
+
+                    event.changeAsPublished();
+                }  catch (Exception e) {
+                    log.error("발행 실패, 다음 스케줄에 재시도", e);
+                }
+            }
+
+            long end = System.currentTimeMillis();
+            long elapsed = end - start;
+            log.info("스케줄링 한 사이클 소요 시간 : {}", elapsed);
+        } catch (Exception e) {
+            log.error("outbox 스케줄링 실패");
         }
     }
 
@@ -48,15 +59,22 @@ public class OutBoxScheduler {
         String eventType = outboxEvent.getEventType();
         String payload = outboxEvent.getPayload();
 
-        OrderCreatedEvent event = objectMapper.readValue(
-                payload,
-                OrderCreatedEvent.class
-        );
+        switch (eventType) {
+            case "ORDER_CREATED":
+                OrderCreatedEvent event = objectMapper.readValue(
+                        payload,
+                        OrderCreatedEvent.class
+                );
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.ORDER_EXCHANGE,
-                RabbitMQConfig.ORDER_ROUTING_KEY,
-                event
-        );
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.ORDER_EXCHANGE,
+                        RabbitMQConfig.ORDER_ROUTING_KEY,
+                        event
+                );
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
     }
 }
