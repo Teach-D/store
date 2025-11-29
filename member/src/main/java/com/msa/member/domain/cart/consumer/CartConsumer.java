@@ -17,7 +17,7 @@ public class CartConsumer {
 
     @RabbitListener(queues = "order.created")
     public void handleOrderCreated(OrderCreatedEvent event) {
-//        log.info("consumer : orderId : {}", event.getOrderId());
+        log.info("consumer 메시지 수신 : orderId : {}", event.getOrderId());
 
         try {
             for (Long cartItemId : event.getCartItemIds()) {

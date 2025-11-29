@@ -174,6 +174,7 @@ public class OrderService {
         orderRepository.save(order);
 
         OrderCreatedEvent event = OrderCreatedEvent.of(
+                order.getOrderId(),
                 userId,
                 cartItemIds
         );
