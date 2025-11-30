@@ -1,0 +1,18 @@
+package com.example.payment.domain.payment.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaymentFailedEvent implements Serializable {
+    private Long orderId;
+    private Long paymentId;
+    private String reason;
+}
