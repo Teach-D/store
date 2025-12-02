@@ -5,18 +5,29 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:mysql://host.docker.internal:3309/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: 1234
+    url: jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: dbadmin
+    password: dbpassword11
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # HikariCP 설정 추가
+    hikari:
+      maximum-pool-size: 5              # 최대 연결 수 (기본값 10에서 5로 감소)
+      minimum-idle: 2                   # 최소 유휴 연결 수
+      connection-timeout: 20000         # 연결 타임아웃 (20초)
+      idle-timeout: 300000              # 유휴 연결 타임아웃 (5분)
+      max-lifetime: 1200000             # 연결 최대 수명 (20분)
+      connection-test-query: SELECT 1   # 연결 테스트 쿼리
+      pool-name: MemberServiceHikariCP
+      leak-detection-threshold: 60000   # 연결 누수 감지 (1분)
+  application:
+    name: order-service
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
-  application:
-    name: order-service
+
 
   rabbitmq:
     host: store-rabbitmq
@@ -26,11 +37,11 @@ spring:
 # Feign Client 설정
 member:
   service:
-    url: http://member-service:8080
+    url: http://member-service
 
 product:
   service:
-    url: http://product-service:8080
+    url: http://product-service
 
 feign:
   client:
@@ -109,7 +120,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://host.docker.internal:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
 ---
 # Docker 환경 설정
 spring:
@@ -121,4 +132,4 @@ spring:
 
 member:
   service:
-    url: http://member-service:8080
+    url: http://member-service

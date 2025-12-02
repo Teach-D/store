@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8000
 
 spring:
   profiles:
@@ -72,18 +72,18 @@ logging:
 # 서비스 URL 설정 (로컬 개발용)
 services:
   member:
-    url: http://host.docker.internal:8081
+    url: http://member-service
   order:
-    url: http://host.docker.internal:8082
+    url: http://order-service
   product:
-    url: http://host.docker.internal:8083
+    url: http://product-service
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://host.docker.internal:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
 
 ---
 # Docker 환경 설정
@@ -95,9 +95,9 @@ spring:
 # Docker 네트워크 내부 통신
 services:
   member:
-    url: http://member-service:8080
+    url: http://member-service
   order:
-    url: http://order-service:8080
+    url: http://order-service
   product:
-    url: http://product-service:8080
+    url: http://product-service
 
