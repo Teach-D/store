@@ -28,7 +28,7 @@ public class OutBoxScheduler {
     @Scheduled(fixedDelay = 1000)
     public void publishOutboxEvents() {
         try {
-            List<OutboxEvent> events = outboxEventRepository.findByPublishedOrderByCreatedAtAsc(false);
+            List<OutboxEvent> events = outboxEventRepository.findByPublishedAndEventTypeStartingWithOrderByCreatedAtAsc(false, "PAYMENT");
 
             if (events.isEmpty()) {
                 return;
@@ -84,7 +84,6 @@ public class OutBoxScheduler {
                 break;
 
             default:
-                throw new IllegalArgumentException();
         }
 
     }

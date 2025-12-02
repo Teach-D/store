@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String ORDER_QUEUE = "order.created";
+    public static final String ORDER_CREATED_PAYMENT_QUEUE = "order.created.payment";
     public static final String ORDER_EXCHANGE = "order.exchange";
     public static final String ORDER_ROUTING_KEY = "order.created";
 
@@ -19,9 +20,21 @@ public class RabbitMQConfig {
     public static final String PAYMENT_COMPLETED_QUEUE = "payment.completed";
     public static final String PAYMENT_FAILED_QUEUE = "payment.failed";
 
+
     @Bean
     public Queue orderQueue() {
         return new Queue(ORDER_QUEUE, true);
+    }
+
+    @Bean
+    public Queue orderCreatedPaymentQueue() {
+        return new Queue(ORDER_CREATED_PAYMENT_QUEUE);
+    }
+
+    @Bean
+    public Binding orderCreatedPaymentBinding(Queue orderCreatedPaymentQueue, DirectExchange orderExchange) {
+        return BindingBuilder
+                .bind(orderCreatedPaymentQueue).to(orderExchange).with("order.created.payment");
     }
 
     @Bean
@@ -50,12 +63,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding paymentCompletedBinding(Queue paymentCompletedQueue, DirectExchange paymentExchange) {
+    public Binding paymentCompletedBinding(Queue paymentCompletedQueue, TopicExchange paymentExchange) {
         return BindingBuilder.bind(paymentCompletedQueue).to(paymentExchange).with("payment.completed");
     }
 
     @Bean
-    public Binding paymenFailedBinding(Queue paymentFailedQueue, DirectExchange paymentExchange) {
+    public Binding paymenFailedBinding(Queue paymentFailedQueue, TopicExchange paymentExchange) {
         return BindingBuilder.bind(paymentFailedQueue).to(paymentExchange).with("payment.failed");
     }
 

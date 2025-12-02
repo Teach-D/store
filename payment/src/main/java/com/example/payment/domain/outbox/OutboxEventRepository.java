@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface OutboxEventRepository extends JpaRepository<OutboxEvent, Long> {
     List<OutboxEvent> findByPublishedOrderByCreatedAtAsc(boolean published);
+    List<OutboxEvent> findByPublishedAndEventTypeStartingWithOrderByCreatedAtAsc(
+            boolean published,
+            String eventTypePrefix
+    );
 }

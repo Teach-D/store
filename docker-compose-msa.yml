@@ -91,7 +91,6 @@ services:
       - product-service
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
   # Member Service
   member-service:
     build:
@@ -163,6 +162,29 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # Payment Service
+  payment-service:
+    build:
+      context: ./payment
+      dockerfile: Dockerfile
+    image: store-payment-service
+    container_name: payment-service
+    restart: always
+    ports:
+      - "8084:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - PRODUCT_SERVICE_URL=http://product-service:8080
+    networks:
+      - msa-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 # 네트워크 정의
 networks:
   msa-network:

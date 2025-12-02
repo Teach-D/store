@@ -3,6 +3,7 @@ package com.msa.order.domain.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.msa.order.domain.order.dto.OrderCreatedEvent;
+import com.msa.order.domain.order.dto.StockRestoreEvent;
 import com.msa.order.global.RabbitMQConfig;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -61,19 +62,42 @@ public class OutBoxScheduler {
 
         switch (eventType) {
             case "ORDER_CREATED":
-                OrderCreatedEvent event = objectMapper.readValue(
+                OrderCreatedEvent orderCreatedEvent = objectMapper.readValue(
                         payload,
                         OrderCreatedEvent.class
                 );
 
                 rabbitTemplate.convertAndSend(
                         RabbitMQConfig.ORDER_EXCHANGE,
-                        RabbitMQConfig.ORDER_ROUTING_KEY,
-                        event
+                        "order.created.payment",
+                        orderCreatedEvent
+                );
+                break;
+            case "STOCK_RESTORE":
+                StockRestoreEvent stockRestoreEvent = objectMapper.readValue(
+                        payload,
+                        StockRestoreEvent.class
+                );
+
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.ORDER_EXCHANGE,
+                        "stock.restore",
+                        stockRestoreEvent
+                );
+                break;
+            case "CART_DELETE":
+                OrderCreatedEvent cartDeleteEvent = objectMapper.readValue(
+                        payload,
+                        OrderCreatedEvent.class
+                );
+
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.ORDER_EXCHANGE,
+                        "cart.delete",
+                        cartDeleteEvent
                 );
                 break;
             default:
-                throw new IllegalArgumentException();
         }
 
     }

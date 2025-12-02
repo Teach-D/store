@@ -80,30 +80,6 @@ management:
       # endpoint: http://localhost:9411/api/v2/spans  # 로컬 환경
       endpoint: http://zipkin:9411/api/v2/spans   # Docker 환경
 
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        register-health-indicator: true
-        sliding-window-type: COUNT_BASED
-        sliding-window-size: 10
-        minimum-number-of-calls: 5 # 최소 5번 이상
-        failure-rate-threshold: 50 # 실패가 50%이상이면 OPEN으로
-        slow-call-rate-threshold: 80
-        slow-call-duration-threshold: 5s
-        wait-duration-in-open-state: 30s
-        permitted-number-of-calls-in-half-open-state: 3 # HALF_OPEN된 상태에서 3번 실행을 했을 때 OPEN이 아니면 CLOSED로
-        automatic-transition-from-open-to-half-open-enabled: true
-        record-failure-predicate: com.msa.order.domain.fail.config.FeignCircuitRecordFailurePredicate
-    instances:
-      memberService:
-        base-config: default
-  timelimiter:
-    configs:
-      default:
-        timeout-duration: 6s
-        cancel-running-future: true
-
 eureka:
   client:
     register-with-eureka: true

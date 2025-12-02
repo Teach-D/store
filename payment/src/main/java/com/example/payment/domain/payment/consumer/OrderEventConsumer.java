@@ -14,7 +14,7 @@ public class OrderEventConsumer {
 
     private final PaymentService paymentService;
 
-    @RabbitListener(queues = "order.created")
+    @RabbitListener(queues = "order.created.payment")
     public void handleOrderCreated(OrderCreatedEvent event) {
         log.info("Received OrderCreatedEvent: {}", event);
 

@@ -17,8 +17,9 @@ public class OrderCreatedEvent implements Serializable {
     private Long userId;
     private List<Long> cartItemIds;
     private LocalDateTime createdAt;
+    private int totalPrice;
 
-    public static OrderCreatedEvent of(Long orderId, Long userId, List<Long> cartItemIds) {
-        return new OrderCreatedEvent(orderId, userId, cartItemIds, LocalDateTime.now());
+    public static OrderCreatedEvent of(Long orderId, Long userId, List<Long> cartItemIds, int totalPrice) {
+        return new OrderCreatedEvent(orderId, userId, cartItemIds, LocalDateTime.now(), totalPrice);
     }
 }

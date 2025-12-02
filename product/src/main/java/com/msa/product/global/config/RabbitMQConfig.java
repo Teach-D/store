@@ -1,9 +1,6 @@
-package com.msa.member.global;
+package com.msa.product.global.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -14,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String CART_DELETE_QUEUE = "cart.delete";
-
     public static final String ORDER_EXCHANGE = "order.exchange";
+
+    public static final String STOCK_RESTORE_QUEUE = "stock.restore";
 
     @Bean
     public DirectExchange orderExchange() {
@@ -24,18 +21,19 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue cartDeleteQueue() {
-        return new Queue(CART_DELETE_QUEUE);
+    public Queue stockRestoreQueue() {
+        return new Queue(STOCK_RESTORE_QUEUE, true);
     }
 
     @Bean
-    public Binding cartDeleteBinding(Queue cartDeleteQueue, DirectExchange orderExchange) {
-        return BindingBuilder.bind(cartDeleteQueue).to(orderExchange).with("cart.delete");
+    public Binding stockRestoreBinding(Queue stockRestoreQueue, DirectExchange orderExchange) {
+        return BindingBuilder.bind(stockRestoreQueue).to(orderExchange).with("stock.restore");
     }
 
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
+        return new
+                Jackson2JsonMessageConverter();
     }
 
     @Bean

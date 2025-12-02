@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-/*@Table(
+@Table(
         name = "idx_published_created",
         indexes = {
                 @Index(name = "idx_published_created",
                 columnList = "published, createdAt")
         }
-)*/
+)
 @NoArgsConstructor
 @Getter
 public class OutboxEvent {
