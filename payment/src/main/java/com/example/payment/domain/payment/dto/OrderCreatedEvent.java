@@ -1,4 +1,4 @@
-package com.msa.order.domain.order.dto;
+package com.example.payment.domain.payment.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +18,6 @@ public class OrderCreatedEvent implements Serializable {
     private List<Long> cartItemIds;
     private LocalDateTime createdAt;
     private int totalPrice;
-
     public static OrderCreatedEvent of(Long orderId, Long userId, List<Long> cartItemIds, int totalPrice) {
         return new OrderCreatedEvent(orderId, userId, cartItemIds, LocalDateTime.now(), totalPrice);
     }

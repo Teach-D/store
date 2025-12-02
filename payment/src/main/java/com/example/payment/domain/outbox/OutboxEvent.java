@@ -1,7 +1,6 @@
-package com.msa.order.domain.outbox;
+package com.example.payment.domain.outbox;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

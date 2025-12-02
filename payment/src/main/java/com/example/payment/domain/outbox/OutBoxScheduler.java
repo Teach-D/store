@@ -1,10 +1,11 @@
-package com.msa.order.domain.outbox;
+package com.example.payment.domain.outbox;
 
+import com.example.payment.domain.payment.dto.OrderCreatedEvent;
+import com.example.payment.domain.payment.dto.PaymentCompletedEvent;
+import com.example.payment.domain.payment.dto.PaymentFailedEvent;
+import com.example.payment.global.RabbitMQConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.msa.order.domain.order.dto.OrderCreatedEvent;
-import com.msa.order.domain.order.dto.StockRestoreEvent;
-import com.msa.order.global.RabbitMQConfig;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +28,13 @@ public class OutBoxScheduler {
     @Scheduled(fixedDelay = 1000)
     public void publishOutboxEvents() {
         try {
-            long start = System.currentTimeMillis();
-            List<OutboxEvent> events = outboxEventRepository.findByPublishedOrderByCreatedAtAsc(false);
+            List<OutboxEvent> events = outboxEventRepository.findByPublishedAndEventTypeStartingWithOrderByCreatedAtAsc(false, "PAYMENT");
 
             if (events.isEmpty()) {
                 return;
             }
 
-            log.info("outbox event 발생 시작, {}", events.size());
+            log.info("payment outbox event 발생 시작, {}", events.size());
 
             for (OutboxEvent event : events) {
                 try {
@@ -48,9 +48,6 @@ public class OutBoxScheduler {
                 }
             }
 
-            long end = System.currentTimeMillis();
-            long elapsed = end - start;
-            log.info("스케줄링 한 사이클 소요 시간 : {}", elapsed);
         } catch (Exception e) {
             log.error("outbox 스케줄링 실패");
         }
@@ -61,42 +58,31 @@ public class OutBoxScheduler {
         String payload = outboxEvent.getPayload();
 
         switch (eventType) {
-            case "ORDER_CREATED":
-                OrderCreatedEvent orderCreatedEvent = objectMapper.readValue(
+            case "PAYMENT_COMPLETED":
+                PaymentCompletedEvent completedEvent = objectMapper.readValue(
                         payload,
-                        OrderCreatedEvent.class
+                        PaymentCompletedEvent.class
                 );
 
                 rabbitTemplate.convertAndSend(
-                        RabbitMQConfig.ORDER_EXCHANGE,
-                        "order.created.payment",
-                        orderCreatedEvent
+                        RabbitMQConfig.PAYMENT_EXCHANGE,
+                        "payment.completed",
+                        completedEvent
                 );
                 break;
-            case "STOCK_RESTORE":
-                StockRestoreEvent stockRestoreEvent = objectMapper.readValue(
+            case "PAYMENT_FAILED":
+                PaymentFailedEvent failedEvent = objectMapper.readValue(
                         payload,
-                        StockRestoreEvent.class
+                        PaymentFailedEvent.class
                 );
 
                 rabbitTemplate.convertAndSend(
-                        RabbitMQConfig.ORDER_EXCHANGE,
-                        "stock.restore",
-                        stockRestoreEvent
+                        RabbitMQConfig.PAYMENT_EXCHANGE,
+                        "payment.failed",
+                        failedEvent
                 );
                 break;
-            case "CART_DELETE":
-                OrderCreatedEvent cartDeleteEvent = objectMapper.readValue(
-                        payload,
-                        OrderCreatedEvent.class
-                );
 
-                rabbitTemplate.convertAndSend(
-                        RabbitMQConfig.ORDER_EXCHANGE,
-                        "cart.delete",
-                        cartDeleteEvent
-                );
-                break;
             default:
         }
 

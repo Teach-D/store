@@ -1,4 +1,4 @@
-package com.msa.order.global;
+package com.example.payment.global;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -20,10 +20,6 @@ public class RabbitMQConfig {
     public static final String PAYMENT_COMPLETED_QUEUE = "payment.completed";
     public static final String PAYMENT_FAILED_QUEUE = "payment.failed";
 
-    public static final String STOCK_RESTORE_QUEUE = "stock.restore";
-
-    public static final String CART_DELETE_QUEUE = "cart.delete";
-
 
     @Bean
     public Queue orderQueue() {
@@ -36,19 +32,19 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Binding orderCreatedPaymentBinding(Queue orderCreatedPaymentQueue, DirectExchange orderExchange) {
+        return BindingBuilder
+                .bind(orderCreatedPaymentQueue).to(orderExchange).with("order.created.payment");
+    }
+
+    @Bean
     public DirectExchange orderExchange() {
         return new DirectExchange(ORDER_EXCHANGE);
     }
 
     @Bean
-    public Binding binding(Queue orderQueue, DirectExchange orderExchange) {
+    public Binding orderBinding(Queue orderQueue, DirectExchange orderExchange) {
         return BindingBuilder.bind(orderQueue).to(orderExchange).with(ORDER_ROUTING_KEY);
-    }
-
-    @Bean
-    public Binding orderCreatedPaymentBinding(Queue orderCreatedPaymentQueue, DirectExchange orderExchange) {
-          return BindingBuilder
-                  .bind(orderCreatedPaymentQueue).to(orderExchange).with("order.created.payment");
     }
 
     @Bean
@@ -67,33 +63,13 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding paymentCompletedBinding(Queue paymentCompletedQueue, DirectExchange paymentExchange) {
+    public Binding paymentCompletedBinding(Queue paymentCompletedQueue, TopicExchange paymentExchange) {
         return BindingBuilder.bind(paymentCompletedQueue).to(paymentExchange).with("payment.completed");
     }
 
     @Bean
-    public Binding paymenFailedBinding(Queue paymentFailedQueue, DirectExchange paymentExchange) {
+    public Binding paymenFailedBinding(Queue paymentFailedQueue, TopicExchange paymentExchange) {
         return BindingBuilder.bind(paymentFailedQueue).to(paymentExchange).with("payment.failed");
-    }
-
-    @Bean
-    public Queue stockRestoreQueue() {
-        return new Queue(STOCK_RESTORE_QUEUE, true);
-    }
-
-    @Bean
-    public Binding stockRestoreBinding(Queue stockRestoreQueue, DirectExchange orderExchange) {
-        return BindingBuilder.bind(stockRestoreQueue).to(orderExchange).with("stock.restore");
-    }
-
-    @Bean
-    public Queue cartDeleteQueue() {
-        return new Queue(CART_DELETE_QUEUE);
-    }
-
-    @Bean
-    public Binding cartDeleteBinding(Queue cartDeleteQueue, DirectExchange orderExchange) {
-        return BindingBuilder.bind(cartDeleteQueue).to(orderExchange).with("cart.delete");
     }
 
     @Bean

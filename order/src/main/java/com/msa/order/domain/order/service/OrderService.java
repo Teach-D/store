@@ -146,6 +146,7 @@ public class OrderService {
                 .memberId(userId)
                 .deliveryId(delivery)
                 .date(date)
+                .status(Order.OrderStatus.PENDING)
                 .build();
 
         int totalPrice = 0;
@@ -176,7 +177,8 @@ public class OrderService {
         OrderCreatedEvent event = OrderCreatedEvent.of(
                 order.getOrderId(),
                 userId,
-                cartItemIds
+                cartItemIds,
+                totalPrice
         );
 
         String payload = null;
@@ -195,6 +197,8 @@ public class OrderService {
         );
 
         outboxEventRepository.save(outboxEvent);
+
+        log.info("PENDING 주문 생성 orderId : {}, totalPrice : {}", order.getOrderId(), order.getTotalPrice());
 
 /*        int failCount =
                 failCountMap.getOrDefault(1L, 0);
@@ -220,5 +224,19 @@ public class OrderService {
         });
 
         orderRepository.delete(order);
+    }
+
+    public void conformOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+        order.confirm();
+
+        log.info("주문 확정 orderId : {}",  orderId);
+    }
+
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+        order.cancel();
+
+        log.info("주문 취소 orderId : {}",  orderId);
     }
 }

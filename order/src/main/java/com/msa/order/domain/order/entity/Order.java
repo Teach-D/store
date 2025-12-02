@@ -35,7 +35,24 @@ public class Order {
 
     private int totalPrice;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status = OrderStatus.PENDING;
+
+    public enum OrderStatus {
+        PENDING,
+        CONFIRMED,
+        CANCELLED
+    }
+
     public void updateTotalPrice(int totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public void confirm() {
+        this.status = OrderStatus.CONFIRMED;
+    }
+
+    public void cancel() {
+        this.status = OrderStatus.CANCELLED;
     }
 }

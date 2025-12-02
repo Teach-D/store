@@ -256,4 +256,12 @@ public class ProductService {
         Product product = productRepository.findById(productId).orElseThrow();
         return product.getPrice();
     }
+
+    public void restoreTock(Long productId, Integer quantity) {
+        Product product = productRepository.findById(productId).orElseThrow();
+        product.updateQuantity(product.getQuantity() + quantity);
+        product.updateSaleQuantity(product.getSaleQuantity() - quantity);
+
+        log.info("재고 복구 완료(DB)");
+    }
 }
