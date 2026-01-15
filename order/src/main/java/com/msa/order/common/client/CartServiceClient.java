@@ -18,8 +18,8 @@ public interface CartServiceClient {
     @GetMapping("/carts/{memberId}")
     Long getCartId(@PathVariable Long memberId);
 
-    @GetMapping("/cartItems/cart/{cartId}")
-    List<CartItemDto> getCartItems(@PathVariable Long cartId);
+    @GetMapping("/cartItems/cart")
+    List<CartItemDto> getCartItems(@RequestHeader("X-User-Id") Long userId);
 
     @GetMapping("/coupons/amount/{couponId}")
     int getDiscountAmount(@PathVariable Long couponId);

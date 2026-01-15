@@ -91,7 +91,10 @@ public class ProductController {
 
 
     @PostMapping
-    public ResponseEntity addProduct(@Valid @RequestBody RequestProduct requestProduct, BindingResult bindingResult) {
+    public ResponseEntity addProduct(
+            @Valid @RequestPart("product") RequestProduct requestProduct,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
+            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             bindingResult.getAllErrors().forEach(objectError -> {
@@ -100,8 +103,13 @@ public class ProductController {
             });
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
         }
-        productService.addProduct(requestProduct);
-        return ResponseEntity.status(OK).build();
+        try {
+            productService.addProduct(requestProduct, image);
+            return ResponseEntity.status(OK).build();
+        } catch (Exception e) {
+            log.error("상품 등록 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 등록에 실패했습니다: " + e.getMessage());
+        }
     }
 
     @PatchMapping("/{id}")

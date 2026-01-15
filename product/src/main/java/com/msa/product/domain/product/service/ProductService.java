@@ -35,10 +35,26 @@ public class ProductService {
     private final CategoryService categoryService;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    private final ImageUploadService imageUploadService;
+    private final com.msa.product.domain.product.repository.ProductDetailRepository productDetailRepository;
 
     @Transactional
-    public void addProduct(RequestProduct requestProduct) {
+    public void addProduct(RequestProduct requestProduct, org.springframework.web.multipart.MultipartFile image) throws java.io.IOException {
         Category category = categoryService.getCategory(requestProduct.getCategoryId());
+
+        String imageUrl = null;
+
+        // 1. 이미지 파일이 업로드된 경우
+        if (image != null && !image.isEmpty()) {
+            imageUrl = imageUploadService.saveImage(image);
+            log.info("파일 업로드 완료. imageUrl: {}", imageUrl);
+        }
+        // 2. RequestProduct에 imageUrl이 있는 경우 (외부 URL)
+        else if (requestProduct.getImageUrl() != null && !requestProduct.getImageUrl().isEmpty()) {
+            imageUrl = requestProduct.getImageUrl();
+            log.info("외부 URL 사용. imageUrl: {}", imageUrl);
+        }
+
         Product product = Product.builder()
                         .category(category)
                         .quantity(requestProduct.getQuantity())
@@ -54,29 +70,32 @@ public class ProductService {
         ProductDetail productDetail = ProductDetail.builder()
                 .product(product)
                 .description(requestProduct.getDescription())
-                .imageUrl(requestProduct.getImageUrl())
+                .imageUrl(imageUrl)
                 .rating(rating)
                 .build();
 
-
         productRepository.save(product);
+        productDetailRepository.save(productDetail);
+
+        log.info("상품 등록 완료. productId: {}, imageUrl: {}", product.getId(), imageUrl);
     }
 
 
     // categoryId로 category에 속해 있는 product list 조회
     @Transactional(readOnly = true)
     public List<ResponseProduct> getProductsByCategoryId(Long categoryId) {
+        log.info("getProductsByCategoryId {}", categoryId);
         List<ResponseProduct> responseProducts = new ArrayList<>();
+        List<Product> productsCategoryId;
 
-        List<Product> productsCategoryId = productRepository.findByCategory_id(categoryId);
+        if (categoryId == 0) {
+            productsCategoryId = productRepository.findAll();
+        } else {
+            productsCategoryId = productRepository.findByCategory_id(categoryId);
+        }
+
         for (Product product : productsCategoryId) {
-            ResponseProduct build = ResponseProduct.builder()
-                    .title(product.getTitle())
-                    .price(product.getPrice())
-                    .quantity(product.getQuantity())
-                    .categoryId(categoryId)
-                    .build();
-            responseProducts.add(build);
+            responseProducts.add(ResponseProduct.entityToDto(product));
         }
 
         return responseProducts;
@@ -91,15 +110,7 @@ public class ProductService {
         List<ProductTag> productTags = tag.getProductTags();
         for (ProductTag productTag : productTags) {
             Product product = productTag.getProduct();
-
-            ResponseProduct responseProduct = ResponseProduct.builder()
-                    .title(product.getTitle())
-                    .price(product.getPrice())
-                    .quantity(product.getQuantity())
-                    .categoryId(product.getCategory().getId())
-                    .build();
-
-            responseProducts.add(responseProduct);
+            responseProducts.add(ResponseProduct.entityToDto(product));
         }
 
         return responseProducts;
@@ -109,11 +120,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ResponseProduct getProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        return ResponseProduct.builder()
-                .title(product.getTitle())
-                .price(product.getPrice())
-                .categoryId(product.getCategory().getId())
-                .build();
+        return ResponseProduct.entityToDto(product);
     }
 
     public void editProduct(RequestProduct requestProduct, Long id) {
@@ -203,10 +210,7 @@ public class ProductService {
 
     public ResponseProduct getProductByName(String name) {
         Product product = productRepository.findByTitle(name);
-        return ResponseProduct.builder()
-                .title(product.getTitle())
-                .price(product.getPrice())
-                .build();
+        return ResponseProduct.entityToDto(product);
     }
 
     public List<ResponseProduct> getProductsByOption(Long categoryId, String title, String sort, String order) {

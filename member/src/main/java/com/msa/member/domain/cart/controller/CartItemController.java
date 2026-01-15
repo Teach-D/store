@@ -36,9 +36,9 @@ public class CartItemController {
         return ResponseEntity.status(HttpStatus.OK).body(cartItems);
     }
 
-    @GetMapping("/cart/{cartId}")
-    public List<CartItemDto> getCartItemDtos(@PathVariable Long cartId) {
-        return cartItemService.getCartItemDtos(cartId);
+    @GetMapping("/cart")
+    public List<CartItemDto> getCartItemDtos(@RequestHeader("X-User-Id") Long userId) {
+        return cartItemService.getCartItemDtos(userId);
     }
 
 
@@ -49,8 +49,8 @@ public class CartItemController {
     }
 
     @PostMapping("/{productId}")
-    public ResponseEntity<Void> addCartItem(@RequestBody RequestCartItem requestCartItem, @PathVariable Long productId) {
-        cartItemService.addCartItem(requestCartItem, productId);
+    public ResponseEntity<Void> addCartItem(@RequestHeader("X-User-Id") Long userId, @RequestBody RequestCartItem requestCartItem, @PathVariable Long productId) {
+        cartItemService.addCartItem(requestCartItem, productId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

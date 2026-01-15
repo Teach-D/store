@@ -57,7 +57,7 @@ public class CartItemService {
         return cartItemDtos;
     }
 
-    public void addCartItem(RequestCartItem requestCartItem, Long productId) {
+    public void addCartItem(RequestCartItem requestCartItem, Long productId, Long userId) {
         int orderQuantity = requestCartItem.getQuantity();
         int productQuantity = productServiceClient.getProductQuantity(productId);
         int productSaleQuantity = productServiceClient.getProductSaleQuantity(productId);
@@ -66,9 +66,9 @@ public class CartItemService {
             throw new CustomException(OUT_OF_PRODUCT_QUANTITY);
         }
 
-        if (cartItemRepository.existsByCartIdAndProductId(requestCartItem.getCartId(), productId)) {
+        if (cartItemRepository.existsByCartIdAndProductId(userId, productId)) {
             CartItem cartItem = cartItemRepository
-                    .findCartItemByCartIdAndProductId(requestCartItem.getCartId(), productId)
+                    .findCartItemByCartIdAndProductId(userId, productId)
                     .orElseThrow(() -> new CustomException(CART_ITEM_NOT_FOUND));
 
             cartItem.updateQuantity(cartItem.getQuantity() + requestCartItem.getQuantity());
@@ -85,7 +85,7 @@ public class CartItemService {
         productServiceClient.updateProductSaleQuantity(productId, productSaleQuantity + orderQuantity);
 */
 
-        Cart cart = cartRepository.findById(requestCartItem.getCartId()).orElseThrow(() -> new CustomException(CART_NOT_FOUND));
+        Cart cart = cartRepository.findById(userId).orElseThrow(() -> new CustomException(CART_NOT_FOUND));
 
         CartItem cartItem = CartItem.builder()
                 .cart(cart)

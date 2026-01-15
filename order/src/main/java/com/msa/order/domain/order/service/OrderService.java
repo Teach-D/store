@@ -91,7 +91,7 @@ public class OrderService {
 
     public void addOrderByDiscount(Long userId, Long discountId) {
         Long cartId = cartServiceClient.getCartId(userId);
-        List<CartItemDto> cartItems = cartServiceClient.getCartItems(cartId);
+        List<CartItemDto> cartItems = cartServiceClient.getCartItems(userId);
         Long delivery = cartServiceClient.getDelivery(userId);
         int discountAmount = cartServiceClient.getDiscountAmount(discountId);
 
@@ -135,7 +135,7 @@ public class OrderService {
 
     public void addOrderByNoDiscount(Long userId) {
         Long cartId = cartServiceClient.getCartId(userId);
-        List<CartItemDto> cartItems = cartServiceClient.getCartItems(cartId);
+        List<CartItemDto> cartItems = cartServiceClient.getCartItems(userId);
         Long delivery = cartServiceClient.getDelivery(userId);
         List<Long> cartItemIds = new ArrayList<>();
 

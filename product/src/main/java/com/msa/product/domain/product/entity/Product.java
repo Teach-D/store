@@ -44,6 +44,10 @@ public class Product {
     @JsonIgnore
     private final List<ProductTag> productTags = new ArrayList<>();
 
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private ProductDetail productDetail;
+
     public Product(Product p) {
         this.id = p.getId();
         this.title = p.getTitle();
@@ -51,6 +55,7 @@ public class Product {
         this.quantity = p.getQuantity();
         this.category = p.getCategory();
         this.saleQuantity = p.getSaleQuantity();
+        this.productDetail = p.getProductDetail();
     }
 
     public void updateQuantity(int quantity) {
