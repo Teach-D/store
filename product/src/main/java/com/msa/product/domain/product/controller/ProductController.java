@@ -45,19 +45,16 @@ public class ProductController {
         return ResponseEntity.status(OK).body(productService.getProductByName(name));
     }
 
-    // categoryId에 속해 있는 product list 조회
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<List<ResponseProduct>> getProductByCategoryId(@PathVariable Long categoryId) {
         return ResponseEntity.status(OK).body(productService.getProductsByCategoryId(categoryId));
     }
 
-    // tagId에 속해 있는 product list 조회
     @GetMapping("/tag/{tagId}")
     public ResponseEntity<List<ResponseProduct>> getProductByTagId(@PathVariable Long tagId) {
         return ResponseEntity.status(OK).body(productService.getProductsByTagId(tagId));
     }
 
-    // tagId에 속해 있는 cached product list 조회(하루동안 특정 조회수보다 적은 조회수면 DB에서 product list 조회)
     @GetMapping("/cached/tag/{tagId}")
     public ResponseEntity<List<ResponseProduct>> getCachedProductByTagId(@PathVariable Long tagId) {
         return ResponseEntity.status(OK).body(productCacheService.getPopularProductsByTagId(tagId));
@@ -130,5 +127,25 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.status(NO_CONTENT).build();
+    }
+
+    @GetMapping("/search/order-quantity")
+    public ResponseEntity<List<ResponseProduct>> searchByOrderQuantity(@RequestParam String keyword) {
+        log.info("상품 검색 (주문순): keyword={}", keyword);
+        return ResponseEntity.status(OK).body(productService.searchByKeywordOrderByOrderQuantity(keyword));
+    }
+
+    @GetMapping("/search/rating")
+    public ResponseEntity<List<ResponseProduct>> searchByRating(@RequestParam String keyword) {
+        log.info("상품 검색 (별점순): keyword={}", keyword);
+        return ResponseEntity.status(OK).body(productService.searchByKeywordOrderByRating(keyword));
+    }
+
+    @GetMapping("/category/{categoryId}/order-quantity")
+    public ResponseEntity<List<ResponseProduct>> getProductsByCategoryOrderByOrderQuantity(
+            @PathVariable Long categoryId
+    ) {
+        log.info("카테고리별 상품 조회 (주문순): categoryId={}", categoryId);
+        return ResponseEntity.status(OK).body(productService.getProductsByCategoryOrderByOrderQuantity(categoryId));
     }
 }

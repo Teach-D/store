@@ -16,13 +16,19 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+    name = "review",
+    indexes = {
+        @Index(name = "idx_review_product_rating", columnList = "product_id, rating"),
+        @Index(name = "idx_review_member", columnList = "member_id")
+    }
+)
 public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 별점
     private int rating;
 
     private String title;

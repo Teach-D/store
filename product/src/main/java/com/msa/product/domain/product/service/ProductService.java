@@ -44,13 +44,10 @@ public class ProductService {
 
         String imageUrl = null;
 
-        // 1. 이미지 파일이 업로드된 경우
         if (image != null && !image.isEmpty()) {
             imageUrl = imageUploadService.saveImage(image);
             log.info("파일 업로드 완료. imageUrl: {}", imageUrl);
-        }
-        // 2. RequestProduct에 imageUrl이 있는 경우 (외부 URL)
-        else if (requestProduct.getImageUrl() != null && !requestProduct.getImageUrl().isEmpty()) {
+        } else if (requestProduct.getImageUrl() != null && !requestProduct.getImageUrl().isEmpty()) {
             imageUrl = requestProduct.getImageUrl();
             log.info("외부 URL 사용. imageUrl: {}", imageUrl);
         }
@@ -81,7 +78,6 @@ public class ProductService {
     }
 
 
-    // categoryId로 category에 속해 있는 product list 조회
     @Transactional(readOnly = true)
     public List<ResponseProduct> getProductsByCategoryId(Long categoryId) {
         log.info("getProductsByCategoryId {}", categoryId);
@@ -101,7 +97,6 @@ public class ProductService {
         return responseProducts;
     }
 
-    // categoryId로 category에 속해 있는 product list 조회
     @Transactional(readOnly = true)
     public List<ResponseProduct> getProductsByTagId(Long tagId) {
         List<ResponseProduct> responseProducts = new ArrayList<>();
@@ -214,13 +209,8 @@ public class ProductService {
     }
 
     public List<ResponseProduct> getProductsByOption(Long categoryId, String title, String sort, String order) {
-        // categoryId가 0이면 적용x
         Long filteredCategoryId = categoryId != 0 ? categoryId : null;
-
-        // title이 0이면 적용x
         String filteredTitle = "0".equals(title) ? title : null;
-
-        // sort, order가 "0"이면 정렬 제외 처리
         boolean noSort = "0".equals(sort) || "0".equals(order);
         String filteredSort = noSort ? null : sort.toLowerCase();
         String filteredOrder = noSort ? null : order.toLowerCase();
@@ -267,5 +257,38 @@ public class ProductService {
         product.updateSaleQuantity(product.getSaleQuantity() - quantity);
 
         log.info("재고 복구 완료(DB)");
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseProduct> searchByKeywordOrderByOrderQuantity(String keyword) {
+        List<Product> products = productRepository.findByTitleContainingOrderByOrderQuantityDesc(keyword);
+
+        List<ResponseProduct> result = new ArrayList<>();
+        for (Product product : products) {
+            result.add(ResponseProduct.entityToDto(product));
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseProduct> searchByKeywordOrderByRating(String keyword) {
+        List<Product> products = productRepository.findByTitleContainingOrderByAvgRatingDesc(keyword);
+
+        List<ResponseProduct> result = new ArrayList<>();
+        for (Product product : products) {
+            result.add(ResponseProduct.entityToDto(product));
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseProduct> getProductsByCategoryOrderByOrderQuantity(Long categoryId) {
+        List<Product> products = productRepository.findByCategoryOrderByOrderQuantityDesc(categoryId);
+
+        List<ResponseProduct> result = new ArrayList<>();
+        for (Product product : products) {
+            result.add(ResponseProduct.entityToDto(product));
+        }
+        return result;
     }
 }

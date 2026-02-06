@@ -13,6 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
+@Table(
+    name = "order_item",
+    indexes = {
+        @Index(name = "idx_order_item_product_quantity", columnList = "product_id, quantity")
+    }
+)
 public class OrderItem {
 
     @Id
