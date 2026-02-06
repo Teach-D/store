@@ -32,4 +32,10 @@ public interface CartServiceClient {
 
     @DeleteMapping("/coupons/use/{couponId}")
     ResponseEntity<Void> useCoupon(@PathVariable Long couponId, @RequestHeader("X-User-Id") Long userId);
+
+    @GetMapping("/members/{memberId}/gender")
+    String getMemberGender(@PathVariable("memberId") Long memberId);
+
+    @GetMapping("/members/{memberId}/birth-date")
+    String getMemberBirthDate(@PathVariable("memberId") Long memberId);
 }

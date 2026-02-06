@@ -89,8 +89,13 @@ public class MemberController {
         return ResponseEntity.ok().body(SuccessDto.valueOf("true"));
     }*/
 
-/*    @DeleteMapping("/signout")
-    public ResponseEntity<SuccessDto> signout(@IfLogin LoginUserDto loginUserDto) {
-        return memberService.signout(loginUserDto);
-    }*/
+    @GetMapping("/{memberId}/gender")
+    public ResponseEntity<String> getMemberGender(@PathVariable Long memberId) {
+        return ResponseEntity.ok(memberService.getMemberGender(memberId));
+    }
+
+    @GetMapping("/{memberId}/birth-date")
+    public ResponseEntity<String> getMemberBirthDate(@PathVariable Long memberId) {
+        return ResponseEntity.ok(memberService.getMemberBirthDate(memberId));
+    }
 }

@@ -57,4 +57,32 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findByTitle(String title);
 
     List<Product> findByCategory_id(Long categoryId);
+
+    @Query(value = """
+        SELECT p.* FROM product p
+        INNER JOIN product_order_stats pos ON pos.product_id = p.id
+        WHERE p.title LIKE CONCAT('%', :keyword, '%')
+          AND pos.gender = :gender
+          AND pos.age_group = :ageGroup
+        ORDER BY pos.total_quantity DESC
+        """, nativeQuery = true)
+    List<Product> findByKeywordAndGenderAndAgeGroupOrderByOrderQuantity(
+        @Param("keyword") String keyword,
+        @Param("gender") String gender,
+        @Param("ageGroup") String ageGroup
+    );
+
+    @Query(value = """
+        SELECT p.* FROM product p
+        INNER JOIN product_review_stats prs ON prs.product_id = p.id
+        WHERE p.title LIKE CONCAT('%', :keyword, '%')
+          AND prs.gender = :gender
+          AND prs.age_group = :ageGroup
+        ORDER BY prs.avg_score DESC
+        """, nativeQuery = true)
+    List<Product> findByKeywordAndGenderAndAgeGroupOrderByAvgRating(
+        @Param("keyword") String keyword,
+        @Param("gender") String gender,
+        @Param("ageGroup") String ageGroup
+    );
 }

@@ -148,6 +148,17 @@ public class MemberService {
         memberRepository.deleteById(memberId);
     }
 
+    @Transactional(readOnly = true)
+    public String getMemberGender(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        return member.getGender();
+    }
 
-
+    @Transactional(readOnly = true)
+    public String getMemberBirthDate(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        return member.getBirthDate().toString();
+    }
 }

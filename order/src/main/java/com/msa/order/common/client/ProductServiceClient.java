@@ -3,10 +3,9 @@ package com.msa.order.common.client;
 import com.msa.order.global.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Service
 @FeignClient(name = "product-service", url = "${product.service.url}", configuration = FeignConfig.class)
@@ -24,4 +23,6 @@ public interface ProductServiceClient {
     @PutMapping("/products/{productId}/saleQuantity/{saleQuantity}")
     void updateProductSaleQuantity(@PathVariable("productId") Long productId, @PathVariable("saleQuantity") int saleQuantity);
 
+    @PostMapping("/products/stats/order")
+    void updateOrderStats(@RequestBody Map<String, Object> request);
 }

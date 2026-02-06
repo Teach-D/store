@@ -1,9 +1,13 @@
 package com.msa.product.domain.product.controller;
 
+import com.msa.product.domain.product.dto.request.OrderStatsUpdateRequest;
 import com.msa.product.domain.product.dto.request.RequestProduct;
 import com.msa.product.domain.product.dto.response.ResponseProduct;
+import com.msa.product.domain.product.entity.AgeGroup;
+import com.msa.product.domain.product.entity.Gender;
 import com.msa.product.domain.product.service.ProductCacheService;
 import com.msa.product.domain.product.service.ProductService;
+import com.msa.product.domain.product.service.ProductStatsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +30,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final ProductCacheService productCacheService;
+    private final ProductStatsService productStatsService;
 
     @GetMapping
     public ResponseEntity<List<ResponseProduct>> getProductsByOption(
@@ -147,5 +152,40 @@ public class ProductController {
     ) {
         log.info("카테고리별 상품 조회 (주문순): categoryId={}", categoryId);
         return ResponseEntity.status(OK).body(productService.getProductsByCategoryOrderByOrderQuantity(categoryId));
+    }
+
+    @PostMapping("/stats/order")
+    public ResponseEntity<Void> updateOrderStats(@RequestBody OrderStatsUpdateRequest request) {
+        productStatsService.updateOrderStats(
+                request.getProductId(),
+                Gender.valueOf(request.getGender()),
+                AgeGroup.valueOf(request.getAgeGroup()),
+                request.getQuantity()
+        );
+        return ResponseEntity.status(OK).build();
+    }
+
+    @GetMapping("/search/order-quantity/filter")
+    public ResponseEntity<List<ResponseProduct>> searchByGenderAndAgeOrderByOrderQuantity(
+            @RequestParam String keyword,
+            @RequestParam String gender,
+            @RequestParam String ageGroup
+    ) {
+        return ResponseEntity.status(OK).body(
+                productStatsService.searchByGenderAndAgeOrderByOrderQuantity(
+                        keyword, Gender.valueOf(gender), AgeGroup.valueOf(ageGroup))
+        );
+    }
+
+    @GetMapping("/search/rating/filter")
+    public ResponseEntity<List<ResponseProduct>> searchByGenderAndAgeOrderByRating(
+            @RequestParam String keyword,
+            @RequestParam String gender,
+            @RequestParam String ageGroup
+    ) {
+        return ResponseEntity.status(OK).body(
+                productStatsService.searchByGenderAndAgeOrderByAvgRating(
+                        keyword, Gender.valueOf(gender), AgeGroup.valueOf(ageGroup))
+        );
     }
 }
