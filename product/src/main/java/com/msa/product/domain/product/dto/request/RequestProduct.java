@@ -26,4 +26,6 @@ public class RequestProduct {
 
     @NotNull(message = "제품의 수량을 적어주세요")
     private int quantity;
+
+    private Long sellerId;
 }

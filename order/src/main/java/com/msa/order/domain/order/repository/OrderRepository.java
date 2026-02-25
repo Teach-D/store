@@ -13,4 +13,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.orderId = :orderId")
     Optional<Order> findByOrderIdWithItems(@Param("orderId") Long orderId);
+
+    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.orderItems WHERE o.status = :status AND o.date = :date")
+    List<Order> findByStatusAndDateWithItems(
+            @Param("status") Order.OrderStatus status,
+            @Param("date") String date
+    );
 }

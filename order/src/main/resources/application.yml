@@ -104,6 +104,10 @@ resilience4j:
         timeout-duration: 6s
         cancel-running-future: true
 
+settlement:
+  commission:
+    rate: 10.0
+
 eureka:
   client:
     register-with-eureka: true
@@ -117,7 +121,7 @@ spring:
     activate:
       on-profile: docker
   datasource:
-    url: jdbc:mariadb://mariadb:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mariadb://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
 
 member:
   service:

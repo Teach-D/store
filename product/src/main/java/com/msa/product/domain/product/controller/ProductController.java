@@ -78,7 +78,11 @@ public class ProductController {
     @GetMapping("/{productId}/price")
     public int getProductPrice(@PathVariable("productId") Long productId) {
         return productService.getProductPrice(productId);
+    }
 
+    @GetMapping("/{productId}/sellerId")
+    public Long getProductSellerId(@PathVariable("productId") Long productId) {
+        return productService.getProductSellerId(productId);
     }
 
     @PutMapping("/{productId}/quantity/{quantity}")

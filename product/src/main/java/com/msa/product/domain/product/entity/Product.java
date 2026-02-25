@@ -21,9 +21,9 @@ import java.util.List;
 @Table(
     name = "product",
     indexes = {
-        @Index(name = "idx_product_category_sale", columnList = "category_id, saleQuantity DESC"),
+        @Index(name = "idx_product_category_sale", columnList = "category_id, saleQuantity DESC, id"),  // 카테고리별 판매순 No-Offset 커버링 인덱스
         @Index(name = "idx_product_title", columnList = "title"),
-        @Index(name = "idx_product_sale_quantity", columnList = "saleQuantity DESC")
+        @Index(name = "idx_product_sale_quantity", columnList = "saleQuantity DESC, id")                // 전체 판매순 No-Offset 커버링 인덱스
     }
 )
 public class Product {
@@ -31,6 +31,8 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private Long sellerId;
 
     private String title;
 

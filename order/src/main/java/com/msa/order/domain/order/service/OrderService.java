@@ -152,10 +152,14 @@ public class OrderService {
         int totalPrice = 0;
 
         for (CartItemDto cartItem : cartItems) {
+            Long sellerId = productServiceClient.getProductSellerId(cartItem.getProductId());
+
             OrderItem orderItem = OrderItem.builder()
                     .productId(cartItem.getProductId())
                     .order(order)
                     .quantity(cartItem.getQuantity())
+                    .unitPrice(cartItem.getProductPrice())
+                    .sellerId(sellerId)
                     .build();
 
             orderItemRepository.save(orderItem);

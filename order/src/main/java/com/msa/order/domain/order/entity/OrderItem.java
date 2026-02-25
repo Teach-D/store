@@ -35,4 +35,8 @@ public class OrderItem {
 
     int quantity;
 
+    private int unitPrice;
+
+    private Long sellerId;
+
 }

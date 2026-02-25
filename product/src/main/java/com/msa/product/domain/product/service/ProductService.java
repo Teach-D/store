@@ -57,6 +57,7 @@ public class ProductService {
                         .quantity(requestProduct.getQuantity())
                         .price(requestProduct.getPrice())
                         .title(requestProduct.getTitle())
+                        .sellerId(requestProduct.getSellerId())
                         .build();
 
         Rating rating = Rating.builder()
@@ -249,6 +250,11 @@ public class ProductService {
     public int getProductPrice(Long productId) {
         Product product = productRepository.findById(productId).orElseThrow();
         return product.getPrice();
+    }
+
+    public Long getProductSellerId(Long productId) {
+        Product product = productRepository.findById(productId).orElseThrow();
+        return product.getSellerId();
     }
 
     public void restoreTock(Long productId, Integer quantity) {

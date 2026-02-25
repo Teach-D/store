@@ -7,10 +7,40 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692"   # prometheus 메트릭 포트
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
-    networks: # ← 이 2줄 추가
+    volumes:
+      - ./monitoring/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    networks:
+      - msa-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - rabbitmq
+    networks:
+      - msa-network
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
       - msa-network
   # zipkin
   zipkin:
@@ -103,7 +133,7 @@ services:
       - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       - PRODUCT_SERVICE_URL=http://product-service:8080
     networks:
       - msa-network
@@ -127,7 +157,7 @@ services:
       - "8082:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       - MEMBER_SERVICE_URL=http://member-service:8080
     networks:
       - msa-network
@@ -149,7 +179,7 @@ services:
       - "8083:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
     networks:
@@ -174,7 +204,7 @@ services:
       - "8084:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       - PRODUCT_SERVICE_URL=http://product-service:8080
     networks:
       - msa-network

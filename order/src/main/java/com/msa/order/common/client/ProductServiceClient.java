@@ -25,4 +25,7 @@ public interface ProductServiceClient {
 
     @PostMapping("/products/stats/order")
     void updateOrderStats(@RequestBody Map<String, Object> request);
+
+    @GetMapping("/products/{productId}/sellerId")
+    Long getProductSellerId(@PathVariable("productId") Long productId);
 }
