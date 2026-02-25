@@ -26,6 +26,8 @@ public class Payment {
     @Enumerated
     private PaymentStatus status;
 
+    private String pgPaymentKey;
+    private String paymentMethod;
     private String failureReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -41,8 +43,10 @@ public class Payment {
         updatedAt = LocalDateTime.now();
     }
 
-    public void complete() {
-        status = PaymentStatus.COMPLETED;
+    public void complete(String pgPaymentKey, String paymentMethod) {
+        this.pgPaymentKey = pgPaymentKey;
+        this.paymentMethod = paymentMethod;
+        this.status = PaymentStatus.COMPLETED;
     }
 
     public void fail(String reason) {

@@ -5,7 +5,7 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:mariadb://host.docker.internal:3307/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mariadb://localhost:3307/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: 1234
     driver-class-name: org.mariadb.jdbc.Driver
@@ -74,11 +74,10 @@ management:
         include: health,info,metrics,circuitbreakers,circuitbreakerevents
   tracing:
     sampling:
-      probability: 1.0  # 모든 요청 추적 (운영: 0.1 권장)
+      probability: 1.0
   zipkin:
     tracing:
-      # endpoint: http://localhost:9411/api/v2/spans  # 로컬 환경
-      endpoint: http://zipkin:9411/api/v2/spans   # Docker 환경
+      endpoint: http://zipkin:9411/api/v2/spans
 
 eureka:
   client:
@@ -86,8 +85,12 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://host.docker.internal:8761/eureka
+
+toss:
+  payments:
+    secret-key: "테스트키"
+    base-url: https://api.tosspayments.com
 ---
-# Docker 환경 설정
 spring:
   config:
     activate:

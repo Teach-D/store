@@ -19,7 +19,7 @@ public class OrderEventConsumer {
         log.info("Received OrderCreatedEvent: {}", event);
 
         try {
-            paymentService.processPayment(event);
+            paymentService.initPayment(event);
         } catch (Exception e) {
             log.error("Error processing OrderCreatedEvent: {}", event, e);
             throw e;
