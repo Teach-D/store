@@ -1,5 +1,6 @@
 package com.msa.order.domain.settlement.controller;
 
+import com.msa.order.domain.settlement.batch.SettlementJobLauncher;
 import com.msa.order.domain.settlement.dto.SettlementItemResponse;
 import com.msa.order.domain.settlement.dto.SettlementResponse;
 import com.msa.order.domain.settlement.entity.Settlement;
@@ -7,12 +8,15 @@ import com.msa.order.domain.settlement.entity.SettlementItem;
 import com.msa.order.domain.settlement.repository.SettlementItemRepository;
 import com.msa.order.domain.settlement.repository.SettlementRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,6 +26,20 @@ public class SettlementController {
 
     private final SettlementRepository settlementRepository;
     private final SettlementItemRepository settlementItemRepository;
+    private final SettlementJobLauncher settlementJobLauncher;
+
+    /**
+     * 수동 실행: POST /settlements/run?date=2026-02-27
+     * 강제 재실행: POST /settlements/run?date=2026-02-27&force=true
+     */
+    @PostMapping("/run")
+    public ResponseEntity<String> runSettlement(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(defaultValue = "false") boolean force
+    ) {
+        settlementJobLauncher.run(date, force);
+        return ResponseEntity.ok("[정산 Batch] 실행 요청: " + date);
+    }
 
     @GetMapping
     public ResponseEntity<List<SettlementResponse>> getSettlements(
@@ -47,4 +65,5 @@ public class SettlementController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
+
 }
