@@ -7,6 +7,7 @@ import com.msa.product.domain.product.repository.ProductRepository;
 import com.msa.product.domain.product.repository.ProductReviewStatsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +23,27 @@ public class ProductStatsService {
     private final ProductOrderStatsRepository orderStatsRepository;
     private final ProductReviewStatsRepository reviewStatsRepository;
     private final ProductRepository productRepository;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final RankingService rankingService;
 
+    // Write-Behind: DB 대신 Redis에 누적
     public void updateOrderStats(Long productId, Gender gender, AgeGroup ageGroup, int quantity) {
+        String key = productId + ":" + gender.name() + ":" + ageGroup.name();
+
+        stringRedisTemplate.opsForValue().increment("stats:order:" + key + ":count");
+        stringRedisTemplate.opsForValue().increment("stats:order:" + key + ":quantity", quantity);
+        stringRedisTemplate.opsForSet().add("stats:order:dirty", key);
+
+        rankingService.incrementRanking(productId, quantity);
+
+        log.info("[Write-Behind] Redis 누적: productId={}, gender={}, ageGroup={}, quantity={}",
+                productId, gender, ageGroup, quantity);
+    }
+
+    // 스케줄러 호출용 — Redis 누적값을 DB에 반영
+    @Transactional
+    public void flushOrderStats(Long productId, Gender gender, AgeGroup ageGroup,
+                                int countDelta, int quantityDelta) {
         ProductOrderStats stats = orderStatsRepository
                 .findByProductIdAndGenderAndAgeGroup(productId, gender, ageGroup)
                 .orElseGet(() -> orderStatsRepository.save(
@@ -34,9 +54,9 @@ public class ProductStatsService {
                                 .build()
                 ));
 
-        stats.addOrder(quantity);
-        log.info("주문 통계 업데이트: productId={}, gender={}, ageGroup={}, quantity={}",
-                productId, gender, ageGroup, quantity);
+        stats.addOrderBulk(countDelta, quantityDelta);
+        log.info("[Write-Behind] DB 반영: productId={}, +count={}, +quantity={}",
+                productId, countDelta, quantityDelta);
     }
 
     public void updateReviewStats(Long productId, Gender gender, AgeGroup ageGroup, int rating) {
