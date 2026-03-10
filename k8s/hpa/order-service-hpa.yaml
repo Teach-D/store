@@ -1,0 +1,38 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service-hpa
+  namespace: ecommerce
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30       # 30초 관찰 후 즉시 증가 (주문 폭주 대응)
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 60                  # 60초마다 최대 2개씩 증가
+    scaleDown:
+      stabilizationWindowSeconds: 300      # 5분 안정화 후 축소 (급격한 축소 방지)
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 120                 # 120초마다 최대 1개씩 축소
