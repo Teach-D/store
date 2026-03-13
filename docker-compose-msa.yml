@@ -57,7 +57,7 @@ services:
     container_name: mysql-board
     restart: always
     ports:
-      - "3309:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: store
@@ -110,7 +110,7 @@ services:
     container_name: gateway-service
     restart: always
     ports:
-      - "8080:8080"
+      - "8080:8000"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     networks:
@@ -215,6 +215,33 @@ services:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  # AI 이미지 생성 서비스 (ComfyUI → RunPod/Paperspace 호출)
+  ai-image-service:
+    build:
+      context: ./ai-image-service
+      dockerfile: Dockerfile
+    image: store-ai-image-service
+    container_name: ai-image-service
+    restart: always
+    ports:
+      - "8085:8085"
+    environment:
+      - RABBITMQ_HOST=store-rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin
+      - COMFYUI_URL=${COMFYUI_URL:-http://localhost:8188}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOAPI_KEY=${GOAPI_KEY:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-ap-northeast-2}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-store-product-images}
+    networks:
+      - msa-network
+    depends_on:
+      - rabbitmq
+
 # 네트워크 정의
 networks:
   msa-network:

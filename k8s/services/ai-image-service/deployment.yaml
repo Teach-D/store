@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-image-service
+  namespace: ecommerce
+  labels:
+    app: ai-image-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-image-service
+  template:
+    metadata:
+      labels:
+        app: ai-image-service
+    spec:
+      containers:
+        - name: ai-image-service
+          image: store-ai-image-service:latest
+          ports:
+            - containerPort: 8085
+          env:
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: RABBITMQ_HOST
+            - name: RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: RABBITMQ_PORT
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: password
+            - name: COMFYUI_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ai-image-secret
+                  key: comfyui-url
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ai-image-secret
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-image-secret
+                  key: aws-secret-access-key
+            - name: AWS_REGION
+              value: "ap-northeast-2"
+            - name: S3_BUCKET_NAME
+              value: "store-product-images"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8085
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8085
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-image-service
+  namespace: ecommerce
+spec:
+  selector:
+    app: ai-image-service
+  ports:
+    - port: 80
+      targetPort: 8085
+  type: ClusterIP
+---
+# RunPod / Paperspace ComfyUI URL + AWS 자격증명 시크릿
+# kubectl create secret generic ai-image-secret \
+#   --from-literal=comfyui-url=https://YOUR_RUNPOD_URL \
+#   --from-literal=aws-access-key-id=YOUR_KEY \
+#   --from-literal=aws-secret-access-key=YOUR_SECRET \
+#   -n ecommerce

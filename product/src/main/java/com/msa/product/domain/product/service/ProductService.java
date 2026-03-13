@@ -12,10 +12,13 @@ import com.msa.product.domain.review.entity.Rating;
 import com.msa.product.domain.tag.entity.ProductTag;
 import com.msa.product.domain.tag.entity.Tag;
 import com.msa.product.domain.tag.repository.TagRepository;
+import com.msa.product.global.config.RabbitMQConfig;
+import com.msa.product.global.dto.ProductCreatedEvent;
 import com.msa.product.global.exception.CustomException;
 import com.msa.product.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -37,20 +40,14 @@ public class ProductService {
     private final TagRepository tagRepository;
     private final ImageUploadService imageUploadService;
     private final com.msa.product.domain.product.repository.ProductDetailRepository productDetailRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
-    public void addProduct(RequestProduct requestProduct, org.springframework.web.multipart.MultipartFile image) throws java.io.IOException {
+    public void addProduct(RequestProduct requestProduct){
         Category category = categoryService.getCategory(requestProduct.getCategoryId());
 
         String imageUrl = null;
 
-        if (image != null && !image.isEmpty()) {
-            imageUrl = imageUploadService.saveImage(image);
-            log.info("파일 업로드 완료. imageUrl: {}", imageUrl);
-        } else if (requestProduct.getImageUrl() != null && !requestProduct.getImageUrl().isEmpty()) {
-            imageUrl = requestProduct.getImageUrl();
-            log.info("외부 URL 사용. imageUrl: {}", imageUrl);
-        }
 
         Product product = Product.builder()
                         .category(category)
@@ -76,6 +73,27 @@ public class ProductService {
         productDetailRepository.save(productDetail);
 
         log.info("상품 등록 완료. productId: {}, imageUrl: {}", product.getId(), imageUrl);
+
+        // AI 이미지 생성 이벤트 발행 (이미지가 없을 때만 AI가 자동 생성)
+        if (imageUrl == null) {
+            ProductCreatedEvent event = ProductCreatedEvent.builder()
+                    .productId(product.getId())
+                    .title(product.getTitle())
+                    .description(requestProduct.getDescription())
+                    .categoryName(category.getName())
+                    .price(product.getPrice())
+                    .build();
+            rabbitTemplate.convertAndSend(RabbitMQConfig.PRODUCT_EXCHANGE, "product.created", event);
+            log.info("AI 이미지 생성 요청 발행 productId: {}", product.getId());
+        }
+    }
+
+    @Transactional
+    public void updateProductImages(Long productId, String imageUrl, String promoImageUrl) {
+        ProductDetail productDetail = productDetailRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        productDetail.updateImages(imageUrl, promoImageUrl);
+        log.info("AI 이미지 URL 업데이트 완료 productId: {}, imageUrl: {}, promoImageUrl: {}", productId, imageUrl, promoImageUrl);
     }
 
 

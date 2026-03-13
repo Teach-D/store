@@ -36,3 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 /db
+
+### AI Image Service ###
+ai-image-service/generated_images/
+ai-image-service/.env
