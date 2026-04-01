@@ -4,110 +4,136 @@ import logging
 import time
 
 import aio_pika
+import aiohttp
 from deep_translator import GoogleTranslator
 
 from config import settings
-from comfyui_client import ComfyUIClient
 from s3_uploader import S3Uploader
+from providers.base import GenerationRequest, ImageType
+from providers.selector import ProviderSelector
+from providers.stable_diffusion_provider import StableDiffusionProvider
+from providers.dalle_provider import DallEProvider
 
 logger = logging.getLogger(__name__)
 
 PRODUCT_EXCHANGE = "product.exchange"
 PRODUCT_CREATED_QUEUE = "product.created"
 
-# 카테고리별 프롬프트 스타일 템플릿
-CATEGORY_STYLES = {
-    "전자기기": "on a clean tech-styled surface, minimalist background, blue accent lighting",
-    "스마트폰": "on a sleek reflective surface, tech background, modern minimalist",
-    "노트북":   "on a desk setup, professional workspace background",
-    "의류":     "on a mannequin or flat lay, fashion editorial style, neutral background",
-    "식품":     "on a wooden table, natural lighting, fresh ingredients around",
-    "화장품":   "on a marble surface, soft pastel background, beauty editorial style",
-    "가구":     "in a modern interior setting, lifestyle photography",
-    "스포츠":   "on a dynamic background, action-oriented composition, energetic lighting",
-}
-DEFAULT_STYLE = "clean white background, studio lighting"
 
-
-def translate(text: str) -> str:
+def _translate(text: str) -> str:
+    """한국어 → 영어 번역 (실패 시 원문 반환)"""
     try:
         return GoogleTranslator(source="auto", target="en").translate(text)
     except Exception:
         return text
 
 
-def get_category_style(category: str) -> str:
-    for key, style in CATEGORY_STYLES.items():
-        if key in category:
-            return style
-    return DEFAULT_STYLE
+def _build_selector() -> ProviderSelector:
+    """
+    ComfyUI(SD)를 기본으로 초기화.
+    OPENAI_API_KEY 설정 시 DALL·E가 폴백으로 추가됨.
+    """
+    sd = StableDiffusionProvider(settings.comfyui_url, settings.comfyui_timeout)
+    dalle = DallEProvider(settings.openai_api_key) if settings.openai_api_key else None
+    selector = ProviderSelector(sd_provider=sd, dalle_provider=dalle)
+    logger.info(f"프로바이더 초기화: {selector.available_providers()}")
+    return selector
 
 
-def build_product_prompt(title: str, description: str, category: str) -> str:
-    t = translate(f"{title} {description}")
-    style = get_category_style(category)
-    return (
-        f"professional product photography of {t}, "
-        f"{style}, sharp focus, high resolution, commercial photography"
-    )
+async def _download_bytes(url: str) -> bytes:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+            resp.raise_for_status()
+            return await resp.read()
 
 
-def build_promo_prompt(title: str, description: str, category: str) -> str:
-    t = translate(f"{title} {description}")
-    style = get_category_style(category)
-    return (
-        f"promotional advertisement for {t}, "
-        f"{style}, vibrant colors, dynamic composition, "
-        f"marketing material, dramatic lighting, high quality"
-    )
-
-
-async def handle(message: aio_pika.IncomingMessage, exchange: aio_pika.Exchange):
+async def handle(
+    message: aio_pika.IncomingMessage,
+    exchange: aio_pika.Exchange,
+    selector: ProviderSelector,
+):
     async with message.process(requeue=False):
-        data = json.loads(message.body)
-        product_id = data["productId"]
-        title      = data["title"]
-        description= data["description"]
-        category   = data.get("categoryName", "")
+        data        = json.loads(message.body)
+        product_id  = data["productId"]
+        title       = data["title"]
+        description = data["description"]
+        category    = data.get("categoryName", "")
+        price       = data.get("price", 0)
+        ref_url     = data.get("referenceImageUrl")
 
-        logger.info(f"이미지 생성 시작 productId={product_id} category={category}")
+        logger.info(f"이미지 생성 시작 productId={product_id} category={category} price={price}")
         total_start = time.time()
 
-        comfyui = ComfyUIClient(settings.comfyui_url, settings.comfyui_timeout)
-        s3      = S3Uploader()
+        # 한국어 제목·설명 개별 번역 (함께 번역 시 문맥 손실 방지)
+        title_en       = _translate(title)
+        description_en = _translate(description)
 
-        # 1. 상품 이미지 (SDXL 기본 워크플로우)
-        t1 = time.time()
-        product_image = await comfyui.generate_product_image(
-            build_product_prompt(title, description, category)
+        # ControlNet 참고 이미지 다운로드 (판매자가 URL 제공 시)
+        reference_image = None
+        if ref_url:
+            try:
+                reference_image = await _download_bytes(ref_url)
+                logger.info(f"참고 이미지 다운로드 완료 productId={product_id}")
+            except Exception as e:
+                logger.warning(f"참고 이미지 다운로드 실패, ControlNet 없이 진행: {e}")
+
+        product_req = GenerationRequest(
+            product_id=product_id,
+            title=title_en,
+            description=description_en,
+            category=category,
+            price=price,
+            image_type=ImageType.PRODUCT,
+            reference_image=reference_image,  # 있으면 ControlNet 자동 사용
         )
-        product_url = await s3.upload(product_image, f"products/{product_id}/product_image.png")
-        logger.info(f"상품 이미지 완료: {time.time() - t1:.1f}초 | {product_url}")
-
-        # 2. 홍보 이미지 (SDXL + LCM-LoRA 워크플로우)
-        t2 = time.time()
-        promo_image = await comfyui.generate_promo_image(
-            build_promo_prompt(title, description, category)
+        promo_req = GenerationRequest(
+            product_id=product_id,
+            title=title_en,
+            description=description_en,
+            category=category,
+            price=price,
+            image_type=ImageType.PROMO,
         )
-        promo_url = await s3.upload(promo_image, f"products/{product_id}/promo_image.png")
-        logger.info(f"홍보 이미지 완료: {time.time() - t2:.1f}초 (LCM-LoRA) | {promo_url}")
 
-        # 3. product-service로 결과 전송
+        # 상품 이미지 + 홍보 이미지 병렬 생성 (프로바이더 폴백 포함)
+        product_result, promo_result = await asyncio.gather(
+            selector.generate(product_req),
+            selector.generate(promo_req),
+        )
+        logger.info(
+            f"생성 완료 productId={product_id} "
+            f"product={product_result.provider}({product_result.generation_time_ms}ms) "
+            f"promo={promo_result.provider}({promo_result.generation_time_ms}ms)"
+        )
+
+        # S3 업로드 병렬 처리
+        s3 = S3Uploader()
+        product_url, promo_url = await asyncio.gather(
+            s3.upload(product_result.image_data, f"products/{product_id}/product_image.png"),
+            s3.upload(promo_result.image_data, f"products/{product_id}/promo_image.png"),
+        )
+
+        # product-service로 완료 이벤트 전송
         await exchange.publish(
             aio_pika.Message(
                 body=json.dumps({
-                    "productId":    product_id,
-                    "imageUrl":     product_url,
+                    "productId":     product_id,
+                    "imageUrl":      product_url,
                     "promoImageUrl": promo_url,
                 }).encode(),
                 content_type="application/json",
             ),
             routing_key="product.image.ready",
         )
-        logger.info(f"이미지 생성 완료 productId={product_id} 총 소요시간={time.time() - total_start:.1f}초")
+        logger.info(
+            f"완료 productId={product_id} 총={time.time() - total_start:.1f}초 "
+            f"controlnet={reference_image is not None}"
+        )
 
 
 async def start_consumer():
+    selector = _build_selector()
+
     connection = await aio_pika.connect_robust(
         host=settings.rabbitmq_host,
         port=settings.rabbitmq_port,
@@ -115,7 +141,7 @@ async def start_consumer():
         password=settings.rabbitmq_password,
     )
     async with connection:
-        channel  = await connection.channel()
+        channel = await connection.channel()
         await channel.set_qos(prefetch_count=1)
 
         exchange = await channel.declare_exchange(
@@ -134,4 +160,4 @@ async def start_consumer():
         logger.info("RabbitMQ 연결 완료 — product.created 큐 구독 시작")
         async with queue.iterator() as q:
             async for message in q:
-                await handle(message, exchange)
+                await handle(message, exchange, selector)

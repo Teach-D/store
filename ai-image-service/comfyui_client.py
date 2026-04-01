@@ -3,6 +3,7 @@ import json
 import random
 import logging
 from pathlib import Path
+from typing import Optional
 
 import aiohttp
 
@@ -30,6 +31,33 @@ class ComfyUIClient:
         """홍보 이미지 — SDXL + LCM-LoRA (8스텝, 빠른 생성)"""
         workflow = self._load("promo_image.json")
         workflow["6"]["inputs"]["text"] = prompt
+        workflow["3"]["inputs"]["seed"] = random.randint(0, 2 ** 32 - 1)
+        return await self._run(workflow)
+
+    async def upload_image(self, filename: str, image_data: bytes) -> str:
+        """ComfyUI에 이미지 업로드 후 파일명 반환 (ControlNet 참고 이미지용)"""
+        form = aiohttp.FormData()
+        form.add_field("image", image_data, filename=filename, content_type="image/png")
+        form.add_field("type", "input")
+        form.add_field("overwrite", "true")
+        async with aiohttp.ClientSession(headers=NGROK_HEADERS) as s:
+            async with s.post(
+                f"{self.base_url}/upload/image",
+                data=form,
+                timeout=aiohttp.ClientTimeout(total=30),
+            ) as r:
+                r.raise_for_status()
+                return (await r.json())["name"]
+
+    async def generate_controlnet_image(
+        self, prompt: str, negative: str, reference_image: bytes
+    ) -> bytes:
+        """ControlNet 워크플로우로 참고 이미지 구도를 따라 생성"""
+        uploaded_name = await self.upload_image("control_reference.png", reference_image)
+        workflow = self._load("controlnet_image.json")
+        workflow["6"]["inputs"]["text"] = prompt
+        workflow["7"]["inputs"]["text"] = negative
+        workflow["13"]["inputs"]["image"] = uploaded_name
         workflow["3"]["inputs"]["seed"] = random.randint(0, 2 ** 32 - 1)
         return await self._run(workflow)
 
