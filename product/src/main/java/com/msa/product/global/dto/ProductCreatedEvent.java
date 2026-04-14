@@ -15,4 +15,5 @@ public class ProductCreatedEvent {
     private String description;
     private String categoryName;
     private int price;
+    private String referenceImageUrl;  // ControlNet용 참고 이미지 URL (선택)
 }

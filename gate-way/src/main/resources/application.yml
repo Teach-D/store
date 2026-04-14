@@ -95,9 +95,9 @@ spring:
 # Docker 네트워크 내부 통신
 services:
   member:
-    url: http://member-service
+    url: http://member-service:8080
   order:
-    url: http://order-service
+    url: http://order-service:8080
   product:
-    url: http://product-service
+    url: http://product-service:8080
 

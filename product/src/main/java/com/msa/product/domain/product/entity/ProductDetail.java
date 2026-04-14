@@ -21,6 +21,7 @@ public class ProductDetail {
 
     private String description;
     private String imageUrl;
+    private String promoImageUrl;
 
     @Embedded
     private Rating rating;
@@ -31,5 +32,10 @@ public class ProductDetail {
         this.description = description;
         this.imageUrl = imageUrl;
         this.rating = rating;
+    }
+
+    public void updateImages(String imageUrl, String promoImageUrl) {
+        this.imageUrl = imageUrl;
+        this.promoImageUrl = promoImageUrl;
     }
 }

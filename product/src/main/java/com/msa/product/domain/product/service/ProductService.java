@@ -4,6 +4,7 @@ import com.msa.product.domain.category.entity.Category;
 import com.msa.product.domain.category.repository.CategoryRepository;
 import com.msa.product.domain.category.service.CategoryService;
 import com.msa.product.domain.product.dto.request.RequestProduct;
+import com.msa.product.domain.product.dto.response.ProductIndexingInfo;
 import com.msa.product.domain.product.dto.response.ResponseProduct;
 import com.msa.product.domain.product.entity.Product;
 import com.msa.product.domain.product.entity.ProductDetail;
@@ -96,6 +97,13 @@ public class ProductService {
         log.info("AI 이미지 URL 업데이트 완료 productId: {}, imageUrl: {}, promoImageUrl: {}", productId, imageUrl, promoImageUrl);
     }
 
+
+    @Transactional(readOnly = true)
+    public List<ProductIndexingInfo> getAllForIndexing() {
+        return productRepository.findAll().stream()
+                .map(ProductIndexingInfo::from)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<ResponseProduct> getProductsByCategoryId(Long categoryId) {

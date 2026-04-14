@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs cat:*)",
+      "Bash(ls -d /c/Users/wkadh/OneDrive/바탕 화면/coding/project/store/*/settings.gradle)",
+      "Bash(ls -d /c/Users/wkadh/OneDrive/바탕 화면/coding/project/store/*/)",
+      "Bash(wmic path:*)",
+      "Bash(powershell.exe -Command \"Get-WmiObject Win32_VideoController | Select-Object Name, AdapterRAM | Format-List\" 2>/dev/null)",
+      "Bash(ls -la ai-*/)",
+      "Bash(find ./ai-* -type f -name \"*.py\")",
+      "Bash(xargs wc:*)",
+      "Bash(xargs grep:*)"
+    ]
+  }
+}

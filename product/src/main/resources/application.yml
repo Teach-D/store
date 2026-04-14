@@ -9,6 +9,13 @@ spring:
     username: root
     password: 1234
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      pool-name: ProductHikariPool
+      maximum-pool-size: 20        # 랭킹 집계 쿼리 제거 후 적정 커넥션 수 (기본값 10 → 동시 요청 대응)
+      minimum-idle: 5              # 유휴 커넥션 최소 유지 (웜업 비용 절감)
+      connection-timeout: 3000     # 커넥션 획득 대기 최대 3초 (기본 30초 → 빠른 실패)
+      idle-timeout: 600000         # 유휴 커넥션 유지 10분
+      max-lifetime: 1800000        # 커넥션 최대 수명 30분 (DB 타임아웃보다 짧게 설정)
 
   jpa:
     hibernate:
@@ -102,5 +109,5 @@ spring:
     url: jdbc:mariadb://mysql:3306/store?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
   data:
     redis:
-      host: host.docker.internal
+      host: redis
       port: 6379

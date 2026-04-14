@@ -1,0 +1,22 @@
+groups:
+  - name: dlq-alerts
+    rules:
+      - alert: DlqMessageAccumulated
+        # *.dlq 패턴의 모든 큐에서 메시지가 5개 이상 쌓이면 발동
+        expr: rabbitmq_queue_messages{queue=~".*\\.dlq"} >= 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DLQ 메시지 적체 감지"
+          description: "[{{ $labels.queue }}] 에 {{ $value }}개 메시지가 쌓여 있습니다. 수동 확인이 필요합니다."
+
+      - alert: DlqMessageCritical
+        # 20개 이상이면 critical
+        expr: rabbitmq_queue_messages{queue=~".*\\.dlq"} >= 20
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DLQ 메시지 심각 수준 적체"
+          description: "[{{ $labels.queue }}] 에 {{ $value }}개 메시지가 쌓여 있습니다. 즉각 조치가 필요합니다."

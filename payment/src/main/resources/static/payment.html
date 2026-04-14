@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>토스페이먼츠 결제 테스트</title>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 60px auto; padding: 0 20px; }
+        h2 { color: #3182f6; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
+        input {
+            width: 100%; padding: 10px 12px; border: 1px solid #d1d1d1;
+            border-radius: 8px; font-size: 15px; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 14px; background: #3182f6; color: white;
+            border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold;
+        }
+        button:hover { background: #1b64da; }
+        .notice { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #555; margin-bottom: 20px; }
+        .notice strong { color: #e84c4c; }
+    </style>
+</head>
+<body>
+    <h2>토스페이먼츠 결제 테스트</h2>
+
+    <div class="notice">
+        <strong>사전 조건:</strong> 결제 전에 주문이 생성되어 Payment 서비스에 PENDING 레코드가 있어야 합니다.<br>
+        아래 orderId와 금액을 주문과 동일하게 입력하세요.
+    </div>
+
+    <div class="form-group">
+        <label>주문 ID (orderId)</label>
+        <input id="orderId" type="number" value="1" placeholder="주문 ID" />
+    </div>
+    <div class="form-group">
+        <label>금액 (원)</label>
+        <input id="amount" type="number" value="50000" placeholder="결제 금액" />
+    </div>
+    <div class="form-group">
+        <label>상품명</label>
+        <input id="orderName" type="text" value="테스트 상품" placeholder="상품명" />
+    </div>
+
+    <button onclick="pay()">결제하기</button>
+
+    <script>
+        // 토스페이먼츠 테스트 클라이언트 키
+        const CLIENT_KEY = 'test_ck_Z61JOxRQVEzGp0lP2kGzrW0X9bAq';
+        const tossPayments = TossPayments(CLIENT_KEY);
+
+        function pay() {
+            const orderId = document.getElementById('orderId').value;
+            const amount  = parseInt(document.getElementById('amount').value);
+            const orderName = document.getElementById('orderName').value;
+
+            if (!orderId || !amount) {
+                alert('주문 ID와 금액을 입력하세요.');
+                return;
+            }
+
+            // 토스 orderId: 영숫자/하이픈, 6자 이상 (서버와 동일하게 ORDER + orderId 형식)
+            const tossOrderId = 'ORDER' + orderId;
+
+            tossPayments.requestPayment('카드', {
+                amount: amount,
+                orderId: tossOrderId,
+                orderName: orderName,
+                customerName: '테스트 고객',
+                successUrl: window.location.origin + '/payment-success.html',
+                failUrl:    window.location.origin + '/payment-fail.html',
+            }).catch(error => {
+                console.error('결제 오류:', error);
+                alert('결제 오류: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
