@@ -1,6 +1,6 @@
 # MSA E-Commerce Platform
 
-Spring Boot 기반 마이크로서비스 이커머스 플랫폼입니다. 분산 트랜잭션, AI 연동, Kubernetes 배포를 포함한 클라우드 네이티브 아키텍처로 구성되어 있습니다.
+Spring Boot 기반 마이크로서비스 이커머스 플랫폼입니다. AI 연동, Kubernetes 배포를 포함한 클라우드 네이티브 아키텍처로 구성되어 있습니다.
 
 ---
 
@@ -27,12 +27,9 @@ Spring Boot 기반 마이크로서비스 이커머스 플랫폼입니다. 분산
 | `discovery-service` | Spring Boot (Eureka) | 8761 | 서비스 레지스트리 |
 | `gate-way` | Spring Cloud Gateway | 8000 | API 게이트웨이, JWT 인증 |
 | `member` | Spring Boot | 8080 | 회원, 장바구니, 쿠폰, 배송지 |
-| `order` | Spring Boot | 8080 | 주문, 정산, Saga 오케스트레이션 |
+| `order` | Spring Boot | 8080 | 주문, 정산 |
 | `payment` | Spring Boot | 8080 | 결제 (Toss Payments 연동) |
 | `product` | Spring Boot | 8080 | 상품, 리뷰, 카테고리, 랭킹 |
-| `ai-image-service` | Python (aio_pika) | - | AI 상품 이미지 생성 (ComfyUI/DALL-E) |
-| `ai-review-service` | Python (aio_pika) | - | AI 리뷰 감성 분석 (Ollama) |
-| `ai-rag-service` | Python (aio_pika) | - | RAG 기반 상품 검색 챗봇 (Milvus) |
 
 ---
 
@@ -54,7 +51,7 @@ graph TB
 
     subgraph Services["Microservices"]
         MEMBER["Member Service\n(회원/장바구니/쿠폰/배송지)"]
-        ORDER["Order Service\n(주문/정산/Saga)"]
+        ORDER["Order Service\n(주문/정산)"]
         PAYMENT["Payment Service\n(결제/Toss Payments)"]
         PRODUCT["Product Service\n(상품/리뷰/랭킹)"]
     end
@@ -62,14 +59,12 @@ graph TB
     subgraph AI["AI Services (Python)"]
         AI_IMG["AI Image Service\n(ComfyUI → DALL-E → Midjourney)"]
         AI_REV["AI Review Service\n(Ollama LLM)"]
-        AI_RAG["AI RAG Service\n(Milvus Vector DB)"]
     end
 
     subgraph Infra["Infrastructure"]
         MQ["RabbitMQ\n(Message Broker)"]
         REDIS["Redis\n(Cache / Coupon)"]
         DB["MariaDB\n(Persistent Storage)"]
-        MILVUS["Milvus\n(Vector DB)"]
     end
 
     subgraph Monitoring["Observability"]
@@ -84,12 +79,11 @@ graph TB
     MEMBER & ORDER & PAYMENT & PRODUCT --> EUREKA
 
     ORDER & PAYMENT & PRODUCT & MEMBER --> MQ
-    MQ --> AI_IMG & AI_REV & AI_RAG
+    MQ --> AI_IMG & AI_REV
 
     MEMBER --> REDIS
     PRODUCT --> REDIS
     MEMBER & ORDER & PAYMENT & PRODUCT --> DB
-    AI_RAG --> MILVUS
 
     MEMBER & ORDER & PAYMENT & PRODUCT --> ZIPKIN
     MEMBER & ORDER & PAYMENT & PRODUCT --> PROM
@@ -114,19 +108,6 @@ graph TB
 | Auth | JWT (jjwt) |
 | Observability | Micrometer Tracing + Brave + Zipkin |
 | Build | Gradle (JDK 17 Temurin) |
-
-### AI / Python
-| 분류 | 기술 |
-|------|------|
-| Async Messaging | aio_pika |
-| HTTP Client | httpx (async) |
-| LLM | Ollama (로컬 추론) |
-| Image Gen | ComfyUI (Stable Diffusion), DALL-E, Midjourney (fallback) |
-| Translation | deep_translator (Google Translate) |
-| Vector DB | pymilvus (Milvus) |
-| Embedding | sentence-transformers |
-| S3 Upload | aioboto3 |
-| Validation | pydantic |
 
 ### Infrastructure
 | 분류 | 기술 |
@@ -168,67 +149,6 @@ flowchart LR
 - `POST /members/signup`, `POST /members/login`
 
 ---
-
-### Member Service
-
-**주요 API**
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| POST | `/members/signup` | 회원가입 |
-| POST | `/members/login` | 로그인 (JWT 발급) |
-| GET | `/members/info` | 내 정보 조회 |
-| GET | `/members/{id}/gender` | 성별 정보 |
-| GET | `/members/{id}/birth-date` | 생년월일 |
-| GET | `/carts/{memberId}` | 장바구니 조회 |
-| POST | `/carts` | 장바구니 생성 |
-| GET | `/cartItems/cart` | 장바구니 아이템 목록 |
-| POST | `/cartItems` | 아이템 추가 |
-| DELETE | `/cartItems/{id}` | 아이템 삭제 |
-| GET | `/coupons` | 쿠폰 목록 |
-| POST | `/coupons/issue/{couponId}` | 쿠폰 발급 (Redis 원자적 처리) |
-| DELETE | `/coupons/use/{couponId}` | 쿠폰 사용 |
-| GET | `/deliveries/user/{userId}` | 배송지 조회 |
-| POST | `/deliveries` | 배송지 추가 |
-
----
-
-### Order Service
-
-**주요 API**
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| POST | `/orders` | 주문 생성 |
-| GET | `/orders/{orderId}` | 주문 조회 |
-| GET | `/orders` | 주문 목록 (페이지네이션) |
-| PUT | `/orders/{orderId}/cancel` | 주문 취소 |
-| GET | `/orders/{orderId}/status` | 주문 상태 조회 |
-| GET | `/settlements` | 정산 목록 |
-| POST | `/settlements` | 정산 생성 |
-
----
-
-### Product Service
-
-**주요 API**
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| GET | `/products` | 상품 목록 (페이지네이션) |
-| GET | `/products/{id}` | 상품 상세 |
-| POST | `/products` | 상품 등록 (AI 이미지 생성 트리거) |
-| PUT | `/products/{id}` | 상품 수정 |
-| DELETE | `/products/{id}` | 상품 삭제 |
-| PUT | `/products/{id}/quantity/{qty}` | 재고 수정 |
-| PUT | `/products/{id}/saleQuantity/{qty}` | 판매량 수정 |
-| GET | `/products/ranking/top` | 인기 상품 Top 10 |
-| GET | `/categories` | 카테고리 목록 |
-| POST | `/categories` | 카테고리 생성 |
-| GET | `/reviews` | 리뷰 목록 (`?productId=`) |
-| POST | `/review` | 리뷰 등록 (AI 분석 트리거) |
-| GET | `/tags` | 태그 목록 |
-| POST | `/tags` | 태그 생성 |
 
 ---
 
@@ -326,23 +246,6 @@ erDiagram
         bigint settlement_id FK
         bigint product_id
         decimal price
-    }
-
-    FAILED_TASK {
-        bigint id PK
-        varchar task_type
-        text payload
-        int retry_count
-        datetime created_at
-        varchar status
-    }
-
-    OUTBOX_EVENT {
-        bigint id PK
-        varchar event_type
-        text payload
-        boolean published
-        datetime created_at
     }
 
     ORDER ||--o{ ORDER_ITEM : "contains"
@@ -455,24 +358,21 @@ erDiagram
 ```mermaid
 graph LR
     subgraph "Order Service"
-        OS_PUB["Publisher\n(OutboxScheduler)"]
+        OS_PUB["Publisher"]
         OS_CON["Consumer\n(PaymentEventConsumer)"]
     end
 
     subgraph "order.exchange (Direct)"
         OE_OP["order.created.payment"]
-        OE_SR["stock.restore"]
         OE_CD["cart.delete"]
     end
 
     subgraph "Queues"
         Q_OCP["order.created.payment"]
-        Q_SR["stock.restore"]
         Q_CD["cart.delete"]
         Q_PC["payment.completed"]
         Q_PF["payment.failed"]
         Q_PRC["product.created"]
-        Q_PRR["product.created.rag"]
         Q_RC["review.created"]
         Q_RS["review.summary.ready"]
     end
@@ -484,7 +384,6 @@ graph LR
 
     subgraph "product.exchange (Direct)"
         PRE_PC["product.created"]
-        PRE_RAG["product.created.rag"]
     end
 
     subgraph "review.exchange (Direct)"
@@ -494,7 +393,7 @@ graph LR
 
     subgraph "Payment Service"
         PAY_CON["Consumer"]
-        PAY_PUB["Publisher\n(OutboxScheduler)"]
+        PAY_PUB["Publisher"]
     end
 
     subgraph "Member Service"
@@ -503,12 +402,11 @@ graph LR
 
     subgraph "Product Service"
         PRD_PUB["Publisher"]
-        PRD_CON["Consumer\n(StockRestore/ImageReady/ReviewSummary)"]
+        PRD_CON["Consumer\n(ImageReady/ReviewSummary)"]
     end
 
     subgraph "AI Services"
         AI_IMG_CON["AI Image Service"]
-        AI_RAG_CON["AI RAG Service"]
         AI_REV_CON["AI Review Service"]
         AI_REV_PUB["AI Review Service\n(Publisher)"]
         AI_IMG_PUB["AI Image Service\n(Publisher)"]
@@ -520,29 +418,27 @@ graph LR
     end
 
     OS_PUB --> OE_OP --> Q_OCP --> PAY_CON
-    OS_PUB --> OE_SR --> Q_SR --> PRD_CON
     OS_PUB --> OE_CD --> Q_CD --> MEM_CON
 
     PAY_PUB --> PE_PC --> Q_PC --> OS_CON
     PAY_PUB --> PE_PF --> Q_PF --> OS_CON
 
     PRD_PUB --> PRE_PC --> Q_PRC --> AI_IMG_CON
-    PRD_PUB --> PRE_RAG --> Q_PRR --> AI_RAG_CON
     PRD_PUB --> RE_RC --> Q_RC --> AI_REV_CON
 
     AI_IMG_PUB --> PRD_CON
     AI_REV_PUB --> RE_RS --> Q_RS --> PRD_CON
 
-    Q_OCP & Q_SR & Q_CD & Q_PC & Q_PF & Q_PRC -->|"3회 재시도 실패"| DLX --> DLQ
+    Q_OCP & Q_CD & Q_PC & Q_PF & Q_PRC -->|"3회 재시도 실패"| DLX --> DLQ
 ```
 
 ### RabbitMQ 설정 요약
 
 | Exchange | Type | 바인딩 큐 |
 |----------|------|-----------|
-| `order.exchange` | Direct | `order.created.payment`, `stock.restore`, `cart.delete` |
+| `order.exchange` | Direct | `order.created.payment`, `cart.delete` |
 | `payment.exchange` | Topic | `payment.completed`, `payment.failed` |
-| `product.exchange` | Direct | `product.created`, `product.created.rag` |
+| `product.exchange` | Direct | `product.created` |
 | `review.exchange` | Direct | `review.created`, `review.summary.ready` |
 | `dlx.exchange` | Direct | `*.dlq` (모든 실패 메시지) |
 
@@ -556,7 +452,7 @@ graph LR
 
 ## 데이터 흐름도
 
-### 1. 주문 생성 ~ 결제 완료 (Saga Pattern)
+### 1. 주문 생성 ~ 결제 완료
 
 ```mermaid
 sequenceDiagram
@@ -577,24 +473,15 @@ sequenceDiagram
     OS->>PRS: [Feign] 상품 재고 확인 & 차감
 
     OS->>OS: Order 저장 (PENDING)
-    OS->>OS: OutboxEvent 저장 (미발행)
     OS-->>Client: 주문 ID 반환
 
-    loop OutboxScheduler 폴링
-        OS->>MQ: OrderCreatedEvent 발행 (order.created.payment)
-        OS->>OS: 발행 완료 표시
-    end
-
+    OS->>MQ: OrderCreatedEvent 발행 (order.created.payment)
     MQ->>PS: OrderCreatedEvent 수신
 
     PS->>PS: Payment 생성 (PENDING)
     PS->>PS: Toss Payments API 호출
     PS->>PS: Payment 상태 업데이트 (COMPLETED)
-    PS->>PS: OutboxEvent 저장
-
-    loop OutboxScheduler 폴링
-        PS->>MQ: PaymentCompletedEvent 발행 (payment.completed)
-    end
+    PS->>MQ: PaymentCompletedEvent 발행 (payment.completed)
 
     MQ->>OS: PaymentCompletedEvent 수신
     OS->>OS: Order 상태 업데이트 (CONFIRMED)
@@ -608,108 +495,7 @@ sequenceDiagram
 
 ---
 
-### 2. 결제 실패 시 보상 트랜잭션 (Compensating Transaction)
-
-```mermaid
-sequenceDiagram
-    participant PS as Payment Service
-    participant MQ as RabbitMQ
-    participant OS as Order Service
-    participant PRS as Product Service
-
-    PS->>PS: Toss Payments 실패
-    PS->>PS: Payment 상태 업데이트 (FAILED)
-    PS->>MQ: PaymentFailedEvent 발행 (payment.failed)
-
-    MQ->>OS: PaymentFailedEvent 수신
-    OS->>OS: Order 상태 업데이트 (CANCELLED)
-    OS->>MQ: stock.restore 발행
-
-    MQ->>PRS: stock.restore 수신
-    PRS->>PRS: 재고 원복 (quantity 증가)
-
-    note over OS,PRS: 보상 트랜잭션으로 데이터 정합성 복구
-```
-
----
-
-### 3. 상품 등록 ~ AI 이미지 생성
-
-```mermaid
-sequenceDiagram
-    actor Admin
-    participant GW as API Gateway
-    participant PRS as Product Service
-    participant MQ as RabbitMQ
-    participant AI_IMG as AI Image Service
-    participant S3 as AWS S3
-    participant GT as Google Translate
-
-    Admin->>GW: POST /products (상품 정보)
-    GW->>PRS: 상품 등록 요청
-
-    PRS->>PRS: Product & ProductDetail 저장
-    PRS->>MQ: ProductCreatedEvent 발행 (product.created)
-    PRS-->>Admin: 상품 ID 반환
-
-    MQ->>AI_IMG: ProductCreatedEvent 수신
-
-    AI_IMG->>GT: 한국어 제목/설명 → 영어 번역
-    GT-->>AI_IMG: 영어 프롬프트
-
-    alt ComfyUI (Primary - Stable Diffusion)
-        AI_IMG->>AI_IMG: ComfyUI 이미지 생성 (300s timeout)
-    else DALL-E (Fallback)
-        AI_IMG->>AI_IMG: OpenAI DALL-E 생성
-    else Midjourney (Final Fallback)
-        AI_IMG->>AI_IMG: Midjourney (GoAPI) 생성
-    end
-
-    AI_IMG->>S3: 상품 이미지 + 프로모션 이미지 업로드
-    S3-->>AI_IMG: S3 URL
-
-    AI_IMG->>MQ: ImageReadyEvent 발행 (product.image.ready)
-    MQ->>PRS: ImageReadyEvent 수신
-    PRS->>PRS: ProductDetail.imageUrl & promoImageUrl 업데이트
-```
-
----
-
-### 4. 리뷰 등록 ~ AI 감성 분석
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant GW as API Gateway
-    participant PRS as Product Service
-    participant MQ as RabbitMQ
-    participant AI_REV as AI Review Service
-    participant OLLAMA as Ollama LLM
-
-    User->>GW: POST /review (JWT 포함)
-    GW->>PRS: 리뷰 등록 요청
-
-    PRS->>PRS: Review 저장
-    PRS->>PRS: ProductDetail.rating 업데이트
-    PRS->>MQ: ReviewCreatedEvent 발행 (review.created)
-    PRS-->>User: 등록 완료
-
-    MQ->>AI_REV: ReviewCreatedEvent 수신
-
-    AI_REV->>PRS: [HTTP] GET /reviews?productId={id} (최근 20개)
-    PRS-->>AI_REV: 리뷰 목록
-
-    AI_REV->>OLLAMA: LLM 감성 분석 요청 (temperature=0.1)
-    OLLAMA-->>AI_REV: JSON 분석 결과\n{summary, sentiment, positiveKeywords, negativeKeywords, avgRating}
-
-    AI_REV->>MQ: ReviewSummaryEvent 발행 (review.summary.ready)
-    MQ->>PRS: ReviewSummaryEvent 수신
-    PRS->>PRS: ProductReviewStats 캐시 업데이트 (Redis)
-```
-
----
-
-### 5. 쿠폰 발급 (Redis 분산 처리)
+### 2. 쿠폰 발급 (Redis 분산 처리)
 
 ```mermaid
 sequenceDiagram
@@ -732,35 +518,6 @@ sequenceDiagram
         REDIS-->>MS: 실패
         MS-->>User: 쿠폰 소진
     end
-```
-
----
-
-### 6. RAG 상품 검색 챗봇 흐름
-
-```mermaid
-sequenceDiagram
-    participant PRS as Product Service
-    participant MQ as RabbitMQ
-    participant RAG as AI RAG Service
-    participant MILVUS as Milvus Vector DB
-    participant EMBED as sentence-transformers
-
-    PRS->>MQ: ProductCreatedEvent 발행 (product.created.rag)
-    MQ->>RAG: ProductCreatedEvent 수신
-
-    RAG->>PRS: [HTTP] 상품 리뷰 조회
-    RAG->>EMBED: 상품 제목+설명+리뷰 임베딩
-    EMBED-->>RAG: 384차원 벡터
-    RAG->>MILVUS: 벡터 인덱싱 저장
-
-    actor User
-    User->>RAG: [HTTP] 챗봇 질문
-    RAG->>EMBED: 질문 임베딩
-    EMBED-->>RAG: 질문 벡터
-    RAG->>MILVUS: 하이브리드 검색 (BM25 + 벡터 유사도)
-    MILVUS-->>RAG: 관련 상품 문서
-    RAG-->>User: RAG 기반 답변
 ```
 
 ---
@@ -887,6 +644,19 @@ flowchart TD
 
 ## 성능 개선 결과
 
+### 상품 조회 성능 개선
+
+| # | 방법 | 문제 | 성과 |
+|---|------|------|------|
+| 1 | **커버링 인덱스 적용** | 750만 건 환경에서 Full Scan·filesort로 응답 지연 (2.5s) | filesort·임시 테이블 제거 → **96% 단축 (2.5s → 80ms)** |
+| 2 | **역정규화 + Redis Write-Behind** | 다중 JOIN + 실시간 통계 업데이트 충돌로 DB 병목 (3.8s) | **93% 단축 (3.8s → 250ms)**, DB 쓰기 N회 → 1회 |
+
+**커버링 인덱스:** 정렬·조회 컬럼을 모두 포함한 인덱스를 설계해 테이블 재접근을 제거하고 filesort·임시 테이블을 완전히 제거
+
+**Redis Write-Behind:** 역정규화 테이블로 읽기 부하를 분산하고 통계 업데이트는 Redis에 누적 후 10초 주기 배치로 DB에 일괄 반영해 쓰기 충돌 해소
+
+---
+
 ### 모놀리식 → 마이크로서비스 전환
 
 | 지표 | Before (Monolith) | After (MSA) | 개선율 |
@@ -907,8 +677,6 @@ flowchart TD
 
 | 패턴 | 목적 | 효과 |
 |------|------|------|
-| Outbox Pattern | 이벤트 유실 방지 | 트랜잭션-이벤트 원자성 보장 |
-| Saga (Choreography) | 분산 트랜잭션 | 결제 실패 시 재고/쿠폰 자동 복구 |
 | Circuit Breaker | 장애 격리 | Cascade Failure 방지 |
 | DLX/DLQ | 메시지 재처리 | 메시지 유실 없이 재시도 |
 | Publisher Confirms | 발행 확인 | 브로커 장애 시 재발행 |
@@ -964,7 +732,6 @@ bash k8s/deploy.sh
 | `OPENAI_API_KEY` | OpenAI DALL-E 키 | - |
 | `AWS_S3_BUCKET` | S3 버킷명 | - |
 | `OLLAMA_URL` | Ollama 서버 URL | - |
-| `MILVUS_HOST` | Milvus 벡터 DB 호스트 | - |
 
 ---
 
@@ -975,12 +742,11 @@ store/
 ├── discovery-service/          # Eureka 서비스 디스커버리
 ├── gate-way/                   # Spring Cloud Gateway (인증/라우팅)
 ├── member/                     # 회원/장바구니/쿠폰/배송지
-├── order/                      # 주문/정산/Saga
+├── order/                      # 주문/정산
 ├── payment/                    # 결제 (Toss Payments)
 ├── product/                    # 상품/리뷰/랭킹/카테고리
 ├── ai-image-service/           # Python AI 이미지 생성
 ├── ai-review-service/          # Python AI 리뷰 감성 분석
-├── ai-rag-service/             # Python RAG 챗봇 (Milvus)
 ├── k8s/                        # Kubernetes 매니페스트 (EKS)
 │   ├── services/               # 각 서비스별 Deployment/Service/HPA
 │   └── deploy.sh               # 배포 스크립트
