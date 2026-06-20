@@ -29,7 +29,7 @@ public class FailedTaskScheduler {
         log.info("재시도 스케줄링 시작");
 
         List<FailedTask> tasks = failedTaskRepository.findByStatusAndRetryCountLessThan(
-                FailedTask.TaskStatus.PENDING, 5
+                FailedTask.TaskStatus.PENDING, 3
         );
 
         if (tasks.isEmpty()){
@@ -52,7 +52,7 @@ public class FailedTaskScheduler {
 
                 task.incrementRetryCount();
 
-                if (task.getRetryCount() >= 5) {
+                if (task.getRetryCount() >= 3) {
                     task.markAsFailed();
                     log.info("실패");
                 } else {

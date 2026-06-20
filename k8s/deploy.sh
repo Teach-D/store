@@ -50,7 +50,11 @@ kubectl apply -f services/gateway/
 echo "🔀 Ingress 배포 중..."
 kubectl apply -f ingress/
 
-# 8. 배포 상태 확인
+# 8. HPA 배포
+echo "📈 HPA(Auto Scaler) 배포 중..."
+kubectl apply -f hpa/
+
+# 9. 배포 상태 확인
 echo "✅ 배포 완료! 상태 확인 중..."
 kubectl get all -n ecommerce
 

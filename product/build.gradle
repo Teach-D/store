@@ -87,6 +87,9 @@ dependencies {
     implementation 'io.github.resilience4j:resilience4j-spring-boot3'
     implementation 'io.github.resilience4j:resilience4j-micrometer'
 
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework:spring-aspects'
+
     // RabbitMQ
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 

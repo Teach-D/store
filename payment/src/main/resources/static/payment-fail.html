@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 실패</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 60px auto; padding: 0 20px; text-align: center; }
+        .fail { color: #e84c4c; font-size: 48px; }
+        .card { background: #f8f9fa; border-radius: 12px; padding: 24px; margin-top: 20px; text-align: left; }
+        .card div { margin-bottom: 8px; font-size: 14px; }
+        .card span { color: #666; }
+        .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; background: #3182f6;
+               color: white; border-radius: 8px; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="fail">✕</div>
+    <h2>결제에 실패했습니다</h2>
+
+    <div class="card" id="errorInfo"></div>
+    <a href="/payment.html" class="btn">다시 시도하기</a>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('errorInfo').innerHTML = `
+            <div><span>오류 코드</span>: ${params.get('code') || '-'}</div>
+            <div><span>메시지</span>: ${params.get('message') || '-'}</div>
+            <div><span>주문 ID</span>: ${params.get('orderId') || '-'}</div>
+        `;
+    </script>
+</body>
+</html>

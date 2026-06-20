@@ -37,35 +37,56 @@ Spring Boot 기반 마이크로서비스 이커머스 플랫폼입니다. AI 연
 
 ```mermaid
 graph TB
-    Client(["Client"])
-    GW["API Gateway\nJWT 인증 / 라우팅"]
-    EUREKA["Eureka\n서비스 디스커버리"]
+    Client(["Client\n(Browser / Mobile)"])
 
-    subgraph Services["Microservices"]
-        MEMBER["Member\n회원/장바구니/쿠폰"]
-        ORDER["Order\n주문/정산"]
-        PAYMENT["Payment\n결제"]
-        PRODUCT["Product\n상품/리뷰/랭킹"]
+    subgraph Gateway["API Gateway (port 8000)"]
+        GW["Spring Cloud Gateway"]
+        JWT["JWT Auth Filter"]
+        ROLE["Role Authorization Filter"]
     end
 
-    subgraph AI["AI Services"]
-        AI_IMG["AI Image\n이미지 생성"]
-        AI_REV["AI Review\n감성 분석"]
+    subgraph Discovery["Service Discovery"]
+        EUREKA["Eureka Server\n(port 8761)"]
+    end
+
+    subgraph Services["Microservices"]
+        MEMBER["Member Service\n(회원/장바구니/쿠폰/배송지)"]
+        ORDER["Order Service\n(주문/정산)"]
+        PAYMENT["Payment Service\n(결제/Toss Payments)"]
+        PRODUCT["Product Service\n(상품/리뷰/랭킹)"]
+    end
+
+    subgraph AI["AI Services (Python)"]
+        AI_IMG["AI Image Service\n(ComfyUI → DALL-E → Midjourney)"]
+        AI_REV["AI Review Service\n(Ollama LLM)"]
     end
 
     subgraph Infra["Infrastructure"]
-        MQ["RabbitMQ"]
-        REDIS["Redis"]
-        DB["MariaDB"]
-        ZIPKIN["Zipkin / Prometheus"]
+        MQ["RabbitMQ\n(Message Broker)"]
+        REDIS["Redis\n(Cache / Coupon)"]
+        DB["MariaDB\n(Persistent Storage)"]
     end
 
-    Client --> GW --> Services
-    Services --> EUREKA
-    Services --> MQ --> AI_IMG & AI_REV
-    Services --> DB
-    MEMBER & PRODUCT --> REDIS
-    Services --> ZIPKIN
+    subgraph Monitoring["Observability"]
+        ZIPKIN["Zipkin\n(Distributed Tracing)"]
+        PROM["Prometheus + AlertManager"]
+    end
+
+    Client --> GW
+    GW --> JWT --> ROLE
+    ROLE --> MEMBER & ORDER & PAYMENT & PRODUCT
+
+    MEMBER & ORDER & PAYMENT & PRODUCT --> EUREKA
+
+    ORDER & PAYMENT & PRODUCT & MEMBER --> MQ
+    MQ --> AI_IMG & AI_REV
+
+    MEMBER --> REDIS
+    PRODUCT --> REDIS
+    MEMBER & ORDER & PAYMENT & PRODUCT --> DB
+
+    MEMBER & ORDER & PAYMENT & PRODUCT --> ZIPKIN
+    MEMBER & ORDER & PAYMENT & PRODUCT --> PROM
 ```
 
 ---
@@ -184,11 +205,11 @@ erDiagram
         varchar delivery_status
     }
 
-    MEMBER ||--o{ CART : ""
-    CART ||--o{ CART_ITEM : ""
-    MEMBER ||--o{ MEMBER_COUPON : ""
-    COUPON ||--o{ MEMBER_COUPON : ""
-    MEMBER ||--o{ DELIVERY : ""
+    MEMBER ||--o{ CART : "has"
+    CART ||--o{ CART_ITEM : "contains"
+    MEMBER ||--o{ MEMBER_COUPON : "holds"
+    COUPON ||--o{ MEMBER_COUPON : "issued_as"
+    MEMBER ||--o{ DELIVERY : "registers"
 ```
 
 ---
@@ -227,8 +248,8 @@ erDiagram
         decimal price
     }
 
-    ORDER ||--o{ ORDER_ITEM : ""
-    SETTLEMENT ||--o{ SETTLEMENT_ITEM : ""
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    SETTLEMENT ||--o{ SETTLEMENT_ITEM : "includes"
 ```
 
 ---
@@ -299,13 +320,13 @@ erDiagram
         text negative_keywords
     }
 
-    CATEGORY ||--o{ PRODUCT : ""
-    PRODUCT ||--|| PRODUCT_DETAIL : ""
-    PRODUCT ||--o{ PRODUCT_TAG : ""
-    TAG ||--o{ PRODUCT_TAG : ""
-    PRODUCT ||--o{ REVIEW : ""
-    PRODUCT ||--o{ PRODUCT_ORDER_STATS : ""
-    PRODUCT ||--o| PRODUCT_REVIEW_STATS : ""
+    CATEGORY ||--o{ PRODUCT : "classifies"
+    PRODUCT ||--|| PRODUCT_DETAIL : "has"
+    PRODUCT ||--o{ PRODUCT_TAG : "tagged_with"
+    TAG ||--o{ PRODUCT_TAG : "applied_to"
+    PRODUCT ||--o{ REVIEW : "receives"
+    PRODUCT ||--o{ PRODUCT_ORDER_STATS : "tracks"
+    PRODUCT ||--o| PRODUCT_REVIEW_STATS : "summarizes"
 ```
 
 ---
@@ -336,22 +357,79 @@ erDiagram
 
 ```mermaid
 graph LR
-    ORDER["Order"]
-    PAYMENT["Payment"]
-    MEMBER["Member"]
-    PRODUCT["Product"]
-    AI_IMG["AI Image"]
-    AI_REV["AI Review"]
-    DLQ["DLQ\n(실패 메시지)"]
+    subgraph "Order Service"
+        OS_PUB["Publisher"]
+        OS_CON["Consumer\n(PaymentEventConsumer)"]
+    end
 
-    ORDER -->|"order.created.payment"| PAYMENT
-    ORDER -->|"cart.delete"| MEMBER
-    PAYMENT -->|"payment.completed/failed"| ORDER
-    PRODUCT -->|"product.created"| AI_IMG
-    PRODUCT -->|"review.created"| AI_REV
-    AI_IMG -->|"product.image.ready"| PRODUCT
-    AI_REV -->|"review.summary.ready"| PRODUCT
-    ORDER & PAYMENT & PRODUCT -->|"3회 실패"| DLQ
+    subgraph "order.exchange (Direct)"
+        OE_OP["order.created.payment"]
+        OE_CD["cart.delete"]
+    end
+
+    subgraph "Queues"
+        Q_OCP["order.created.payment"]
+        Q_CD["cart.delete"]
+        Q_PC["payment.completed"]
+        Q_PF["payment.failed"]
+        Q_PRC["product.created"]
+        Q_RC["review.created"]
+        Q_RS["review.summary.ready"]
+    end
+
+    subgraph "payment.exchange (Topic)"
+        PE_PC["payment.completed"]
+        PE_PF["payment.failed"]
+    end
+
+    subgraph "product.exchange (Direct)"
+        PRE_PC["product.created"]
+    end
+
+    subgraph "review.exchange (Direct)"
+        RE_RC["review.created"]
+        RE_RS["review.summary.ready"]
+    end
+
+    subgraph "Payment Service"
+        PAY_CON["Consumer"]
+        PAY_PUB["Publisher"]
+    end
+
+    subgraph "Member Service"
+        MEM_CON["Consumer\n(CartDeleteConsumer)"]
+    end
+
+    subgraph "Product Service"
+        PRD_PUB["Publisher"]
+        PRD_CON["Consumer\n(ImageReady/ReviewSummary)"]
+    end
+
+    subgraph "AI Services"
+        AI_IMG_CON["AI Image Service"]
+        AI_REV_CON["AI Review Service"]
+        AI_REV_PUB["AI Review Service\n(Publisher)"]
+        AI_IMG_PUB["AI Image Service\n(Publisher)"]
+    end
+
+    subgraph "dlx.exchange (DLX)"
+        DLX["Dead Letter Exchange"]
+        DLQ["*.dlq queues"]
+    end
+
+    OS_PUB --> OE_OP --> Q_OCP --> PAY_CON
+    OS_PUB --> OE_CD --> Q_CD --> MEM_CON
+
+    PAY_PUB --> PE_PC --> Q_PC --> OS_CON
+    PAY_PUB --> PE_PF --> Q_PF --> OS_CON
+
+    PRD_PUB --> PRE_PC --> Q_PRC --> AI_IMG_CON
+    PRD_PUB --> RE_RC --> Q_RC --> AI_REV_CON
+
+    AI_IMG_PUB --> PRD_CON
+    AI_REV_PUB --> RE_RS --> Q_RS --> PRD_CON
+
+    Q_OCP & Q_CD & Q_PC & Q_PF & Q_PRC -->|"3회 재시도 실패"| DLX --> DLQ
 ```
 
 ### RabbitMQ 설정 요약
@@ -449,33 +527,57 @@ sequenceDiagram
 ### Kubernetes 배포 구조 (AWS EKS)
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 35, 'rankSpacing': 35}}}%%
 graph TB
-    LB["AWS Load Balancer"]
+    subgraph EKS["AWS EKS Cluster"]
+        subgraph NS["Namespace: ecommerce"]
+            subgraph GW_POD["Gateway (HPA: 2~10)"]
+                GW1["gateway-pod-1"]
+                GW2["gateway-pod-2"]
+            end
 
-    subgraph EKS["AWS EKS  |  Namespace: ecommerce"]
-        GW["Gateway (HPA 2~10)"]
+            subgraph MEM_POD["Member (HPA: 2~10)"]
+                MEM1["member-pod-1"]
+                MEM2["member-pod-2"]
+            end
 
-        subgraph APP["Application Services"]
-            MEMBER["Member (HPA 2~10)"]
-            ORDER["Order (HPA 2~10)"]
-            PAYMENT["Payment (HPA 1~10)"]
-            PRODUCT["Product (HPA 2~10)"]
+            subgraph ORD_POD["Order (HPA: 2~10)"]
+                ORD1["order-pod-1"]
+                ORD2["order-pod-2"]
+            end
+
+            subgraph PAY_POD["Payment (HPA: 1~10)"]
+                PAY1["payment-pod-1"]
+            end
+
+            subgraph PRD_POD["Product (HPA: 2~10)"]
+                PRD1["product-pod-1"]
+                PRD2["product-pod-2"]
+            end
+
+            subgraph INF["Infrastructure Pods"]
+                DISC["Discovery Service\n(Eureka)"]
+                MQ_POD["RabbitMQ\n(PVC: rabbitmq-data)"]
+                MYSQL_POD["MySQL 8.0\n(PVC: mysql-data)"]
+                ZIP_POD["Zipkin"]
+            end
+
+            subgraph AI_POD["AI Pods"]
+                AI_IMG_POD["AI Image Service"]
+            end
         end
-
-        subgraph INFRA["Infrastructure"]
-            EUREKA["Eureka"]
-            MQ["RabbitMQ (PVC)"]
-            MYSQL["MySQL (PVC)"]
-            ZIPKIN["Zipkin"]
-        end
-
-        AI["AI Image Service"]
     end
 
-    LB --> GW --> APP
-    APP --> EUREKA & MQ & MYSQL & ZIPKIN
-    MQ --> AI
+    LB["AWS Load Balancer\n(Service: gateway-service)"]
+    LB --> GW1 & GW2
+
+    GW1 & GW2 --> MEM1 & MEM2
+    GW1 & GW2 --> ORD1 & ORD2
+    GW1 & GW2 --> PAY1
+    GW1 & GW2 --> PRD1 & PRD2
+
+    MEM1 & MEM2 & ORD1 & ORD2 & PAY1 & PRD1 & PRD2 --> MQ_POD
+    MEM1 & MEM2 & ORD1 & ORD2 & PAY1 & PRD1 & PRD2 --> MYSQL_POD
+    MQ_POD --> AI_IMG_POD
 ```
 
 ### HPA (Horizontal Pod Autoscaler) 설정

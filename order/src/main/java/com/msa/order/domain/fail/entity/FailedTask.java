@@ -59,7 +59,7 @@ public class FailedTask {
         this.retryCount++;
         this.lastRetryAt = LocalDateTime.now();
 
-        if (retryCount >= 5) {
+        if (retryCount >= 3) {
             this.status = TaskStatus.FAILED;
         }
     }

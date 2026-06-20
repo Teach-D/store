@@ -44,17 +44,12 @@ public class PaymentEventConsumer {
     public void handlePaymentCompleted(PaymentCompletedEvent event) {
         log.info("Completed payment 수신 : {}", event);
 
-        try {
-            orderService.conformOrder(event.getOrderId());
-            Order order = orderRepository.findByOrderIdWithItems(event.getOrderId())
-                    .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
-            publishCartDeleteEvent(order);
-            updateOrderStats(order);
+        orderService.conformOrder(event.getOrderId());
+        Order order = orderRepository.findByOrderIdWithItems(event.getOrderId())
+                .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+        publishCartDeleteEvent(order);
+        updateOrderStats(order);
 
-            log.info("주문 확정: {}", event);
-        } catch (Exception e) {
-            log.error("Error while processing PaymentCompletedEvent: {}", event, e);
-        }
     }
 
     @RabbitListener(queues = "payment.failed")

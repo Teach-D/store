@@ -23,6 +23,11 @@ public class RabbitMQConfig {
     public static final String PRODUCT_CREATED_QUEUE = "product.created";
     public static final String PRODUCT_IMAGE_READY_QUEUE = "product.image.ready";
 
+    // AI 리뷰 분석 관련
+    public static final String REVIEW_EXCHANGE = "review.exchange";
+    public static final String REVIEW_CREATED_QUEUE = "review.created";
+    public static final String REVIEW_SUMMARY_READY_QUEUE = "review.summary.ready";
+
     // DLX / DLQ
     public static final String DLX_EXCHANGE = "dlx.exchange";
     public static final String STOCK_RESTORE_DLQ = "stock.restore.dlq";
@@ -87,6 +92,32 @@ public class RabbitMQConfig {
     @Bean
     public Binding stockRestoreBinding(Queue stockRestoreQueue, @Qualifier("orderExchange") DirectExchange orderExchange) {
         return BindingBuilder.bind(stockRestoreQueue).to(orderExchange).with("stock.restore");
+    }
+
+    // AI 리뷰 분석 Exchange / Queue
+    @Bean
+    public DirectExchange reviewExchange() {
+        return new DirectExchange(REVIEW_EXCHANGE);
+    }
+
+    @Bean
+    public Queue reviewCreatedQueue() {
+        return new Queue(REVIEW_CREATED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding reviewCreatedBinding(Queue reviewCreatedQueue, @Qualifier("reviewExchange") DirectExchange reviewExchange) {
+        return BindingBuilder.bind(reviewCreatedQueue).to(reviewExchange).with(REVIEW_CREATED_QUEUE);
+    }
+
+    @Bean
+    public Queue reviewSummaryReadyQueue() {
+        return new Queue(REVIEW_SUMMARY_READY_QUEUE, true);
+    }
+
+    @Bean
+    public Binding reviewSummaryReadyBinding(Queue reviewSummaryReadyQueue, @Qualifier("reviewExchange") DirectExchange reviewExchange) {
+        return BindingBuilder.bind(reviewSummaryReadyQueue).to(reviewExchange).with(REVIEW_SUMMARY_READY_QUEUE);
     }
 
     // DLX Exchange

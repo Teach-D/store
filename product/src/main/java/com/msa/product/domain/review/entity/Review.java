@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @Table(
     name = "review",
     indexes = {
+        @Index(name = "idx_review_product_id", columnList = "product_id, id"),   // No-Offset 페이징 커버링 인덱스
         @Index(name = "idx_review_product_rating", columnList = "product_id, rating"),
         @Index(name = "idx_review_member", columnList = "member_id")
     }

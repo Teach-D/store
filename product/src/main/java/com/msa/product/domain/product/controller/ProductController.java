@@ -2,6 +2,7 @@ package com.msa.product.domain.product.controller;
 
 import com.msa.product.domain.product.dto.request.OrderStatsUpdateRequest;
 import com.msa.product.domain.product.dto.request.RequestProduct;
+import com.msa.product.domain.product.dto.response.ProductIndexingInfo;
 import com.msa.product.domain.product.dto.response.ResponseProduct;
 import com.msa.product.domain.product.entity.AgeGroup;
 import com.msa.product.domain.product.entity.Gender;
@@ -98,24 +99,9 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity addProduct(
-            @Valid @RequestPart("product") RequestProduct requestProduct,
-            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
-            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(objectError -> {
-                String message = objectError.getDefaultMessage();
-                sb.append("message :" + message);
-            });
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
-        }
-        try {
-            productService.addProduct(requestProduct, image);
+            @Valid @RequestBody RequestProduct requestProduct) {
+            productService.addProduct(requestProduct);
             return ResponseEntity.status(OK).build();
-        } catch (Exception e) {
-            log.error("상품 등록 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 등록에 실패했습니다: " + e.getMessage());
-        }
     }
 
     @PatchMapping("/{id}")
@@ -179,6 +165,13 @@ public class ProductController {
                 productStatsService.searchByGenderAndAgeOrderByOrderQuantity(
                         keyword, Gender.valueOf(gender), AgeGroup.valueOf(ageGroup))
         );
+    }
+
+    // RAG 인덱싱용 — title, description, categoryName, price 포함
+    @GetMapping("/for-indexing")
+    public ResponseEntity<List<ProductIndexingInfo>> getProductsForIndexing() {
+        List<ProductIndexingInfo> result = productService.getAllForIndexing();
+        return ResponseEntity.status(OK).body(result);
     }
 
     @GetMapping("/search/rating/filter")

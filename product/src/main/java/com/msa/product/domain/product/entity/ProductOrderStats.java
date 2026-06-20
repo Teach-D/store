@@ -49,4 +49,9 @@ public class ProductOrderStats {
         this.orderCount++;
         this.totalQuantity += quantity;
     }
+
+    public void addOrderBulk(int countDelta, int quantityDelta) {
+        this.orderCount += countDelta;
+        this.totalQuantity += quantityDelta;
+    }
 }
